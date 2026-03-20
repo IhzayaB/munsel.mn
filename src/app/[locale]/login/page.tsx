@@ -1,0 +1,166 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Link, useRouter } from "@/i18n/routing";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
+export default function LoginPage() {
+  const t = useTranslations("auth");
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [isRegister, setIsRegister] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      if (isRegister) {
+        if (form.password !== form.confirmPassword) {
+          toast.error("Passwords don't match");
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: form.name,
+            email: form.email,
+            password: form.password,
+          }),
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          toast.error(data.error || "Registration failed");
+          setLoading(false);
+          return;
+        }
+      }
+
+      const result = await signIn("credentials", {
+        email: form.email,
+        password: form.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        toast.error("Invalid email or password");
+      } else {
+        router.push("/");
+        toast.success(isRegister ? "Account created!" : "Welcome back!");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-[60vh]">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="text-4xl mb-2">🧸</div>
+          <CardTitle className="text-2xl">
+            {isRegister ? t("registerTitle") : t("loginTitle")}
+          </CardTitle>
+          <CardDescription>
+            {isRegister ? t("registerSubtitle") : t("loginSubtitle")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {isRegister && (
+              <div>
+                <Label htmlFor="name">{t("name")}</Label>
+                <Input
+                  id="name"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  required
+                />
+              </div>
+            )}
+            <div>
+              <Label htmlFor="email">{t("email")}</Label>
+              <Input
+                id="email"
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="password">{t("password")}</Label>
+              <Input
+                id="password"
+                type="password"
+                value={form.password}
+                onChange={(e) =>
+                  setForm({ ...form, password: e.target.value })
+                }
+                required
+              />
+            </div>
+            {isRegister && (
+              <div>
+                <Label htmlFor="confirmPassword">
+                  {t("confirmPassword")}
+                </Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={form.confirmPassword}
+                  onChange={(e) =>
+                    setForm({ ...form, confirmPassword: e.target.value })
+                  }
+                  required
+                />
+              </div>
+            )}
+
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isRegister ? t("signUp") : t("signIn")}
+            </Button>
+          </form>
+
+          <div className="mt-4 text-center text-sm">
+            <span className="text-muted-foreground">
+              {isRegister ? t("hasAccount") : t("noAccount")}{" "}
+            </span>
+            <button
+              onClick={() => setIsRegister(!isRegister)}
+              className="text-primary hover:underline font-medium"
+            >
+              {isRegister ? t("signIn") : t("signUp")}
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

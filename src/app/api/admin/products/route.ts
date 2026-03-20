@@ -1,0 +1,101 @@
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { products, productVariants } from "@/lib/db/schema";
+import { auth } from "@/lib/auth";
+
+export async function POST(req: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session || session.user?.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const {
+      name,
+      nameMn,
+      slug,
+      description,
+      descriptionMn,
+      price,
+      compareAtPrice,
+      material,
+      materialMn,
+      ageRange,
+      featured,
+      variants,
+    } = body;
+
+    if (!name || !nameMn || !slug || !price) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Create product
+    const [product] = await db
+      .insert(products)
+      .values({
+        name,
+        nameMn,
+        slug,
+        description: description || null,
+        descriptionMn: descriptionMn || null,
+        price,
+        compareAtPrice: compareAtPrice || null,
+        material: material || null,
+        materialMn: materialMn || null,
+        ageRange: ageRange || null,
+        featured: featured || false,
+        active: true,
+        images: [],
+      })
+      .returning();
+
+    // Create variants
+    if (variants && variants.length > 0) {
+      await db.insert(productVariants).values(
+        variants.map(
+          (v: {
+            size: string;
+            color?: string;
+            colorMn?: string;
+            stock: number;
+            sku?: string;
+          }) => ({
+            productId: product.id,
+            size: v.size,
+            color: v.color || null,
+            colorMn: v.colorMn || null,
+            stock: v.stock || 0,
+            sku: v.sku || null,
+          })
+        )
+      );
+    }
+
+    return NextResponse.json({ id: product.id, slug: product.slug });
+  } catch (error) {
+    console.error("Create product error:", error);
+    return NextResponse.json(
+      { error: "Failed to create product" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET() {
+  try {
+    const allProducts = await db.query.products.findMany({
+      with: { category: true, variants: true },
+    });
+    return NextResponse.json(allProducts);
+  } catch (error) {
+    console.error("Fetch products error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch products" },
+      { status: 500 }
+    );
+  }
+}
