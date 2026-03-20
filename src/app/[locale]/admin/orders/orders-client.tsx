@@ -39,12 +39,12 @@ interface Order {
 }
 
 const STATUSES = [
-  { value: "pending", label: "Pending", color: "bg-yellow-100 text-yellow-700" },
-  { value: "paid", label: "Paid", color: "bg-green-100 text-green-700" },
-  { value: "processing", label: "Processing", color: "bg-blue-100 text-blue-700" },
-  { value: "shipped", label: "Shipped", color: "bg-indigo-100 text-indigo-700" },
-  { value: "delivered", label: "Delivered", color: "bg-purple-100 text-purple-700" },
-  { value: "cancelled", label: "Cancelled", color: "bg-red-100 text-red-700" },
+  { value: "pending", label: "Хүлээгдэж буй", color: "bg-yellow-100 text-yellow-700" },
+  { value: "paid", label: "Төлөгдсөн", color: "bg-green-100 text-green-700" },
+  { value: "processing", label: "Бэлтгэж буй", color: "bg-blue-100 text-blue-700" },
+  { value: "shipped", label: "Илгээсэн", color: "bg-indigo-100 text-indigo-700" },
+  { value: "delivered", label: "Хүргэсэн", color: "bg-purple-100 text-purple-700" },
+  { value: "cancelled", label: "Цуцлагдсан", color: "bg-red-100 text-red-700" },
 ];
 
 export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
@@ -66,20 +66,20 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
       setOrders(
         orders.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
       );
-      toast.success("Status updated");
+      toast.success("Төлөв шинэчлэгдлээ");
     } catch {
-      toast.error("Failed to update status");
+      toast.error("Төлөв шинэчлэхэд алдаа гарлаа");
     }
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Orders ({orders.length})</h1>
+    <div>
+      <h1 className="text-xl sm:text-2xl font-bold mb-6">Захиалга ({orders.length})</h1>
 
       {orders.length === 0 ? (
         <Card>
           <CardContent className="text-center py-12">
-            <p className="text-muted-foreground">No orders yet</p>
+            <p className="text-muted-foreground">Захиалга байхгүй</p>
           </CardContent>
         </Card>
       ) : (
@@ -117,7 +117,7 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
                         {formatPrice(order.total)}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {order.items?.length || 0} items
+                        {order.items?.length || 0} бараа
                       </p>
                     </div>
 
@@ -133,7 +133,7 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
                             order.status
                           )}`}
                         >
-                          {order.status}
+                          {STATUSES.find(s => s.value === order.status)?.label || order.status}
                         </span>
                       </SelectTrigger>
                       <SelectContent>
@@ -171,11 +171,11 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
                         </div>
                       ))}
                       <div className="flex justify-between text-sm pt-2 border-t">
-                        <span>Shipping</span>
+                        <span>Хүргэлт</span>
                         <span>{formatPrice(order.shippingCost)}</span>
                       </div>
                       <div className="flex justify-between font-bold">
-                        <span>Total</span>
+                        <span>Нийт</span>
                         <span>{formatPrice(order.total)}</span>
                       </div>
                     </div>

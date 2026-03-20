@@ -89,7 +89,7 @@ export default function EditProductPage() {
         setFetching(false);
       })
       .catch(() => {
-        toast.error("Failed to load product");
+        toast.error("Бүтээгдэхүүн ачаалахад алдаа гарлаа");
         setFetching(false);
       });
   }, [productId]);
@@ -127,7 +127,7 @@ export default function EditProductPage() {
       const data = await res.json();
       setImages([...images, ...data.urls]);
     } catch {
-      toast.error("Failed to upload images");
+      toast.error("Зураг оруулахад алдаа гарлаа");
     } finally {
       setUploading(false);
     }
@@ -150,10 +150,10 @@ export default function EditProductPage() {
 
       if (!res.ok) throw new Error("Failed to update product");
 
-      toast.success("Product updated!");
+      toast.success("Бүтээгдэхүүн амжилттай шинэчлэгдлээ!");
       router.push("/admin/products");
     } catch {
-      toast.error("Failed to update product");
+      toast.error("Бүтээгдэхүүн шинэчлэхэд алдаа гарлаа");
     } finally {
       setLoading(false);
     }
@@ -168,14 +168,14 @@ export default function EditProductPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <h1 className="text-3xl font-bold mb-8">Edit Product</h1>
+    <div className="max-w-3xl">
+      <h1 className="text-xl sm:text-2xl font-bold mb-6">Бүтээгдэхүүн засах</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Images */}
         <Card>
           <CardHeader>
-            <CardTitle>Images</CardTitle>
+            <CardTitle>Зураг</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-3 mb-4">
@@ -197,7 +197,7 @@ export default function EditProductPage() {
                 ) : (
                   <>
                     <Upload className="h-5 w-5 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground mt-1">Upload</span>
+                    <span className="text-xs text-muted-foreground mt-1">Оруулах</span>
                   </>
                 )}
                 <input
@@ -215,11 +215,11 @@ export default function EditProductPage() {
 
         {/* Basic Info */}
         <Card>
-          <CardHeader><CardTitle>Basic Information</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Үндсэн мэдээлэл</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Name (English)</Label>
+                <Label>Нэр (Англи)</Label>
                 <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
               </div>
               <div>
@@ -233,7 +233,7 @@ export default function EditProductPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Description (English)</Label>
+                <Label>Тайлбар (Англи)</Label>
                 <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} />
               </div>
               <div>
@@ -246,15 +246,15 @@ export default function EditProductPage() {
 
         {/* Pricing */}
         <Card>
-          <CardHeader><CardTitle>Pricing</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Үнийн мэдээлэл</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Price (₮)</Label>
+                <Label>Үнэ (₮)</Label>
                 <Input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
               </div>
               <div>
-                <Label>Compare at Price (₮)</Label>
+                <Label>Харьцуулах үнэ (₮)</Label>
                 <Input type="number" value={form.compareAtPrice} onChange={(e) => setForm({ ...form, compareAtPrice: e.target.value })} />
               </div>
             </div>
@@ -263,11 +263,11 @@ export default function EditProductPage() {
 
         {/* Details */}
         <Card>
-          <CardHeader><CardTitle>Details</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Дэлгэрэнгүй</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Material (English)</Label>
+                <Label>Материал (Англи)</Label>
                 <Input value={form.material} onChange={(e) => setForm({ ...form, material: e.target.value })} />
               </div>
               <div>
@@ -276,17 +276,17 @@ export default function EditProductPage() {
               </div>
             </div>
             <div>
-              <Label>Age Range</Label>
+              <Label>Насны ангилал</Label>
               <Input value={form.ageRange} onChange={(e) => setForm({ ...form, ageRange: e.target.value })} />
             </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <input type="checkbox" id="featured" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} />
-                <Label htmlFor="featured">Featured</Label>
+                <Label htmlFor="featured">Онцлох</Label>
               </div>
               <div className="flex items-center gap-2">
                 <input type="checkbox" id="active" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} />
-                <Label htmlFor="active">Active</Label>
+                <Label htmlFor="active">Идэвхтэй</Label>
               </div>
             </div>
           </CardContent>
@@ -295,16 +295,16 @@ export default function EditProductPage() {
         {/* Variants */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Size Variants</CardTitle>
+            <CardTitle>Хэмжээний сонголт</CardTitle>
             <Button type="button" variant="outline" size="sm" onClick={addVariant}>
-              <Plus className="h-4 w-4 mr-1" /> Add Size
+              <Plus className="h-4 w-4 mr-1" /> Хэмжээ нэмэх
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
             {variants.map((variant, i) => (
               <div key={i} className="grid grid-cols-2 md:grid-cols-5 gap-3 p-3 bg-gray-50 rounded-lg">
                 <div>
-                  <Label className="text-xs">Size</Label>
+                  <Label className="text-xs">Хэмжээ</Label>
                   <Select value={variant.size} onValueChange={(v) => v && updateVariant(i, "size", v)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -313,7 +313,7 @@ export default function EditProductPage() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs">Color</Label>
+                  <Label className="text-xs">Өнгө (Англи)</Label>
                   <Input value={variant.color} onChange={(e) => updateVariant(i, "color", e.target.value)} />
                 </div>
                 <div>
@@ -321,7 +321,7 @@ export default function EditProductPage() {
                   <Input value={variant.colorMn} onChange={(e) => updateVariant(i, "colorMn", e.target.value)} />
                 </div>
                 <div>
-                  <Label className="text-xs">Stock</Label>
+                  <Label className="text-xs">Нөөц</Label>
                   <Input type="number" value={variant.stock} onChange={(e) => updateVariant(i, "stock", parseInt(e.target.value) || 0)} />
                 </div>
                 <div className="flex items-end">
@@ -338,7 +338,7 @@ export default function EditProductPage() {
 
         <Button type="submit" size="lg" className="w-full" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Update Product
+          Бүтээгдэхүүн шинэчлэх
         </Button>
       </form>
     </div>

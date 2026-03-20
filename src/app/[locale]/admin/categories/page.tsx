@@ -32,7 +32,7 @@ export default function AdminCategoriesPage() {
       const data = await res.json();
       setCategories(data);
     } catch {
-      toast.error("Failed to load categories");
+      toast.error("Ангилал ачаалахад алдаа гарлаа");
     } finally {
       setLoading(false);
     }
@@ -56,18 +56,18 @@ export default function AdminCategoriesPage() {
         body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error("Failed");
-      toast.success("Category created!");
+      toast.success("Ангилал амжилттай үүсгэлээ!");
       setForm({ name: "", nameMn: "", slug: "" });
       fetchCategories();
     } catch {
-      toast.error("Failed to create category");
+      toast.error("Ангилал үүсгэхэд алдаа гарлаа");
     } finally {
       setCreating(false);
     }
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Delete category "${name}"?`)) return;
+    if (!confirm(`"${name}" ангиллыг устгах уу?`)) return;
 
     try {
       const res = await fetch("/api/admin/categories", {
@@ -76,10 +76,10 @@ export default function AdminCategoriesPage() {
         body: JSON.stringify({ id }),
       });
       if (!res.ok) throw new Error("Failed");
-      toast.success("Category deleted");
+      toast.success("Ангилал устгагдлаа");
       fetchCategories();
     } catch {
-      toast.error("Failed to delete category");
+      toast.error("Ангилал устгахад алдаа гарлаа");
     }
   };
 
@@ -92,19 +92,19 @@ export default function AdminCategoriesPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="text-3xl font-bold mb-8">Categories</h1>
+    <div className="max-w-2xl">
+      <h1 className="text-xl sm:text-2xl font-bold mb-6">Ангилал</h1>
 
       {/* Create form */}
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>Add Category</CardTitle>
+          <CardTitle>Ангилал нэмэх</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleCreate} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Name (English)</Label>
+                <Label>Нэр (Англи)</Label>
                 <Input
                   value={form.name}
                   onChange={(e) =>
@@ -134,7 +134,7 @@ export default function AdminCategoriesPage() {
             </div>
             <Button type="submit" disabled={creating}>
               {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Plus className="mr-2 h-4 w-4" /> Add Category
+              <Plus className="mr-2 h-4 w-4" /> Ангилал нэмэх
             </Button>
           </form>
         </CardContent>
@@ -143,11 +143,11 @@ export default function AdminCategoriesPage() {
       {/* List */}
       <Card>
         <CardHeader>
-          <CardTitle>All Categories ({categories.length})</CardTitle>
+          <CardTitle>Бүх ангилал ({categories.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {categories.length === 0 ? (
-            <p className="text-muted-foreground text-center py-4">No categories yet</p>
+            <p className="text-muted-foreground text-center py-4">Ангилал байхгүй байна</p>
           ) : (
             <div className="space-y-2">
               {categories.map((cat) => (

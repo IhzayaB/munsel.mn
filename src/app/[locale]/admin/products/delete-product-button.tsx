@@ -15,17 +15,17 @@ export function DeleteProductButton({
   const router = useRouter();
 
   const handleDelete = async () => {
-    if (!confirm(`Delete "${productName}"? This cannot be undone.`)) return;
+    if (!confirm(`"${productName}" устгах уу? Энэ үйлдлийг буцаах боломжгүй.`)) return;
 
     try {
       const res = await fetch(`/api/admin/products/${productId}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed");
-      toast.success("Product deleted");
+      toast.success("Бүтээгдэхүүн устгагдлаа");
       router.refresh();
     } catch {
-      toast.error("Failed to delete product");
+      toast.error("Бүтээгдэхүүн устгахад алдаа гарлаа");
     }
   };
 

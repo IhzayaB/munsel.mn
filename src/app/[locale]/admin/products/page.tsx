@@ -24,12 +24,12 @@ export default async function AdminProductsPage() {
   });
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Products</h1>
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold">Бүтээгдэхүүн</h1>
         <Button render={<Link href="/admin/products/new" />}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Product
+          Нэмэх
         </Button>
       </div>
 
@@ -38,19 +38,19 @@ export default async function AdminProductsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Variants</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>Нэр</TableHead>
+                <TableHead>Ангилал</TableHead>
+                <TableHead>Үнэ</TableHead>
+                <TableHead>Хэмжээ</TableHead>
+                <TableHead>Төлөв</TableHead>
+                <TableHead>Үйлдэл</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {allProducts.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8">
-                    No products yet. Add your first product!
+                    Бүтээгдэхүүн байхгүй байна. Эхний бүтээгдэхүүнээ нэмнэ үү!
                   </TableCell>
                 </TableRow>
               ) : (
@@ -69,13 +69,13 @@ export default async function AdminProductsPage() {
                     </TableCell>
                     <TableCell>{formatPrice(product.price)}</TableCell>
                     <TableCell>
-                      {product.variants?.length || 0} sizes
+                      {product.variants?.length || 0} хэмжээ
                     </TableCell>
                     <TableCell>
                       <Badge
                         variant={product.active ? "default" : "secondary"}
                       >
-                        {product.active ? "Active" : "Inactive"}
+                        {product.active ? "Идэвхтэй" : "Идэвхгүй"}
                       </Badge>
                     </TableCell>
                     <TableCell>

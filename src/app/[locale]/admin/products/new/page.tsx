@@ -91,7 +91,7 @@ export default function NewProductPage() {
       const data = await res.json();
       setImages([...images, ...data.urls]);
     } catch {
-      toast.error("Failed to upload images");
+      toast.error("Зураг оруулахад алдаа гарлаа");
     } finally {
       setUploading(false);
     }
@@ -114,24 +114,24 @@ export default function NewProductPage() {
 
       if (!res.ok) throw new Error("Failed to create product");
 
-      toast.success("Product created!");
+      toast.success("Бүтээгдэхүүн амжилттай үүсгэлээ!");
       router.push("/admin/products");
     } catch {
-      toast.error("Failed to create product");
+      toast.error("Бүтээгдэхүүн үүсгэхэд алдаа гарлаа");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <h1 className="text-3xl font-bold mb-8">Add New Product</h1>
+    <div className="max-w-3xl">
+      <h1 className="text-xl sm:text-2xl font-bold mb-6">Шинэ бүтээгдэхүүн нэмэх</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Images */}
         <Card>
           <CardHeader>
-            <CardTitle>Images</CardTitle>
+            <CardTitle>Зураг</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-3 mb-4">
@@ -153,7 +153,7 @@ export default function NewProductPage() {
                 ) : (
                   <>
                     <Upload className="h-5 w-5 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground mt-1">Upload</span>
+                    <span className="text-xs text-muted-foreground mt-1">Оруулах</span>
                   </>
                 )}
                 <input
@@ -172,12 +172,12 @@ export default function NewProductPage() {
         {/* Basic Info */}
         <Card>
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+            <CardTitle>Үндсэн мэдээлэл</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Name (English)</Label>
+                <Label>Нэр (Англи)</Label>
                 <Input
                   value={form.name}
                   onChange={(e) => {
@@ -218,7 +218,7 @@ export default function NewProductPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Description (English)</Label>
+                <Label>Тайлбар (Англи)</Label>
                 <Textarea
                   value={form.description}
                   onChange={(e) =>
@@ -244,12 +244,12 @@ export default function NewProductPage() {
         {/* Pricing */}
         <Card>
           <CardHeader>
-            <CardTitle>Pricing</CardTitle>
+            <CardTitle>Үнийн мэдээлэл</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Price (₮)</Label>
+                <Label>Үнэ (₮)</Label>
                 <Input
                   type="number"
                   value={form.price}
@@ -261,7 +261,7 @@ export default function NewProductPage() {
                 />
               </div>
               <div>
-                <Label>Compare at Price (₮, optional)</Label>
+                <Label>Харьцуулах үнэ (₮, заавал биш)</Label>
                 <Input
                   type="number"
                   value={form.compareAtPrice}
@@ -278,12 +278,12 @@ export default function NewProductPage() {
         {/* Details */}
         <Card>
           <CardHeader>
-            <CardTitle>Details</CardTitle>
+            <CardTitle>Дэлгэрэнгүй</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Material (English)</Label>
+                <Label>Материал (Англи)</Label>
                 <Input
                   value={form.material}
                   onChange={(e) =>
@@ -304,7 +304,7 @@ export default function NewProductPage() {
               </div>
             </div>
             <div>
-              <Label>Age Range</Label>
+              <Label>Насны ангилал</Label>
               <Input
                 value={form.ageRange}
                 onChange={(e) =>
@@ -322,7 +322,7 @@ export default function NewProductPage() {
                   setForm({ ...form, featured: e.target.checked })
                 }
               />
-              <Label htmlFor="featured">Featured Product</Label>
+              <Label htmlFor="featured">Онцлох бүтээгдэхүүн</Label>
             </div>
           </CardContent>
         </Card>
@@ -330,10 +330,10 @@ export default function NewProductPage() {
         {/* Variants */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Size Variants</CardTitle>
+            <CardTitle>Хэмжээний сонголт</CardTitle>
             <Button type="button" variant="outline" size="sm" onClick={addVariant}>
               <Plus className="h-4 w-4 mr-1" />
-              Add Size
+              Хэмжээ нэмэх
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -343,7 +343,7 @@ export default function NewProductPage() {
                 className="grid grid-cols-2 md:grid-cols-5 gap-3 p-3 bg-gray-50 rounded-lg relative"
               >
                 <div>
-                  <Label className="text-xs">Size</Label>
+                  <Label className="text-xs">Хэмжээ</Label>
                   <Select
                     value={variant.size}
                     onValueChange={(v) => v && updateVariant(i, "size", v)}
@@ -361,7 +361,7 @@ export default function NewProductPage() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs">Color</Label>
+                  <Label className="text-xs">Өнгө (Англи)</Label>
                   <Input
                     value={variant.color}
                     onChange={(e) =>
@@ -381,7 +381,7 @@ export default function NewProductPage() {
                   />
                 </div>
                 <div>
-                  <Label className="text-xs">Stock</Label>
+                  <Label className="text-xs">Нөөц</Label>
                   <Input
                     type="number"
                     value={variant.stock}
@@ -410,7 +410,7 @@ export default function NewProductPage() {
 
         <Button type="submit" size="lg" className="w-full" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Create Product
+          Бүтээгдэхүүн үүсгэх
         </Button>
       </form>
     </div>
