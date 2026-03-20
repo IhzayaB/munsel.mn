@@ -13,9 +13,28 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pajama.mn — Нярайн хувцас | Baby Clothing",
+  title: "Pajama.mn — Нярайн хувцас",
   description:
-    "Монголын шилдэг нярайн хувцасны онлайн дэлгүүр. Premium baby clothing store in Mongolia.",
+    "Монголын шилдэг нярайн хувцасны онлайн дэлгүүр",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://pajama-mn.vercel.app"),
+  openGraph: {
+    title: "Pajama.mn — Нярайн хувцас",
+    description: "Монголын шилдэг нярайн хувцасны онлайн дэлгүүр",
+    siteName: "Pajama.mn",
+    images: [{ url: "/logo.png", width: 512, height: 512 }],
+    locale: "mn_MN",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Pajama.mn — Нярайн хувцас",
+    description: "Монголын шилдэг нярайн хувцасны онлайн дэлгүүр",
+    images: ["/logo.png"],
+  },
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

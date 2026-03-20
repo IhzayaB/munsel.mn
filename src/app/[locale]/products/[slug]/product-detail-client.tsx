@@ -9,7 +9,6 @@ import { Separator } from "@/components/ui/separator";
 import { ProductCard } from "@/components/products/product-card";
 import {
   ShoppingBag,
-  ChevronLeft,
   Check,
   Minus,
   Plus,
@@ -19,6 +18,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 import type { ProductWithVariants } from "@/types";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 interface ProductDetailClientProps {
   product: ProductWithVariants;
@@ -67,14 +67,16 @@ export function ProductDetailClient({
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Back link */}
-      <Link
-        href="/products"
-        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6"
-      >
-        <ChevronLeft className="h-4 w-4 mr-1" />
-        {tc("back")}
-      </Link>
+      {/* Breadcrumbs */}
+      <Breadcrumbs
+        items={[
+          { label: "Бүтээгдэхүүн", href: "/products" },
+          ...(product.category
+            ? [{ label: product.category.nameMn }]
+            : []),
+          { label: displayName },
+        ]}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
         {/* Images */}

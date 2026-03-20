@@ -16,6 +16,7 @@ import {
 import { Link, useRouter } from "@/i18n/routing";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import Image from "next/image";
 
 export default function LoginPage() {
   const t = useTranslations("auth");
@@ -36,7 +37,7 @@ export default function LoginPage() {
     try {
       if (isRegister) {
         if (form.password !== form.confirmPassword) {
-          toast.error("Passwords don't match");
+          toast.error("Нууц үг таарахгүй байна");
           setLoading(false);
           return;
         }
@@ -53,7 +54,7 @@ export default function LoginPage() {
 
         if (!res.ok) {
           const data = await res.json();
-          toast.error(data.error || "Registration failed");
+          toast.error(data.error || "Бүртгэл амжилтгүй боллоо");
           setLoading(false);
           return;
         }
@@ -66,13 +67,13 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        toast.error("Invalid email or password");
+        toast.error("И-мэйл эсвэл нууц үг буруу байна");
       } else {
         router.push("/");
-        toast.success(isRegister ? "Account created!" : "Welcome back!");
+        toast.success(isRegister ? "Бүртгэл амжилттай!" : "Тавтай морил!");
       }
     } catch {
-      toast.error("Something went wrong");
+      toast.error("Алдаа гарлаа. Дахин оролдоно уу");
     } finally {
       setLoading(false);
     }
@@ -82,7 +83,13 @@ export default function LoginPage() {
     <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-[60vh]">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="text-4xl mb-2">🧸</div>
+          <Image
+            src="/logo.png"
+            alt="Pajama.mn"
+            width={56}
+            height={56}
+            className="rounded-full mx-auto mb-2"
+          />
           <CardTitle className="text-2xl">
             {isRegister ? t("registerTitle") : t("loginTitle")}
           </CardTitle>

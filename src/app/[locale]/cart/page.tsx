@@ -8,6 +8,8 @@ import { Link } from "@/i18n/routing";
 import { CartItemRow } from "@/components/cart/cart-item";
 import { ShoppingBag } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import Image from "next/image";
 
 export default function CartPage() {
   const t = useTranslations("cart");
@@ -17,8 +19,15 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <ShoppingBag className="h-20 w-20 text-muted-foreground mx-auto mb-6" />
-        <h1 className="text-2xl font-bold mb-4">{t("empty")}</h1>
+        <Image
+          src="/logo.png"
+          alt="Pajama.mn"
+          width={80}
+          height={80}
+          className="mx-auto mb-6 rounded-full opacity-40"
+        />
+        <h1 className="text-2xl font-bold mb-2">{t("empty")}</h1>
+        <p className="text-muted-foreground mb-6">Дэлгүүрээс бүтээгдэхүүн нэмнэ үү</p>
         <Button size="lg" render={<Link href="/products" />}>
           {t("continueShopping")}
         </Button>
@@ -28,7 +37,7 @@ export default function CartPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">{t("title")}</h1>
+      <Breadcrumbs items={[{ label: t("title") }]} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart items */}

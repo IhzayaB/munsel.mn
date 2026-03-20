@@ -21,6 +21,7 @@ import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 type CheckoutStep = "info" | "payment" | "success";
 
@@ -141,7 +142,12 @@ export default function CheckoutPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">{t("title")}</h1>
+      <Breadcrumbs
+        items={[
+          { label: "Сагс", href: "/cart" },
+          { label: t("title") },
+        ]}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">

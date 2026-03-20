@@ -1,13 +1,19 @@
 import { db } from "@/lib/db";
-import { products } from "@/lib/db/schema";
+import { products, categories } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { ProductCard } from "@/components/products/product-card";
+import { HomeClient } from "./home-client";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "pajama.mn — Нярайн хувцас",
     description: "Монголын шилдэг нярай, бяцхан хүүхдийн хувцасны онлайн дэлгүүр",
+    openGraph: {
+      title: "pajama.mn — Нярайн хувцас",
+      description: "Монголын шилдэг нярай, бяцхан хүүхдийн хувцасны онлайн дэлгүүр",
+      images: [{ url: "/logo.png", width: 512, height: 512 }],
+      siteName: "Pajama.mn",
+    },
   };
 }
 
@@ -18,13 +24,12 @@ export default async function HomePage() {
     orderBy: [desc(products.featured), desc(products.createdAt)],
   });
 
+  const allCategories = await db.query.categories.findMany();
+
   return (
-    <div className="container mx-auto px-4 py-8 lg:py-12">
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-        {allProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
-    </div>
+    <HomeClient
+      products={JSON.parse(JSON.stringify(allProducts))}
+      categories={JSON.parse(JSON.stringify(allCategories))}
+    />
   );
 }

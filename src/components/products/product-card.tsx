@@ -3,9 +3,12 @@
 import { Link } from "@/i18n/routing";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingBag } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ShoppingBag, Plus } from "lucide-react";
 import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
+import { useCartStore } from "@/store/cart";
+import { toast } from "sonner";
 
 interface ProductCardProps {
   product: {
@@ -19,16 +22,42 @@ interface ProductCardProps {
     featured?: boolean | null;
     ageRange?: string | null;
     category?: { name: string; nameMn: string } | null;
+    variants?: Array<{ id: string; size?: string; stock: number }> | null;
   };
 }
 
 export function ProductCard({ product }: ProductCardProps) {
   const displayName = product.nameMn;
   const categoryName = product.category?.nameMn;
+  const addItem = useCartStore((s) => s.addItem);
 
   const hasDiscount =
     product.compareAtPrice &&
     Number(product.compareAtPrice) > Number(product.price);
+
+  const hasVariants = product.variants && product.variants.length > 1;
+  const firstVariant = product.variants?.[0];
+  const inStock = firstVariant ? firstVariant.stock > 0 : true;
+
+  const handleQuickAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!inStock) return;
+
+    addItem({
+      productId: product.id,
+      variantId: firstVariant?.id,
+      name: product.name,
+      nameMn: product.nameMn,
+      price: Number(product.price),
+      size: firstVariant?.size,
+      quantity: 1,
+      image: product.images?.[0] ?? undefined,
+      maxStock: firstVariant?.stock,
+    });
+    toast.success("Сагсанд нэмэгдлээ!");
+  };
 
   return (
     <Link href={`/products/${product.slug}`}>
@@ -39,7 +68,7 @@ export function ProductCard({ product }: ProductCardProps) {
               src={product.images[0]}
               alt={displayName}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           ) : (
@@ -63,6 +92,18 @@ export function ProductCard({ product }: ProductCardProps) {
               </Badge>
             )}
           </div>
+
+          {/* Quick add button */}
+          {inStock && (
+            <Button
+              size="icon"
+              className="absolute bottom-2 right-2 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 h-9 w-9 rounded-full shadow-md"
+              onClick={handleQuickAdd}
+              title={hasVariants ? "Сагсанд нэмэх" : "Сагсанд нэмэх"}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          )}
         </div>
 
         <CardContent className="p-4">
@@ -71,7 +112,7 @@ export function ProductCard({ product }: ProductCardProps) {
               {categoryName}
             </p>
           )}
-          <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
+          <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2 text-sm sm:text-base">
             {displayName}
           </h3>
           {product.ageRange && (
@@ -80,11 +121,11 @@ export function ProductCard({ product }: ProductCardProps) {
             </p>
           )}
           <div className="flex items-center gap-2">
-            <p className="text-lg font-bold text-primary">
+            <p className="text-base sm:text-lg font-bold text-primary">
               {formatPrice(product.price)}
             </p>
             {hasDiscount && (
-              <p className="text-sm text-muted-foreground line-through">
+              <p className="text-xs sm:text-sm text-muted-foreground line-through">
                 {formatPrice(product.compareAtPrice!)}
               </p>
             )}
