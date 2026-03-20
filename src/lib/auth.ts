@@ -1,5 +1,8 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
+import Facebook from "next-auth/providers/facebook";
+import Twitter from "next-auth/providers/twitter";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
@@ -13,6 +16,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: "/login",
   },
   providers: [
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID!,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+    }),
+    Facebook({
+      clientId: process.env.AUTH_FACEBOOK_ID!,
+      clientSecret: process.env.AUTH_FACEBOOK_SECRET!,
+    }),
+    Twitter({
+      clientId: process.env.AUTH_TWITTER_ID!,
+      clientSecret: process.env.AUTH_TWITTER_SECRET!,
+    }),
     Credentials({
       name: "credentials",
       credentials: {
@@ -52,10 +67,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
-        token.role = (user as { role?: string }).role;
-        token.id = user.id;
+        // For OAuth users, look up role from DB
+        if (account?.provider !== "credentials") {
+          const dbUser = await db.query.users.findFirst({
+            where: eq(users.email, user.email!),
+          });
+          token.role = dbUser?.role || "customer";
+          token.id = dbUser?.id || user.id;
+        } else {
+          token.role = (user as { role?: string }).role;
+          token.id = user.id;
+        }
       }
       return token;
     },

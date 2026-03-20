@@ -120,7 +120,11 @@
     "noAccount": "Бүртгэл байхгүй юу?",
     "hasAccount": "Бүртгэлтэй юу?",
     "signIn": "Нэвтрэх",
-    "signUp": "Бүртгүүлэх"
+    "signUp": "Бүртгүүлэх",
+    "orContinueWith": "Эсвэл",
+    "continueGoogle": "Google-ээр нэвтрэх",
+    "continueFacebook": "Facebook-ээр нэвтрэх",
+    "continueX": "X-ээр нэвтрэх"
   },
   "footer": {
     "about": "Бидний тухай",
