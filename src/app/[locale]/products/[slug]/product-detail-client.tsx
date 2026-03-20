@@ -129,11 +129,11 @@ export function ProductDetailClient({
             </p>
           )}
 
-          <h1 className="text-3xl font-bold mb-4">{displayName}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-4">{displayName}</h1>
 
           {/* Price */}
           <div className="flex items-center gap-3 mb-6">
-            <span className="text-3xl font-bold text-primary">
+            <span className="text-2xl sm:text-3xl font-bold text-primary">
               {formatPrice(product.price)}
             </span>
             {hasDiscount && (
@@ -164,12 +164,12 @@ export function ProductDetailClient({
                     key={variant.id}
                     onClick={() => setSelectedVariant(variant)}
                     disabled={variant.stock <= 0}
-                    className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                    className={`px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors min-w-[48px] ${
                       selectedVariant?.id === variant.id
                         ? "border-primary bg-primary text-primary-foreground"
                         : variant.stock <= 0
-                        ? "border-gray-200 text-gray-400 cursor-not-allowed"
-                        : "border-gray-300 hover:border-primary"
+                        ? "border-gray-200 text-gray-400 cursor-not-allowed line-through"
+                        : "border-gray-300 hover:border-primary active:bg-gray-100"
                     }`}
                   >
                     {variant.size}
@@ -195,19 +195,21 @@ export function ProductDetailClient({
           </div>
 
           {/* Quantity + Add to cart */}
-          <div className="flex items-center gap-4 mb-8">
+          <div className="flex items-center gap-3 mb-8">
             <div className="flex items-center border rounded-lg">
               <Button
                 variant="ghost"
                 size="icon"
+                className="h-11 w-11"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
               >
                 <Minus className="h-4 w-4" />
               </Button>
-              <span className="w-12 text-center font-medium">{quantity}</span>
+              <span className="w-10 text-center font-medium">{quantity}</span>
               <Button
                 variant="ghost"
                 size="icon"
+                className="h-11 w-11"
                 onClick={() => {
                   const maxQty = selectedVariant ? selectedVariant.stock : 99;
                   setQuantity(Math.min(quantity + 1, maxQty));
@@ -219,7 +221,7 @@ export function ProductDetailClient({
 
             <Button
               size="lg"
-              className="flex-1"
+              className="flex-1 h-12 text-base"
               disabled={!inStock}
               onClick={handleAddToCart}
             >
@@ -260,9 +262,9 @@ export function ProductDetailClient({
 
       {/* Related Products */}
       {relatedProducts.length > 0 && (
-        <div className="mt-16">
-          <h2 className="text-2xl font-bold mb-6">{t("relatedProducts")}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="mt-12 sm:mt-16">
+          <h2 className="text-xl sm:text-2xl font-bold mb-6">{t("relatedProducts")}</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {relatedProducts.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}

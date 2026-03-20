@@ -103,5 +103,15 @@
   }
   html {
     @apply font-sans;
+    -webkit-tap-highlight-color: transparent;
   }
+}
+
+/* Hide scrollbar for category pills */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }

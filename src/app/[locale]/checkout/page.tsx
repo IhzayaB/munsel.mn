@@ -23,6 +23,18 @@ import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
+const UB_DISTRICTS = [
+  "Баянгол",
+  "Баянзүрх",
+  "Чингэлтэй",
+  "Хан-Уул",
+  "Сонгинохайрхан",
+  "Сүхбаатар",
+  "Налайх",
+  "Багануур",
+  "Багахангай",
+];
+
 type CheckoutStep = "info" | "payment" | "success";
 
 export default function CheckoutPage() {
@@ -44,21 +56,21 @@ export default function CheckoutPage() {
     address: "",
     city: "Улаанбаатар",
     district: "",
+    khoroo: "",
     notes: "",
   });
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.name || !form.email || !form.phone || !form.address) {
-      toast.error(
-        "Бүх заавал талбарыг бөглөнө үү"
-      );
+    if (!form.name || !form.phone || !form.district) {
+      toast.error("Бүх заавал талбарыг бөглөнө үү");
       return;
     }
 
     setLoading(true);
     try {
+      const fullAddress = `${form.city}, ${form.district}${form.khoroo ? `, ${form.khoroo}-р хороо` : ""}, ${form.address}`;
       const res = await fetch("/api/qpay/create-invoice", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -71,7 +83,7 @@ export default function CheckoutPage() {
             size: item.size,
             color: item.color,
           })),
-          customer: form,
+          customer: { ...form, address: fullAddress },
         }),
       });
 
@@ -83,9 +95,7 @@ export default function CheckoutPage() {
       setInvoiceId(data.invoiceId);
       setStep("payment");
     } catch {
-      toast.error(
-        "Захиалга үүсгэхэд алдаа гарлаа"
-      );
+      toast.error("Захиалга үүсгэхэд алдаа гарлаа");
     } finally {
       setLoading(false);
     }
@@ -115,12 +125,12 @@ export default function CheckoutPage() {
     return (
       <div className="container mx-auto px-4 py-16 text-center max-w-lg">
         <CheckCircle2 className="h-20 w-20 text-green-500 mx-auto mb-6" />
-        <h1 className="text-3xl font-bold mb-2">{t("orderPlaced")}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">{t("orderPlaced")}</h1>
         <p className="text-muted-foreground mb-2">{t("paymentSuccess")}</p>
         <p className="text-lg font-mono font-bold mb-8">
           {t("orderNumber")}: {orderNumber}
         </p>
-        <Button render={<Link href="/" />}>
+        <Button size="lg" className="w-full sm:w-auto" render={<Link href="/" />}>
           {tc("home")}
         </Button>
       </div>
@@ -131,17 +141,17 @@ export default function CheckoutPage() {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <p className="text-lg text-muted-foreground mb-4">
-          {"Таны сагс хоосон байна"}
+          Таны сагс хоосон байна
         </p>
-        <Button render={<Link href="/products" />}>
-          {"Дэлгүүр үзэх"}
+        <Button size="lg" render={<Link href="/products" />}>
+          Дэлгүүр үзэх
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-6 sm:py-8">
       <Breadcrumbs
         items={[
           { label: "Сагс", href: "/cart" },
@@ -149,115 +159,200 @@ export default function CheckoutPage() {
         ]}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Order summary - visible on top on mobile */}
+      <div className="lg:hidden mb-6">
+        <details className="bg-gray-50 rounded-xl">
+          <summary className="p-4 font-semibold cursor-pointer flex items-center justify-between">
+            <span>{t("orderSummary")} ({items.length})</span>
+            <span className="font-bold text-primary">{formatPrice(getGrandTotal())}</span>
+          </summary>
+          <div className="px-4 pb-4 space-y-2 text-sm">
+            {items.map((item) => (
+              <div
+                key={`${item.productId}-${item.variantId}`}
+                className="flex justify-between"
+              >
+                <span className="truncate mr-2">
+                  {item.nameMn} x{item.quantity}
+                  {item.size && ` (${item.size})`}
+                </span>
+                <span className="whitespace-nowrap">
+                  {formatPrice(item.price * item.quantity)}
+                </span>
+              </div>
+            ))}
+            <Separator />
+            <div className="flex justify-between">
+              <span>Нийлбэр</span>
+              <span>{formatPrice(getTotalPrice())}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Хүргэлт</span>
+              <span>{getShippingCost() === 0 ? "Үнэгүй" : formatPrice(getShippingCost())}</span>
+            </div>
+            <Separator />
+            <div className="flex justify-between font-bold">
+              <span>Нийт</span>
+              <span>{formatPrice(getGrandTotal())}</span>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         <div className="lg:col-span-2">
           {step === "info" && (
-            <form onSubmit={handleSubmitOrder} className="space-y-6">
+            <form onSubmit={handleSubmitOrder} className="space-y-5">
               {/* Contact Info */}
               <Card>
-                <CardHeader>
-                  <CardTitle>{t("contactInfo")}</CardTitle>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">{t("contactInfo")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="name">{t("name")} *</Label>
+                    <Label htmlFor="name">Овог, нэр *</Label>
                     <Input
                       id="name"
                       value={form.name}
                       onChange={(e) =>
                         setForm({ ...form, name: e.target.value })
                       }
+                      placeholder="Бат Болд"
+                      className="h-12 text-base"
                       required
                     />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="email">{t("email")} *</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={form.email}
-                        onChange={(e) =>
-                          setForm({ ...form, email: e.target.value })
-                        }
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="phone">{t("phone")} *</Label>
-                      <Input
-                        id="phone"
-                        value={form.phone}
-                        onChange={(e) =>
-                          setForm({ ...form, phone: e.target.value })
-                        }
-                        placeholder="+976 9911-1234"
-                        required
-                      />
-                    </div>
+                  <div>
+                    <Label htmlFor="phone">Утасны дугаар *</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      inputMode="tel"
+                      value={form.phone}
+                      onChange={(e) =>
+                        setForm({ ...form, phone: e.target.value })
+                      }
+                      placeholder="9911 1234"
+                      className="h-12 text-base"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">И-мэйл (заавал биш)</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      inputMode="email"
+                      value={form.email}
+                      onChange={(e) =>
+                        setForm({ ...form, email: e.target.value })
+                      }
+                      placeholder="tani@email.com"
+                      className="h-12 text-base"
+                    />
                   </div>
                 </CardContent>
               </Card>
 
               {/* Shipping Info */}
               <Card>
-                <CardHeader>
-                  <CardTitle>{t("shippingInfo")}</CardTitle>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Хүргэлтийн мэдээлэл</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="address">{t("address")} *</Label>
-                    <Input
-                      id="address"
-                      value={form.address}
-                      onChange={(e) =>
-                        setForm({ ...form, address: e.target.value })
-                      }
-                      required
-                    />
+                    <Label>Хот *</Label>
+                    <Select
+                      value={form.city}
+                      onValueChange={(v) => v && setForm({ ...form, city: v, district: "" })}
+                    >
+                      <SelectTrigger className="h-12 text-base">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Улаанбаатар">Улаанбаатар</SelectItem>
+                        <SelectItem value="Дархан">Дархан</SelectItem>
+                        <SelectItem value="Эрдэнэт">Эрдэнэт</SelectItem>
+                        <SelectItem value="Бусад">Бусад</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="city">{t("city")}</Label>
-                      <Select
-                        value={form.city}
-                        onValueChange={(v) => v && setForm({ ...form, city: v })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Улаанбаатар">
-                            Улаанбаатар
-                          </SelectItem>
-                          <SelectItem value="Дархан">Дархан</SelectItem>
-                          <SelectItem value="Эрдэнэт">Эрдэнэт</SelectItem>
-                          <SelectItem value="Бусад">
-                            Бусад
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
+
+                  {form.city === "Улаанбаатар" ? (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Дүүрэг *</Label>
+                        <Select
+                          value={form.district}
+                          onValueChange={(v) => v && setForm({ ...form, district: v })}
+                        >
+                          <SelectTrigger className="h-12 text-base">
+                            <SelectValue placeholder="Сонгох" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {UB_DISTRICTS.map((d) => (
+                              <SelectItem key={d} value={d}>
+                                {d}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="khoroo">Хороо</Label>
+                        <Input
+                          id="khoroo"
+                          inputMode="numeric"
+                          value={form.khoroo}
+                          onChange={(e) =>
+                            setForm({ ...form, khoroo: e.target.value })
+                          }
+                          placeholder="Жишээ: 7"
+                          className="h-12 text-base"
+                        />
+                      </div>
                     </div>
+                  ) : (
                     <div>
-                      <Label htmlFor="district">{t("district")}</Label>
+                      <Label htmlFor="district">Аймаг / Дүүрэг *</Label>
                       <Input
                         id="district"
                         value={form.district}
                         onChange={(e) =>
                           setForm({ ...form, district: e.target.value })
                         }
+                        className="h-12 text-base"
+                        required
                       />
                     </div>
-                  </div>
+                  )}
+
                   <div>
-                    <Label htmlFor="notes">{t("notes")}</Label>
+                    <Label htmlFor="address">Дэлгэрэнгүй хаяг *</Label>
+                    <Textarea
+                      id="address"
+                      value={form.address}
+                      onChange={(e) =>
+                        setForm({ ...form, address: e.target.value })
+                      }
+                      placeholder="Байр, орц, тоот"
+                      rows={2}
+                      className="text-base"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="notes">Нэмэлт тэмдэглэл</Label>
                     <Textarea
                       id="notes"
                       value={form.notes}
                       onChange={(e) =>
                         setForm({ ...form, notes: e.target.value })
                       }
-                      rows={3}
+                      placeholder="Жишээ: хаалганы код 1234"
+                      rows={2}
+                      className="text-base"
                     />
                   </div>
                 </CardContent>
@@ -266,11 +361,11 @@ export default function CheckoutPage() {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full"
+                className="w-full h-14 text-base"
                 disabled={loading}
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t("placeOrder")}
+                {t("placeOrder")} • {formatPrice(getGrandTotal())}
               </Button>
             </form>
           )}
@@ -280,11 +375,13 @@ export default function CheckoutPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <QrCode className="h-5 w-5" />
-                  {t("qpay")}
+                  QPay төлбөр
                 </CardTitle>
               </CardHeader>
               <CardContent className="text-center space-y-4">
-                <p className="text-muted-foreground">{t("scanQr")}</p>
+                <p className="text-muted-foreground text-sm sm:text-base">
+                  Банкны аппаараа QR кодыг уншуулна уу
+                </p>
 
                 {qrImage && (
                   <div className="flex justify-center">
@@ -293,7 +390,7 @@ export default function CheckoutPage() {
                       alt="QPay QR Code"
                       width={280}
                       height={280}
-                      className="rounded-lg border"
+                      className="rounded-lg border w-full max-w-[280px]"
                     />
                   </div>
                 )}
@@ -301,20 +398,20 @@ export default function CheckoutPage() {
                 <p className="text-sm text-muted-foreground">
                   {t("orderNumber")}: <strong>{orderNumber}</strong>
                 </p>
-                <p className="text-lg font-bold">
+                <p className="text-xl font-bold">
                   {formatPrice(getGrandTotal())}
                 </p>
 
                 <Button
                   onClick={checkPayment}
                   disabled={loading}
-                  className="w-full max-w-xs"
+                  className="w-full h-14 text-base"
                   size="lg"
                 >
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {t("paymentPending")}
+                      Шалгаж байна...
                     </>
                   ) : (
                     "Төлбөр шалгах"
@@ -325,8 +422,8 @@ export default function CheckoutPage() {
           )}
         </div>
 
-        {/* Order Summary Sidebar */}
-        <div className="bg-gray-50 rounded-xl p-6 h-fit sticky top-24">
+        {/* Order Summary Sidebar - desktop only */}
+        <div className="hidden lg:block bg-gray-50 rounded-xl p-6 h-fit sticky top-24">
             <h2 className="font-bold text-lg mb-4">{t("orderSummary")}</h2>
 
             <div className="space-y-3 text-sm">
@@ -348,15 +445,11 @@ export default function CheckoutPage() {
               <Separator />
 
               <div className="flex justify-between">
-                <span>
-                  Нийлбэр
-                </span>
+                <span>Нийлбэр</span>
                 <span>{formatPrice(getTotalPrice())}</span>
               </div>
               <div className="flex justify-between">
-                <span>
-                  Хүргэлт
-                </span>
+                <span>Хүргэлт</span>
                 <span>
                   {getShippingCost() === 0
                     ? "Үнэгүй"
@@ -365,7 +458,7 @@ export default function CheckoutPage() {
               </div>
               <Separator />
               <div className="flex justify-between font-bold text-lg">
-                <span>{"Нийт"}</span>
+                <span>Нийт</span>
                 <span>{formatPrice(getGrandTotal())}</span>
               </div>
             </div>

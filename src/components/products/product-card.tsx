@@ -93,13 +93,13 @@ export function ProductCard({ product }: ProductCardProps) {
             )}
           </div>
 
-          {/* Quick add button */}
+          {/* Quick add button - always visible on mobile, hover on desktop */}
           {inStock && (
             <Button
               size="icon"
-              className="absolute bottom-2 right-2 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 h-9 w-9 rounded-full shadow-md"
+              className="absolute bottom-2 right-2 opacity-100 sm:opacity-0 sm:translate-y-2 sm:group-hover:opacity-100 sm:group-hover:translate-y-0 transition-all duration-300 h-10 w-10 sm:h-9 sm:w-9 rounded-full shadow-md"
               onClick={handleQuickAdd}
-              title={hasVariants ? "Сагсанд нэмэх" : "Сагсанд нэмэх"}
+              aria-label="Сагсанд нэмэх"
             >
               <Plus className="h-4 w-4" />
             </Button>

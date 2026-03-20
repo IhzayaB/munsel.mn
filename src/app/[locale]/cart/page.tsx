@@ -52,7 +52,7 @@ export default function CartPage() {
         </div>
 
         {/* Summary */}
-        <div className="bg-gray-50 rounded-xl p-6 h-fit sticky top-24">
+        <div className="bg-gray-50 rounded-xl p-5 sm:p-6 h-fit lg:sticky lg:top-24">
           <h2 className="font-bold text-lg mb-4">
             Захиалгын товчхон
           </h2>
@@ -81,13 +81,13 @@ export default function CartPage() {
             {t("shippingNote")}
           </p>
 
-          <Button className="w-full" size="lg" render={<Link href="/checkout" />}>
+          <Button className="w-full h-12 text-base" size="lg" render={<Link href="/checkout" />}>
             {t("checkout")}
           </Button>
 
           <Button
             variant="outline"
-            className="w-full mt-2"
+            className="w-full mt-2 h-10"
             size="sm"
             render={<Link href="/products" />}
           >

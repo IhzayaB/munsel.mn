@@ -106,6 +106,7 @@ export default function LoginPage() {
                   id="name"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="h-12 text-base"
                   required
                 />
               </div>
@@ -115,8 +116,10 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
+                inputMode="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className="h-12 text-base"
                 required
               />
             </div>
@@ -129,6 +132,7 @@ export default function LoginPage() {
                 onChange={(e) =>
                   setForm({ ...form, password: e.target.value })
                 }
+                className="h-12 text-base"
                 required
               />
             </div>
@@ -144,12 +148,13 @@ export default function LoginPage() {
                   onChange={(e) =>
                     setForm({ ...form, confirmPassword: e.target.value })
                   }
+                  className="h-12 text-base"
                   required
                 />
               </div>
             )}
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full h-12 text-base" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isRegister ? t("signUp") : t("signIn")}
             </Button>

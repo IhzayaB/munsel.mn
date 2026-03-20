@@ -42,10 +42,10 @@ export function HomeClient({ products, categories }: HomeClientProps) {
     <div className="container mx-auto px-4 py-8 lg:py-12">
       {/* Category pills */}
       {categories.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-8">
+        <div className="flex gap-2 mb-8 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
           <button
             onClick={() => setSelectedCategory("all")}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+            className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap shrink-0 ${
               selectedCategory === "all"
                 ? "bg-primary text-primary-foreground shadow-sm"
                 : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
@@ -57,7 +57,7 @@ export function HomeClient({ products, categories }: HomeClientProps) {
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+              className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap shrink-0 ${
                 selectedCategory === cat.id
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
