@@ -197,7 +197,7 @@ export default function EditProductPage() {
                   </button>
                 </div>
               ))}
-              <label className="w-24 h-24 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50">
+              <label className="w-24 h-24 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-secondary">
                 {uploading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
@@ -323,7 +323,7 @@ export default function EditProductPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             {variants.map((variant, i) => (
-              <div key={i} className="grid grid-cols-2 md:grid-cols-5 gap-3 p-3 bg-gray-50 rounded-lg">
+              <div key={i} className="grid grid-cols-2 md:grid-cols-5 gap-3 p-3 bg-secondary/50 rounded-lg">
                 <div>
                   <Label className="text-xs">Хэмжээ</Label>
                   <Select value={variant.size} onValueChange={(v) => v && updateVariant(i, "size", v)}>

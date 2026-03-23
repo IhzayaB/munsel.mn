@@ -19,9 +19,9 @@ export function CartItemRow({ item, locale }: CartItemRowProps) {
   const displayName = item.nameMn;
 
   return (
-    <div className="flex gap-3 p-3 bg-gray-50 rounded-lg">
+    <div className="flex gap-3 p-3 bg-secondary/50 rounded-lg">
       {/* Product image */}
-      <div className="w-20 h-20 bg-gray-200 rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden">
+      <div className="w-20 h-20 bg-secondary rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden">
         {item.image ? (
           <Image
             src={item.image}

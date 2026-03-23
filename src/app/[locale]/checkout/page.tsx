@@ -164,7 +164,7 @@ export default function CheckoutPage() {
 
       {/* Order summary - visible on top on mobile */}
       <div className="lg:hidden mb-6">
-        <details className="bg-gray-50 rounded-xl">
+        <details className="bg-secondary rounded-xl">
           <summary className="p-4 font-semibold cursor-pointer flex items-center justify-between">
             <span>{t("orderSummary")} ({items.length})</span>
             <span className="font-bold text-primary">{formatPrice(getGrandTotal())}</span>
@@ -426,7 +426,7 @@ export default function CheckoutPage() {
         </div>
 
         {/* Order Summary Sidebar - desktop only */}
-        <div className="hidden lg:block bg-gray-50 rounded-xl p-6 h-fit sticky top-24">
+        <div className="hidden lg:block bg-secondary rounded-xl p-6 h-fit sticky top-24">
             <h2 className="font-bold text-lg mb-4">{t("orderSummary")}</h2>
 
             <div className="space-y-3 text-sm">

@@ -52,7 +52,7 @@ export default function CartPage() {
         </div>
 
         {/* Summary */}
-        <div className="bg-gray-50 rounded-xl p-5 sm:p-6 h-fit lg:sticky lg:top-24">
+        <div className="bg-secondary rounded-xl p-5 sm:p-6 h-fit lg:sticky lg:top-24">
           <h2 className="font-bold text-lg mb-4">
             Захиалгын товчхон
           </h2>

@@ -62,7 +62,7 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Link href={`/products/${product.slug}`}>
       <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden h-full">
-        <div className="relative bg-gray-100 h-64 flex items-center justify-center overflow-hidden">
+        <div className="relative bg-secondary h-64 flex items-center justify-center overflow-hidden">
           {product.images && product.images.length > 0 ? (
             <Image
               src={product.images[0]}
@@ -72,13 +72,13 @@ export function ProductCard({ product }: ProductCardProps) {
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           ) : (
-            <ShoppingBag className="h-16 w-16 text-gray-300 group-hover:scale-110 transition-transform" />
+            <ShoppingBag className="h-16 w-16 text-muted-foreground/30 group-hover:scale-110 transition-transform" />
           )}
 
           {/* Badges */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">
             {product.featured && (
-              <Badge className="bg-[var(--baby-teal)] hover:bg-[var(--baby-teal-dark)]">⭐ Онцлох</Badge>
+              <Badge className="bg-[var(--baby-peach)] hover:bg-[var(--baby-peach-dark)] text-white">⭐ Онцлох</Badge>
             )}
             {hasDiscount && (
               <Badge variant="destructive">

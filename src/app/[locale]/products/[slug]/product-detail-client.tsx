@@ -81,7 +81,7 @@ export function ProductDetailClient({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
         {/* Images */}
         <div>
-          <div className="aspect-square bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden mb-4 relative">
+          <div className="aspect-square bg-secondary rounded-xl flex items-center justify-center overflow-hidden mb-4 relative">
             {product.images && product.images.length > 0 ? (
               <Image
                 src={product.images[selectedImage]}
@@ -92,7 +92,7 @@ export function ProductDetailClient({
                 priority
               />
             ) : (
-              <ShoppingBag className="h-24 w-24 text-gray-300" />
+              <ShoppingBag className="h-24 w-24 text-muted-foreground/40" />
             )}
           </div>
           {/* Thumbnails */}
@@ -168,8 +168,8 @@ export function ProductDetailClient({
                       selectedVariant?.id === variant.id
                         ? "border-primary bg-primary text-primary-foreground"
                         : variant.stock <= 0
-                        ? "border-gray-200 text-gray-400 cursor-not-allowed line-through"
-                        : "border-gray-300 hover:border-primary active:bg-gray-100"
+                        ? "border-muted text-muted-foreground cursor-not-allowed line-through"
+                        : "border-border hover:border-primary active:bg-accent"
                     }`}
                   >
                     {variant.size}

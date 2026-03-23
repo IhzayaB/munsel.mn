@@ -29,7 +29,7 @@ export function Footer() {
                 href="https://www.instagram.com/pajama.mn/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="h-9 w-9 rounded-full bg-gray-700 flex items-center justify-center hover:bg-pink-500 transition-colors"
+                className="h-9 w-9 rounded-full bg-gray-700 flex items-center justify-center hover:bg-[var(--baby-peach)] transition-colors"
                 aria-label="Instagram"
               >
                 <Instagram className="h-4 w-4" />
@@ -38,7 +38,7 @@ export function Footer() {
                 href="https://www.facebook.com/Pajama.mn"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="h-9 w-9 rounded-full bg-gray-700 flex items-center justify-center hover:bg-blue-500 transition-colors"
+                className="h-9 w-9 rounded-full bg-gray-700 flex items-center justify-center hover:bg-[var(--baby-teal)] transition-colors"
                 aria-label="Facebook"
               >
                 <Facebook className="h-4 w-4" />
