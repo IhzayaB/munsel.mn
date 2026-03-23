@@ -5,7 +5,7 @@ import { Link, usePathname } from "@/i18n/routing";
 import {
   ShoppingBag,
   Menu,
-  User,
+  Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { CartSheet } from "@/components/cart/cart-sheet";
 import { useCartStore } from "@/store/cart";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 
 export function Header() {
@@ -20,6 +21,8 @@ export function Header() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const totalItems = useCartStore((s) => s.getTotalItems());
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "admin";
 
   const navLinks = [
     { href: "/" as const, label: t("home") },
@@ -68,9 +71,11 @@ export function Header() {
 
         {/* Right side actions */}
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="h-10 w-10" render={<Link href="/login" />}>
-            <User className="h-5 w-5" />
-          </Button>
+          {isAdmin && (
+            <Button variant="ghost" size="icon" className="h-10 w-10" render={<Link href="/admin" />}>
+              <Settings className="h-5 w-5" />
+            </Button>
+          )}
 
           {/* Cart */}
           <CartSheet>
@@ -89,45 +94,52 @@ export function Header() {
             <SheetTrigger className="md:hidden" render={<Button variant="ghost" size="icon" className="h-10 w-10" />}>
               <Menu className="h-5 w-5" />
             </SheetTrigger>
-            <SheetContent side="left" className="w-72">
-              <div className="flex flex-col gap-4 mt-8">
-                <Link href="/" className="flex items-center gap-2 mb-4">
-                  <Image
-                    src="/logo.png"
-                    alt="Pajama.mn"
-                    width={36}
-                    height={36}
-                    className="rounded-full"
-                  />
-                  <Image
-                    src="/pajama-text.png"
-                    alt="Pajama.mn"
-                    width={110}
-                    height={26}
-                    className="h-6 w-auto"
-                  />
-                </Link>
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={`text-lg font-medium py-3 transition-colors hover:text-primary ${
-                      pathname === link.href
-                        ? "text-primary"
-                        : "text-muted-foreground"
-                    }`}
-                  >
-                    {link.label}
+            <SheetContent side="left" className="w-72 p-0">
+              <div className="flex flex-col h-full">
+                <div className="px-6 pt-6 pb-4 border-b border-border">
+                  <Link href="/" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
+                    <Image
+                      src="/logo.png"
+                      alt="Pajama.mn"
+                      width={36}
+                      height={36}
+                      className="rounded-full"
+                    />
+                    <Image
+                      src="/pajama-text.png"
+                      alt="Pajama.mn"
+                      width={110}
+                      height={26}
+                      className="h-6 w-auto"
+                    />
                   </Link>
-                ))}
-                <Link
-                  href="/login"
-                  onClick={() => setMobileOpen(false)}
-                  className="text-lg font-medium py-3 text-muted-foreground hover:text-primary"
-                >
-                  {t("login")}
-                </Link>
+                </div>
+                <nav className="flex flex-col px-6 py-4 gap-1">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMobileOpen(false)}
+                      className={`text-base font-medium py-3 px-3 rounded-lg transition-colors hover:bg-accent hover:text-primary ${
+                        pathname === link.href
+                          ? "text-primary bg-accent"
+                          : "text-foreground"
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setMobileOpen(false)}
+                      className="text-base font-medium py-3 px-3 rounded-lg transition-colors hover:bg-accent hover:text-primary text-foreground flex items-center gap-2"
+                    >
+                      <Settings className="h-4 w-4" />
+                      {t("admin")}
+                    </Link>
+                  )}
+                </nav>
               </div>
             </SheetContent>
           </Sheet>

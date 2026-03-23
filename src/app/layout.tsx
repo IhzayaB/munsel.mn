@@ -50,7 +50,7 @@ export default function RootLayout({
     >
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
-        <meta name="theme-color" content="#faf6f1" />
+        <meta name="theme-color" content="#f5fafa" />
         <meta name="format-detection" content="telephone=no" />
       </head>
       <body className="min-h-full flex flex-col">{children}</body>

@@ -350,7 +350,7 @@ export default async function AdminDashboardPage() {
                   {recentOrders.map((order) => {
                     const sc = statusConfig[order.status] || statusConfig.pending;
                     return (
-                      <tr key={order.id} className="border-b last:border-0 hover:bg-gray-50/50">
+                      <tr key={order.id} className="border-b last:border-0 hover:bg-secondary/50">
                         <td className="py-2.5 px-6 font-mono text-xs">
                           {order.orderNumber}
                         </td>

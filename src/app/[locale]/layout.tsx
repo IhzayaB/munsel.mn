@@ -4,6 +4,7 @@ import { routing } from "@/i18n/routing";
 import { Toaster } from "@/components/ui/sonner";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { Providers } from "@/components/providers";
 
 export default async function LocaleLayout({
   children,
@@ -22,10 +23,12 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <Header />
-      <main className="flex-1">{children}</main>
-      <Footer />
-      <Toaster position="top-right" />
+      <Providers>
+        <Header />
+        <main className="flex-1">{children}</main>
+        <Footer />
+        <Toaster position="top-right" />
+      </Providers>
     </NextIntlClientProvider>
   );
 }

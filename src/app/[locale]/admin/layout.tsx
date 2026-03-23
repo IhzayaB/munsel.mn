@@ -24,7 +24,7 @@ export default async function AdminLayout({
 
   return (
     <div className="min-h-[60vh]">
-      <div className="border-b bg-gray-50/80 backdrop-blur-sm sticky top-0 z-40">
+      <div className="border-b bg-secondary/80 backdrop-blur-sm sticky top-0 z-40">
         <div className="container mx-auto px-4 py-2.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

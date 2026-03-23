@@ -232,7 +232,7 @@ export default function CheckoutPage() {
                       onChange={(e) =>
                         setForm({ ...form, phone: e.target.value })
                       }
-                      placeholder="9911 1234"
+                      placeholder="8802 9180"
                       className="h-12 text-base"
                       required
                     />

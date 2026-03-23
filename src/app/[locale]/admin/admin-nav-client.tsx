@@ -39,7 +39,7 @@ export function AdminNavClient({ items }: { items: NavItem[] }) {
             className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs sm:text-sm font-medium whitespace-nowrap transition-colors ${
               isActive
                 ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground hover:bg-gray-100"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary"
             }`}
           >
             <Icon className="h-3.5 w-3.5" />

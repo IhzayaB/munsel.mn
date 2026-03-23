@@ -78,7 +78,7 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Badges */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">
             {product.featured && (
-              <Badge className="bg-pink-500 hover:bg-pink-600">⭐ Онцлох</Badge>
+              <Badge className="bg-[var(--baby-teal)] hover:bg-[var(--baby-teal-dark)]">⭐ Онцлох</Badge>
             )}
             {hasDiscount && (
               <Badge variant="destructive">
@@ -112,7 +112,7 @@ export function ProductCard({ product }: ProductCardProps) {
               {categoryName}
             </p>
           )}
-          <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2 text-sm sm:text-base">
+          <h3 className="font-semibold text-foreground mb-1 line-clamp-2 text-sm sm:text-base">
             {displayName}
           </h3>
           {product.ageRange && (
