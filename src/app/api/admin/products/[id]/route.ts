@@ -4,11 +4,15 @@ import { products, productVariants } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
-// GET single product
+// GET single product (admin only)
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = await auth();
+  if (!session || session.user?.role !== "admin") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const { id } = await params;
   const product = await db.query.products.findFirst({
     where: eq(products.id, id),
@@ -38,7 +42,7 @@ export async function PUT(
     const {
       name, nameMn, slug, description, descriptionMn,
       price, compareAtPrice, material, materialMn,
-      ageRange, featured, active, images, variants,
+      ageRange, featured, active, images, categoryId, variants,
     } = body;
 
     await db
@@ -54,6 +58,7 @@ export async function PUT(
         featured: featured || false,
         active: active !== false,
         images: images || [],
+        categoryId: categoryId || null,
         updatedAt: new Date(),
       })
       .where(eq(products.id, id));

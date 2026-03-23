@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "Pajama.mn — Нярайн хувцас",
   description:
     "Монголын шилдэг нярайн хувцасны онлайн дэлгүүр",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://pajama-mn.vercel.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://pajama.mn"),
   openGraph: {
     title: "Pajama.mn — Нярайн хувцас",
     description: "Монголын шилдэг нярайн хувцасны онлайн дэлгүүр",

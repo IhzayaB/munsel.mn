@@ -4,6 +4,8 @@ import { eq, desc } from "drizzle-orm";
 import { ProductsClient } from "./products-client";
 import type { Metadata } from "next";
 
+export const revalidate = 60;
+
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Бүтээгдэхүүн — pajama.mn",

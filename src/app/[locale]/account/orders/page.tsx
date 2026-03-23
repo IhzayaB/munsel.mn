@@ -48,10 +48,17 @@ export default function AccountOrdersPage() {
   const t = useTranslations("common");
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [needsLogin, setNeedsLogin] = useState(false);
 
   useEffect(() => {
     fetch("/api/orders")
-      .then((r) => r.json())
+      .then((r) => {
+        if (r.status === 401) {
+          setNeedsLogin(true);
+          return [];
+        }
+        return r.json();
+      })
       .then((data) => {
         if (Array.isArray(data)) setOrders(data);
       })
@@ -78,13 +85,13 @@ export default function AccountOrdersPage() {
           <CardContent className="text-center py-12">
             <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground mb-4">
-              Захиалга байхгүй байна
+              {needsLogin ? "Захиалга харахын тулд нэвтэрнэ үү" : "Захиалга байхгүй байна"}
             </p>
             <Link
-              href="/products"
+              href={needsLogin ? "/login" : "/products"}
               className="text-primary hover:underline font-medium"
             >
-              Бүтээгдэхүүн үзэх
+              {needsLogin ? "Нэвтрэх" : "Бүтээгдэхүүн үзэх"}
             </Link>
           </CardContent>
         </Card>

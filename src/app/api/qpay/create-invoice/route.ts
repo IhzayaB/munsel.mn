@@ -4,18 +4,42 @@ import { orders, orderItems, products, productVariants } from "@/lib/db/schema";
 import { createQPayInvoice } from "@/lib/qpay";
 import { eq, inArray } from "drizzle-orm";
 import { generateOrderNumber, FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from "@/lib/utils";
+import { auth } from "@/lib/auth";
+import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit: 5 orders per minute per IP
+    const rlKey = getRateLimitKey(req, "create-invoice");
+    const rl = rateLimit(rlKey, { limit: 5, windowMs: 60_000 });
+    if (!rl.success) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const body = await req.json();
     const { items, customer } = body;
 
-    if (!items?.length || !customer?.name || !customer?.email || !customer?.phone) {
+    if (!items?.length || !customer?.name || !customer?.phone) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
+
+    // Basic input sanitization
+    const sanitizedCustomer = {
+      name: String(customer.name).slice(0, 255),
+      email: customer.email ? String(customer.email).slice(0, 255) : "",
+      phone: String(customer.phone).slice(0, 20),
+      address: customer.address ? String(customer.address).slice(0, 500) : "",
+      city: customer.city ? String(customer.city).slice(0, 100) : "",
+      district: customer.district ? String(customer.district).slice(0, 100) : null,
+      notes: customer.notes ? String(customer.notes).slice(0, 1000) : null,
+    };
+
+    // Link to user if logged in
+    const session = await auth();
+    const userId = session?.user?.id || null;
 
     // Server-side price validation: fetch real prices from DB
     const productIds = [...new Set(items.map((i: { productId: string }) => i.productId))];
@@ -70,13 +94,14 @@ export async function POST(req: NextRequest) {
       .insert(orders)
       .values({
         orderNumber,
-        customerName: customer.name,
-        customerEmail: customer.email,
-        customerPhone: customer.phone,
-        shippingAddress: customer.address,
-        city: customer.city,
-        district: customer.district || null,
-        notes: customer.notes || null,
+        userId,
+        customerName: sanitizedCustomer.name,
+        customerEmail: sanitizedCustomer.email,
+        customerPhone: sanitizedCustomer.phone,
+        shippingAddress: sanitizedCustomer.address,
+        city: sanitizedCustomer.city,
+        district: sanitizedCustomer.district,
+        notes: sanitizedCustomer.notes,
         subtotal: subtotal.toString(),
         shippingCost: shippingCost.toString(),
         total: total.toString(),

@@ -91,7 +91,7 @@ export function Header() {
 
           {/* Mobile menu */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger className="md:hidden" render={<Button variant="ghost" size="icon" className="h-10 w-10" />}>
+            <SheetTrigger className="md:hidden" render={<Button variant="ghost" size="icon" className="h-10 w-10" aria-label="Цэс нээх" />}>
               <Menu className="h-5 w-5" />
             </SheetTrigger>
             <SheetContent side="left" className="w-72 p-0">

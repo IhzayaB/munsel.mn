@@ -5,8 +5,18 @@ import { checkQPayPayment } from "@/lib/qpay";
 import { eq, sql } from "drizzle-orm";
 import { sendOrderConfirmation } from "@/lib/email";
 import { formatPrice } from "@/lib/utils";
+import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
 
 async function handlePaymentConfirmed(orderNumber: string, paymentId: string) {
+  // Idempotency guard: only process if order is still pending
+  const existingOrder = await db.query.orders.findFirst({
+    where: eq(orders.orderNumber, orderNumber),
+  });
+
+  if (!existingOrder || existingOrder.status === "paid") {
+    return; // Already processed or not found
+  }
+
   // Update order status
   await db
     .update(orders)
@@ -37,25 +47,34 @@ async function handlePaymentConfirmed(orderNumber: string, paymentId: string) {
     }
   }
 
-  // Send confirmation email
-  await sendOrderConfirmation({
-    orderNumber: order.orderNumber,
-    customerName: order.customerName,
-    customerEmail: order.customerEmail,
-    items: order.items.map((item) => ({
-      name: item.name,
-      quantity: item.quantity,
-      price: formatPrice(item.price),
-      size: item.size,
-    })),
-    total: formatPrice(order.total),
-    shippingAddress: order.shippingAddress || "",
-    city: order.city || "",
-  });
+  // Send confirmation email (only if customer provided email)
+  if (order.customerEmail) {
+    await sendOrderConfirmation({
+      orderNumber: order.orderNumber,
+      customerName: order.customerName,
+      customerEmail: order.customerEmail,
+      items: order.items.map((item) => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: formatPrice(item.price),
+        size: item.size,
+      })),
+      total: formatPrice(order.total),
+      shippingAddress: order.shippingAddress || "",
+      city: order.city || "",
+    });
+  }
 }
 
 export async function GET(req: NextRequest) {
   try {
+    // Rate limit: 20 checks per minute per IP (user polling)
+    const rlKey = getRateLimitKey(req, "qpay-check");
+    const rl = rateLimit(rlKey, { limit: 20, windowMs: 60_000 });
+    if (!rl.success) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const orderNumber = req.nextUrl.searchParams.get("order");
     const invoiceId = req.nextUrl.searchParams.get("invoice");
 
@@ -92,6 +111,13 @@ export async function GET(req: NextRequest) {
 // QPay callback POST (QPay will call this when payment is made)
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit: 10 callbacks per minute per IP
+    const rlKey = getRateLimitKey(req, "qpay-callback");
+    const rl = rateLimit(rlKey, { limit: 10, windowMs: 60_000 });
+    if (!rl.success) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const orderNumber = req.nextUrl.searchParams.get("order");
 
     if (!orderNumber) {

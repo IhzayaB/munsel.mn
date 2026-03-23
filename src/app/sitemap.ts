@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import type { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pajama.mn";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://pajama.mn";
 
   const allProducts = await db.query.products.findMany({
     where: eq(products.active, true),

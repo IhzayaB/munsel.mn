@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Package, ShoppingCart, Tags, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { AdminNavClient } from "./admin-nav-client";
 
 export default async function AdminLayout({
@@ -20,6 +20,10 @@ export default async function AdminLayout({
     { href: "/admin/products", label: "Бүтээгдэхүүн", icon: "Package" as const },
     { href: "/admin/orders", label: "Захиалга", icon: "ShoppingCart" as const },
     { href: "/admin/categories", label: "Ангилал", icon: "Tags" as const },
+    { href: "/admin/coupons", label: "Купон", icon: "Ticket" as const },
+    { href: "/admin/stock", label: "Нөөц", icon: "Warehouse" as const },
+    { href: "/admin/customers", label: "Хэрэглэгч", icon: "Users" as const },
+    { href: "/admin/settings", label: "Тохиргоо", icon: "Settings" as const },
   ];
 
   return (

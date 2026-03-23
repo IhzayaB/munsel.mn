@@ -21,7 +21,7 @@ export default function Error({
       />
       <h2 className="text-2xl font-bold mb-2">Алдаа гарлаа</h2>
       <p className="text-muted-foreground mb-6 text-center max-w-md">
-        {error.message || "Уучлаарай, алдаа гарлаа. Дахин оролдоно уу."}
+        Уучлаарай, алдаа гарлаа. Дахин оролдоно уу.
       </p>
       <Button onClick={reset} className="rounded-full">Дахин оролдох</Button>
     </div>

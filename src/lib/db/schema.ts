@@ -9,6 +9,7 @@ import {
   jsonb,
   uuid,
   pgEnum,
+  index,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -112,7 +113,11 @@ export const products = pgTable("products", {
   materialMn: varchar("material_mn", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ([
+  index("products_category_id_idx").on(table.categoryId),
+  index("products_active_idx").on(table.active),
+  index("products_featured_idx").on(table.featured),
+]));
 
 // ── Product Variants (size + stock) ────────────────
 export const productVariants = pgTable("product_variants", {
@@ -125,7 +130,9 @@ export const productVariants = pgTable("product_variants", {
   colorMn: varchar("color_mn", { length: 50 }),
   stock: integer("stock").default(0).notNull(),
   sku: varchar("sku", { length: 100 }),
-});
+}, (table) => ([
+  index("product_variants_product_id_idx").on(table.productId),
+]));
 
 // ── Orders ─────────────────────────────────────────
 export const orders = pgTable("orders", {
@@ -133,7 +140,7 @@ export const orders = pgTable("orders", {
   orderNumber: varchar("order_number", { length: 50 }).notNull().unique(),
   userId: uuid("user_id").references(() => users.id),
   customerName: varchar("customer_name", { length: 255 }).notNull(),
-  customerEmail: varchar("customer_email", { length: 255 }).notNull(),
+  customerEmail: varchar("customer_email", { length: 255 }),
   customerPhone: varchar("customer_phone", { length: 20 }).notNull(),
   shippingAddress: text("shipping_address").notNull(),
   city: varchar("city", { length: 100 }).notNull(),
@@ -147,7 +154,11 @@ export const orders = pgTable("orders", {
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ([
+  index("orders_user_id_idx").on(table.userId),
+  index("orders_status_idx").on(table.status),
+  index("orders_created_at_idx").on(table.createdAt),
+]));
 
 // ── Order Items ────────────────────────────────────
 export const orderItems = pgTable("order_items", {
@@ -164,6 +175,30 @@ export const orderItems = pgTable("order_items", {
   color: varchar("color", { length: 50 }),
   quantity: integer("quantity").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+}, (table) => ([
+  index("order_items_order_id_idx").on(table.orderId),
+]));
+
+// ── Coupons ────────────────────────────────────────
+export const coupons = pgTable("coupons", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  code: varchar("code", { length: 50 }).notNull().unique(),
+  type: varchar("type", { length: 20 }).notNull(), // "fixed" or "percent"
+  value: decimal("value", { precision: 10, scale: 2 }).notNull(),
+  minOrderAmount: decimal("min_order_amount", { precision: 10, scale: 2 }),
+  maxUses: integer("max_uses"),
+  usedCount: integer("used_count").default(0).notNull(),
+  active: boolean("active").default(true).notNull(),
+  expiresAt: timestamp("expires_at", { mode: "date" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// ── Store Settings ─────────────────────────────────
+export const storeSettings = pgTable("store_settings", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  key: varchar("key", { length: 100 }).notNull().unique(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // ── Relations ──────────────────────────────────────
@@ -240,3 +275,5 @@ export type ProductVariant = typeof productVariants.$inferSelect;
 export type Order = typeof orders.$inferSelect;
 export type NewOrder = typeof orders.$inferInsert;
 export type OrderItem = typeof orderItems.$inferSelect;
+export type Coupon = typeof coupons.$inferSelect;
+export type StoreSetting = typeof storeSettings.$inferSelect;

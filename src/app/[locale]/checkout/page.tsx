@@ -87,15 +87,18 @@ export default function CheckoutPage() {
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to create order");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Failed to create order");
+      }
 
       const data = await res.json();
       setOrderNumber(data.orderNumber);
       setQrImage(data.qrImage);
       setInvoiceId(data.invoiceId);
       setStep("payment");
-    } catch {
-      toast.error("Захиалга үүсгэхэд алдаа гарлаа");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Захиалга үүсгэхэд алдаа гарлаа");
     } finally {
       setLoading(false);
     }

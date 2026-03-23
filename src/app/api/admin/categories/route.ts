@@ -5,6 +5,10 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
 export async function GET() {
+  const session = await auth();
+  if (!session || session.user?.role !== "admin") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const allCategories = await db.query.categories.findMany();
   return NextResponse.json(allCategories);
 }
@@ -17,7 +21,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, nameMn, slug, description, descriptionMn } = body;
+    const { name, nameMn, slug, description, descriptionMn, image } = body;
 
     if (!name || !nameMn || !slug) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -29,6 +33,7 @@ export async function POST(req: NextRequest) {
         name, nameMn, slug,
         description: description || null,
         descriptionMn: descriptionMn || null,
+        image: image || null,
       })
       .returning();
 
@@ -36,6 +41,38 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Create category error:", error);
     return NextResponse.json({ error: "Failed to create" }, { status: 500 });
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session || session.user?.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { id, name, nameMn, slug, description, descriptionMn, image } = body;
+
+    if (!id || !name || !nameMn || !slug) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    const [updated] = await db
+      .update(categories)
+      .set({
+        name, nameMn, slug,
+        description: description || null,
+        descriptionMn: descriptionMn || null,
+        image: image || null,
+      })
+      .where(eq(categories.id, id))
+      .returning();
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error("Update category error:", error);
+    return NextResponse.json({ error: "Failed to update" }, { status: 500 });
   }
 }
 

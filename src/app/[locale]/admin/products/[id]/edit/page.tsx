@@ -28,6 +28,8 @@ const SIZES = [
   "12-18M", "18-24M", "2T", "3T", "4T",
 ];
 
+interface Category { id: string; name: string; nameMn: string; }
+
 export default function EditProductPage() {
   const router = useRouter();
   const params = useParams();
@@ -37,6 +39,7 @@ export default function EditProductPage() {
   const [fetching, setFetching] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState({
     name: "",
     nameMn: "",
@@ -50,6 +53,7 @@ export default function EditProductPage() {
     ageRange: "",
     featured: false,
     active: true,
+    categoryId: "",
   });
 
   const [variants, setVariants] = useState([
@@ -57,6 +61,7 @@ export default function EditProductPage() {
   ]);
 
   useEffect(() => {
+    fetch("/api/admin/categories").then(r => r.json()).then(setCategories).catch(() => {});
     fetch(`/api/admin/products/${productId}`)
       .then((r) => r.json())
       .then((product) => {
@@ -73,6 +78,7 @@ export default function EditProductPage() {
           ageRange: product.ageRange || "",
           featured: product.featured || false,
           active: product.active !== false,
+          categoryId: product.categoryId || "",
         });
         setImages(product.images || []);
         if (product.variants?.length) {
@@ -231,6 +237,21 @@ export default function EditProductPage() {
               <Label>Slug</Label>
               <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} required />
             </div>
+
+            <div>
+              <Label>Ангилал</Label>
+              <Select value={form.categoryId} onValueChange={(v) => v && setForm({ ...form, categoryId: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Ангилал сонгох" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.nameMn}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Тайлбар (Англи)</Label>

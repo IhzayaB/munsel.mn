@@ -89,5 +89,8 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
     });
   } catch (error) {
     console.error("Failed to send order confirmation email:", error);
+    // In production, you should log this to an error tracking service (e.g. Sentry)
+    // and potentially flag the order for manual review
+    return { success: false, error };
   }
 }

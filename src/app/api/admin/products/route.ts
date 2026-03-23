@@ -23,6 +23,8 @@ export async function POST(req: NextRequest) {
       materialMn,
       ageRange,
       featured,
+      categoryId,
+      images: productImages,
       variants,
     } = body;
 
@@ -49,7 +51,8 @@ export async function POST(req: NextRequest) {
         ageRange: ageRange || null,
         featured: featured || false,
         active: true,
-        images: [],
+        categoryId: categoryId || null,
+        images: productImages || [],
       })
       .returning();
 
@@ -87,6 +90,10 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   try {
+    const session = await auth();
+    if (!session || session.user?.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const allProducts = await db.query.products.findMany({
       with: { category: true, variants: true },
     });

@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { v2 as cloudinary } from "cloudinary";
+import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_FILES = 10;
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,11 +20,38 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Rate limit: 30 uploads per minute
+    const rlKey = getRateLimitKey(req, "upload");
+    const rl = rateLimit(rlKey, { limit: 30, windowMs: 60_000 });
+    if (!rl.success) {
+      return NextResponse.json({ error: "Too many uploads" }, { status: 429 });
+    }
+
     const formData = await req.formData();
     const files = formData.getAll("files") as File[];
 
     if (!files.length) {
       return NextResponse.json({ error: "No files provided" }, { status: 400 });
+    }
+
+    if (files.length > MAX_FILES) {
+      return NextResponse.json({ error: `Maximum ${MAX_FILES} files allowed` }, { status: 400 });
+    }
+
+    // Validate all files before uploading
+    for (const file of files) {
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        return NextResponse.json(
+          { error: `Invalid file type: ${file.type}. Allowed: JPEG, PNG, WebP, AVIF` },
+          { status: 400 }
+        );
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json(
+          { error: `File too large: ${file.name}. Maximum 10MB` },
+          { status: 400 }
+        );
+      }
     }
 
     const urls: string[] = [];

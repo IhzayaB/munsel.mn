@@ -2,13 +2,26 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, ShoppingCart, Tags } from "lucide-react";
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  Tags,
+  Ticket,
+  Warehouse,
+  Users,
+  Settings,
+} from "lucide-react";
 
 const iconMap = {
   LayoutDashboard,
   Package,
   ShoppingCart,
   Tags,
+  Ticket,
+  Warehouse,
+  Users,
+  Settings,
 } as const;
 
 interface NavItem {
