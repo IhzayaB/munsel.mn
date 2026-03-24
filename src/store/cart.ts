@@ -69,11 +69,13 @@ export const useCartStore = create<CartState>()(
                   (i) =>
                     !(i.productId === productId && i.variantId === variantId)
                 )
-              : state.items.map((i) =>
-                  i.productId === productId && i.variantId === variantId
-                    ? { ...i, quantity }
-                    : i
-                ),
+              : state.items.map((i) => {
+                  if (i.productId === productId && i.variantId === variantId) {
+                    const max = i.maxStock || 99;
+                    return { ...i, quantity: Math.min(quantity, max) };
+                  }
+                  return i;
+                }),
         })),
 
       clearCart: () => set({ items: [] }),

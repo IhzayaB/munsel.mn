@@ -54,7 +54,7 @@ export default function CartPage() {
         {/* Summary — sticky bottom bar on mobile, sidebar on desktop */}
         <div className="hidden lg:block bg-secondary rounded-xl p-5 sm:p-6 h-fit lg:sticky lg:top-24">
           <h2 className="font-bold text-lg mb-4">
-            {t("checkout") === "Төлбөр төлөх" ? "Захиалгын товчхон" : t("checkout")}
+            {t("orderSummary")}
           </h2>
 
           <div className="space-y-3 text-sm">

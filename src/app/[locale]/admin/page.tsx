@@ -23,86 +23,83 @@ export default async function AdminDashboardPage() {
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-  // Core stats
-  const [productCount] = await db.select({ count: count() }).from(products);
-  const [orderCount] = await db.select({ count: count() }).from(orders);
-  const [userCount] = await db.select({ count: count() }).from(users);
-  const [revenue] = await db
-    .select({ total: sql<string>`COALESCE(SUM(${orders.total}::numeric), 0)` })
-    .from(orders)
-    .where(eq(orders.status, "paid"));
-
-  // Orders this week
-  const [weekOrders] = await db
-    .select({ count: count() })
-    .from(orders)
-    .where(gte(orders.createdAt, sevenDaysAgo));
-
-  // Revenue this month
-  const [monthRevenue] = await db
-    .select({ total: sql<string>`COALESCE(SUM(${orders.total}::numeric), 0)` })
-    .from(orders)
-    .where(and(eq(orders.status, "paid"), gte(orders.createdAt, thirtyDaysAgo)));
-
-  // Order status breakdown
-  const statusBreakdown = await db
-    .select({
-      status: orders.status,
-      count: count(),
-    })
-    .from(orders)
-    .groupBy(orders.status);
+  // Run all independent queries in parallel
+  const [
+    [productCount],
+    [orderCount],
+    [userCount],
+    [revenue],
+    [weekOrders],
+    [monthRevenue],
+    statusBreakdown,
+    topProducts,
+    lowStockItems,
+    recentOrders,
+    dailyRevenue,
+  ] = await Promise.all([
+    db.select({ count: count() }).from(products),
+    db.select({ count: count() }).from(orders),
+    db.select({ count: count() }).from(users),
+    db
+      .select({ total: sql<string>`COALESCE(SUM(${orders.total}::numeric), 0)` })
+      .from(orders)
+      .where(eq(orders.status, "paid")),
+    db
+      .select({ count: count() })
+      .from(orders)
+      .where(gte(orders.createdAt, sevenDaysAgo)),
+    db
+      .select({ total: sql<string>`COALESCE(SUM(${orders.total}::numeric), 0)` })
+      .from(orders)
+      .where(and(eq(orders.status, "paid"), gte(orders.createdAt, thirtyDaysAgo))),
+    db
+      .select({ status: orders.status, count: count() })
+      .from(orders)
+      .groupBy(orders.status),
+    db
+      .select({
+        name: orderItems.name,
+        productId: orderItems.productId,
+        totalQty: sql<number>`SUM(${orderItems.quantity})`.as("total_qty"),
+        totalRevenue: sql<string>`SUM(${orderItems.price}::numeric * ${orderItems.quantity})`.as("total_revenue"),
+      })
+      .from(orderItems)
+      .groupBy(orderItems.productId, orderItems.name)
+      .orderBy(sql`total_qty DESC`)
+      .limit(5),
+    db
+      .select({
+        variantId: productVariants.id,
+        size: productVariants.size,
+        stock: productVariants.stock,
+        productName: products.nameMn,
+        productId: products.id,
+      })
+      .from(productVariants)
+      .innerJoin(products, eq(productVariants.productId, products.id))
+      .where(sql`${productVariants.stock} <= 3`)
+      .orderBy(productVariants.stock)
+      .limit(10),
+    db.query.orders.findMany({
+      orderBy: (orders, { desc }) => [desc(orders.createdAt)],
+      limit: 8,
+      with: { items: true },
+    }),
+    db
+      .select({
+        day: sql<string>`TO_CHAR(${orders.createdAt}, 'MM/DD')`.as("day"),
+        revenue: sql<string>`COALESCE(SUM(${orders.total}::numeric), 0)`.as("revenue"),
+        count: count(),
+      })
+      .from(orders)
+      .where(and(gte(orders.createdAt, sevenDaysAgo), eq(orders.status, "paid")))
+      .groupBy(sql`TO_CHAR(${orders.createdAt}, 'MM/DD')`)
+      .orderBy(sql`TO_CHAR(${orders.createdAt}, 'MM/DD')`),
+  ]);
 
   const statusMap = Object.fromEntries(
     statusBreakdown.map((s) => [s.status, s.count])
   );
-
-  // Top 5 selling products (by quantity sold)
-  const topProducts = await db
-    .select({
-      name: orderItems.name,
-      productId: orderItems.productId,
-      totalQty: sql<number>`SUM(${orderItems.quantity})`.as("total_qty"),
-      totalRevenue: sql<string>`SUM(${orderItems.price}::numeric * ${orderItems.quantity})`.as("total_revenue"),
-    })
-    .from(orderItems)
-    .groupBy(orderItems.productId, orderItems.name)
-    .orderBy(sql`total_qty DESC`)
-    .limit(5);
-
-  // Low stock variants (stock <= 3)
-  const lowStockItems = await db
-    .select({
-      variantId: productVariants.id,
-      size: productVariants.size,
-      stock: productVariants.stock,
-      productName: products.nameMn,
-      productId: products.id,
-    })
-    .from(productVariants)
-    .innerJoin(products, eq(productVariants.productId, products.id))
-    .where(sql`${productVariants.stock} <= 3`)
-    .orderBy(productVariants.stock)
-    .limit(10);
-
-  // Recent orders
-  const recentOrders = await db.query.orders.findMany({
-    orderBy: (orders, { desc }) => [desc(orders.createdAt)],
-    limit: 8,
-    with: { items: true },
-  });
-
-  // Daily revenue for last 7 days
-  const dailyRevenue = await db
-    .select({
-      day: sql<string>`TO_CHAR(${orders.createdAt}, 'MM/DD')`.as("day"),
-      revenue: sql<string>`COALESCE(SUM(${orders.total}::numeric), 0)`.as("revenue"),
-      count: count(),
-    })
-    .from(orders)
-    .where(and(gte(orders.createdAt, sevenDaysAgo), eq(orders.status, "paid")))
-    .groupBy(sql`TO_CHAR(${orders.createdAt}, 'MM/DD')`)
-    .orderBy(sql`TO_CHAR(${orders.createdAt}, 'MM/DD')`);
 
   const maxDailyRevenue = Math.max(
     ...dailyRevenue.map((d) => Number(d.revenue)),

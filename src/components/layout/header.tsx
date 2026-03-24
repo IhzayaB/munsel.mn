@@ -7,6 +7,7 @@ import {
   Menu,
   Settings,
   Search,
+  User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -47,6 +48,7 @@ export function Header() {
 
   const navLinks = [
     { href: "/" as const, label: t("home") },
+    { href: "/products" as const, label: t("products") },
   ];
 
   return (
@@ -72,15 +74,40 @@ export function Header() {
           />
         </Link>
 
+        {/* Desktop nav links */}
+        <nav className="hidden md:flex items-center gap-1">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors hover:bg-accent hover:text-primary ${
+                pathname === link.href ? "text-primary bg-accent" : "text-foreground"
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+
         {/* Right side actions */}
         <div className="flex items-center gap-0.5 sm:gap-1">
           {/* Search */}
           <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-10 sm:w-10" aria-label={t("search")} onClick={() => setSearchOpen(true)}>
             <Search className="h-5 w-5" />
           </Button>
-          {isAdmin && (
+
+          {/* User account / Admin */}
+          {isAdmin ? (
             <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-10 sm:w-10" aria-label={t("admin")} render={<Link href="/admin" />}>
               <Settings className="h-5 w-5" />
+            </Button>
+          ) : session ? (
+            <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-10 sm:w-10" aria-label={t("account")} render={<Link href="/account/orders" />}>
+              <User className="h-5 w-5" />
+            </Button>
+          ) : (
+            <Button variant="ghost" size="icon" className="hidden sm:flex h-10 w-10" aria-label={t("login")} render={<Link href="/login" />}>
+              <User className="h-5 w-5" />
             </Button>
           )}
 
@@ -144,6 +171,26 @@ export function Header() {
                     >
                       <Settings className="h-4 w-4" />
                       {t("admin")}
+                    </Link>
+                  )}
+                  {!session && (
+                    <Link
+                      href="/login"
+                      onClick={() => setMobileOpen(false)}
+                      className="text-base font-medium py-3 px-3 rounded-lg transition-colors hover:bg-accent hover:text-primary text-foreground flex items-center gap-2"
+                    >
+                      <User className="h-4 w-4" />
+                      {t("login")}
+                    </Link>
+                  )}
+                  {session && !isAdmin && (
+                    <Link
+                      href="/account/orders"
+                      onClick={() => setMobileOpen(false)}
+                      className="text-base font-medium py-3 px-3 rounded-lg transition-colors hover:bg-accent hover:text-primary text-foreground flex items-center gap-2"
+                    >
+                      <User className="h-4 w-4" />
+                      {t("account")}
                     </Link>
                   )}
                 </nav>

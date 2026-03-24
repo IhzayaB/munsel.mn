@@ -88,11 +88,38 @@ export default function CheckoutPage() {
     notes: "",
   });
 
+  const [phoneError, setPhoneError] = useState("");
+
+  // Persist form to sessionStorage
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("pajama-checkout-form");
+      if (saved) setForm(JSON.parse(saved));
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem("pajama-checkout-form", JSON.stringify(form));
+    } catch {}
+  }, [form]);
+
+  const validatePhone = (phone: string) => {
+    const cleaned = phone.replace(/[\s-]/g, "");
+    return /^[6-9]\d{7}$/.test(cleaned);
+  };
+
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
+    setPhoneError("");
 
     if (!form.name || !form.phone || !form.district) {
-      toast.error("Бүх заавал талбарыг бөглөнө үү");
+      toast.error(t("fillRequired"));
+      return;
+    }
+
+    if (!validatePhone(form.phone)) {
+      setPhoneError(t("invalidPhone"));
       return;
     }
 
@@ -128,7 +155,7 @@ export default function CheckoutPage() {
       setBankUrls(data.urls || []);
       setStep("payment");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Захиалга үүсгэхэд алдаа гарлаа");
+      toast.error(err instanceof Error ? err.message : t("orderError"));
     } finally {
       setLoading(false);
     }
@@ -144,12 +171,13 @@ export default function CheckoutPage() {
         if (pollRef.current) clearInterval(pollRef.current);
         setStep("success");
         clearCart();
+        try { sessionStorage.removeItem("pajama-checkout-form"); } catch {}
         toast.success(t("paymentSuccess"));
       } else if (manual) {
         toast.info(t("paymentPending"));
       }
     } catch {
-      if (manual) toast.error("Алдаа гарлаа");
+      if (manual) toast.error(t("genericError"));
     } finally {
       if (manual) setLoading(false);
     }
@@ -172,13 +200,13 @@ export default function CheckoutPage() {
       const res = await fetch(`/api/qpay/create-invoice/coupon?code=${encodeURIComponent(couponCode.trim().toUpperCase())}&subtotal=${getTotalPrice()}`);
       const data = await res.json();
       if (!res.ok) {
-        toast.error(data.error || "Купон олдсонгүй");
+        toast.error(data.error || t("couponNotFound"));
         return;
       }
       setAppliedCoupon(data);
-      toast.success(`Купон амжилттай: -${formatPrice(data.discount)}`);
+      toast.success(`${t("couponSuccess")}: -${formatPrice(data.discount)}`);
     } catch {
-      toast.error("Купон шалгахад алдаа гарлаа");
+      toast.error(t("couponError"));
     } finally {
       setCouponLoading(false);
     }
@@ -212,10 +240,10 @@ export default function CheckoutPage() {
     return (
       <div className="container mx-auto px-3 sm:px-4 py-12 sm:py-16 text-center">
         <p className="text-lg text-muted-foreground mb-4">
-          Таны сагс хоосон байна
+          {t("emptyCart")}
         </p>
         <Button size="lg" render={<Link href="/products" />}>
-          Дэлгүүр үзэх
+          {t("goShopping")}
         </Button>
       </div>
     );
@@ -225,10 +253,34 @@ export default function CheckoutPage() {
     <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8 pb-4 sm:pb-8">
       <Breadcrumbs
         items={[
-          { label: "Сагс", href: "/cart" },
+          { label: tc("cart"), href: "/cart" },
           { label: t("title") },
         ]}
       />
+
+      {/* Step progress indicator */}
+      <div className="flex items-center justify-center gap-2 mb-6">
+        {[{ key: "step1", step: "info" }, { key: "step2", step: "payment" }, { key: "step3", step: "success" }].map((s, i) => {
+          const steps = ["info", "payment", "success"];
+          const currentIdx = steps.indexOf(step);
+          const isActive = i <= currentIdx;
+          return (
+            <div key={s.key} className="flex items-center gap-2">
+              <div className={`flex items-center gap-1.5 text-sm font-medium ${
+                isActive ? "text-primary" : "text-muted-foreground"
+              }`}>
+                <span className={`h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                  isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                }`}>
+                  {i + 1}
+                </span>
+                <span className="hidden sm:inline">{t(s.key as "step1" | "step2" | "step3")}</span>
+              </div>
+              {i < 2 && <div className={`w-8 sm:w-12 h-0.5 ${i < currentIdx ? "bg-primary" : "bg-muted"}`} />}
+            </div>
+          );
+        })}
+      </div>
 
       {/* Order summary - visible on top on mobile */}
       <div className="lg:hidden mb-6">
@@ -254,22 +306,22 @@ export default function CheckoutPage() {
             ))}
             <Separator />
             <div className="flex justify-between">
-              <span>Нийлбэр</span>
+              <span>{t("subtotal")}</span>
               <span>{formatPrice(getTotalPrice())}</span>
             </div>
             <div className="flex justify-between">
-              <span>Хүргэлт</span>
-              <span>{getShippingCost() === 0 ? "Үнэгүй" : formatPrice(getShippingCost())}</span>
+              <span>{t("deliveryFee")}</span>
+              <span>{getShippingCost() === 0 ? t("free") : formatPrice(getShippingCost())}</span>
             </div>
             {appliedCoupon && (
               <div className="flex justify-between text-green-600">
-                <span>Купон ({appliedCoupon.code})</span>
+                <span>{t("couponDiscount")} ({appliedCoupon.code})</span>
                 <span>-{formatPrice(appliedCoupon.discount)}</span>
               </div>
             )}
             <Separator />
-            <div className="flex justify-between font-bold">
-              <span>Нийт</span>
+            <div className="flex justify-between font-bold text-lg">
+              <span>{t("total")}</span>
               <span>{formatPrice(grandTotalWithDiscount)}</span>
             </div>
           </div>
@@ -287,35 +339,39 @@ export default function CheckoutPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="name">Овог, нэр *</Label>
+                    <Label htmlFor="name">{t("name")} *</Label>
                     <Input
                       id="name"
                       value={form.name}
                       onChange={(e) =>
                         setForm({ ...form, name: e.target.value })
                       }
-                      placeholder="Бат Болд"
+                      placeholder={t("namePlaceholder")}
                       className="h-12 text-base"
                       required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="phone">Утасны дугаар *</Label>
+                    <Label htmlFor="phone">{t("phone")} *</Label>
                     <Input
                       id="phone"
                       type="tel"
                       inputMode="tel"
                       value={form.phone}
-                      onChange={(e) =>
-                        setForm({ ...form, phone: e.target.value })
-                      }
-                      placeholder="8802 9180"
-                      className="h-12 text-base"
+                      onChange={(e) => {
+                        setForm({ ...form, phone: e.target.value });
+                        setPhoneError("");
+                      }}
+                      placeholder={t("phonePlaceholder")}
+                      className={`h-12 text-base ${phoneError ? "border-destructive" : ""}`}
                       required
                     />
+                    {phoneError && (
+                      <p className="text-xs text-destructive mt-1">{phoneError}</p>
+                    )}
                   </div>
                   <div>
-                    <Label htmlFor="email">И-мэйл (заавал биш)</Label>
+                    <Label htmlFor="email">{t("emailOptional")}</Label>
                     <Input
                       id="email"
                       type="email"
@@ -334,11 +390,11 @@ export default function CheckoutPage() {
               {/* Shipping Info */}
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Хүргэлтийн мэдээлэл</CardTitle>
+                  <CardTitle className="text-lg">{t("shippingInfo")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label>Хот *</Label>
+                    <Label>{t("city")} *</Label>
                     <Select
                       value={form.city}
                       onValueChange={(v) => v && setForm({ ...form, city: v, district: "" })}
@@ -358,13 +414,13 @@ export default function CheckoutPage() {
                   {form.city === "Улаанбаатар" ? (
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <Label>Дүүрэг *</Label>
+                        <Label>{t("district")} *</Label>
                         <Select
                           value={form.district}
                           onValueChange={(v) => v && setForm({ ...form, district: v })}
                         >
                           <SelectTrigger className="h-12 text-base">
-                            <SelectValue placeholder="Сонгох" />
+                            <SelectValue placeholder={t("selectPlaceholder")} />
                           </SelectTrigger>
                           <SelectContent>
                             {UB_DISTRICTS.map((d) => (
@@ -376,7 +432,7 @@ export default function CheckoutPage() {
                         </Select>
                       </div>
                       <div>
-                        <Label htmlFor="khoroo">Хороо</Label>
+                        <Label htmlFor="khoroo">{t("khoroo")}</Label>
                         <Input
                           id="khoroo"
                           inputMode="numeric"
@@ -384,14 +440,14 @@ export default function CheckoutPage() {
                           onChange={(e) =>
                             setForm({ ...form, khoroo: e.target.value })
                           }
-                          placeholder="Жишээ: 7"
+                          placeholder={t("khorooPlaceholder")}
                           className="h-12 text-base"
                         />
                       </div>
                     </div>
                   ) : (
                     <div>
-                      <Label htmlFor="district">Аймаг / Дүүрэг *</Label>
+                      <Label htmlFor="district">{t("districtLabel")} *</Label>
                       <Input
                         id="district"
                         value={form.district}
@@ -405,14 +461,14 @@ export default function CheckoutPage() {
                   )}
 
                   <div>
-                    <Label htmlFor="address">Дэлгэрэнгүй хаяг *</Label>
+                    <Label htmlFor="address">{t("address")} *</Label>
                     <Textarea
                       id="address"
                       value={form.address}
                       onChange={(e) =>
                         setForm({ ...form, address: e.target.value })
                       }
-                      placeholder="Байр, орц, тоот"
+                      placeholder={t("addressDetail")}
                       rows={2}
                       className="text-base"
                       required
@@ -420,14 +476,14 @@ export default function CheckoutPage() {
                   </div>
 
                   <div>
-                    <Label htmlFor="notes">Нэмэлт тэмдэглэл</Label>
+                    <Label htmlFor="notes">{t("notes")}</Label>
                     <Textarea
                       id="notes"
                       value={form.notes}
                       onChange={(e) =>
                         setForm({ ...form, notes: e.target.value })
                       }
-                      placeholder="Жишээ: хаалганы код 1234"
+                      placeholder={t("notesPlaceholder")}
                       rows={2}
                       className="text-base"
                     />
@@ -441,7 +497,7 @@ export default function CheckoutPage() {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Tag className="h-4 w-4" />
-                    Купон код
+                    {t("coupon")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -464,7 +520,7 @@ export default function CheckoutPage() {
                       <Input
                         value={couponCode}
                         onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                        placeholder="Купон код оруулах"
+                        placeholder={t("couponPlaceholder")}
                         className="h-12 text-base uppercase"
                         onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), applyCoupon())}
                       />
@@ -475,7 +531,7 @@ export default function CheckoutPage() {
                         disabled={couponLoading || !couponCode.trim()}
                         className="h-12 px-6"
                       >
-                        {couponLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Хэрэглэх"}
+                        {couponLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("couponApply")}
                       </Button>
                     </div>
                   )}
@@ -500,12 +556,12 @@ export default function CheckoutPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <QrCode className="h-5 w-5" />
-                  QPay төлбөр
+                  {t("qpay")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-muted-foreground text-sm sm:text-base text-center">
-                  Банкны аппаараа QR кодыг уншуулна уу
+                  {t("scanQr")}
                 </p>
 
                 {qrImage && (
@@ -532,7 +588,7 @@ export default function CheckoutPage() {
                 {/* Bank app deep links for mobile */}
                 {bankUrls.length > 0 && (
                   <div>
-                    <p className="text-sm font-medium text-center mb-3">Банкны аппаар төлөх</p>
+                    <p className="text-sm font-medium text-center mb-3">{t("payByApp")}</p>
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3">
                       {bankUrls.map((bank) => (
                         <a
@@ -558,7 +614,7 @@ export default function CheckoutPage() {
 
                 <div className="flex items-center gap-2 text-sm text-muted-foreground justify-center">
                   <Loader2 className="h-3 w-3 animate-spin" />
-                  Төлбөр хүлээж байна...
+                  {t("paymentPending")}
                 </div>
 
                 <Button
@@ -570,10 +626,10 @@ export default function CheckoutPage() {
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Шалгаж байна...
+                      {t("checking")}
                     </>
                   ) : (
-                    "Төлбөр шалгах"
+                    t("checkPayment")
                   )}
                 </Button>
               </CardContent>
@@ -604,26 +660,26 @@ export default function CheckoutPage() {
               <Separator />
 
               <div className="flex justify-between">
-                <span>Нийлбэр</span>
+                <span>{t("subtotal")}</span>
                 <span>{formatPrice(getTotalPrice())}</span>
               </div>
               <div className="flex justify-between">
-                <span>Хүргэлт</span>
+                <span>{t("deliveryFee")}</span>
                 <span>
                   {getShippingCost() === 0
-                    ? "Үнэгүй"
+                    ? t("free")
                     : formatPrice(getShippingCost())}
                 </span>
               </div>
               {appliedCoupon && (
                 <div className="flex justify-between text-green-600">
-                  <span>Купон ({appliedCoupon.code})</span>
+                  <span>{t("couponDiscount")} ({appliedCoupon.code})</span>
                   <span>-{formatPrice(appliedCoupon.discount)}</span>
                 </div>
               )}
               <Separator />
               <div className="flex justify-between font-bold text-lg">
-                <span>Нийт</span>
+                <span>{t("total")}</span>
                 <span>{formatPrice(grandTotalWithDiscount)}</span>
               </div>
             </div>

@@ -57,7 +57,7 @@ export default function LoginPage() {
 
   const handleSocialLogin = (provider: string) => {
     setSocialLoading(provider);
-    signIn(provider, { callbackUrl: "/admin" });
+    signIn(provider, { callbackUrl: "/" });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,7 +74,7 @@ export default function LoginPage() {
       if (result?.error) {
         toast.error(t("invalidCredentials"));
       } else {
-        router.push("/admin");
+        router.push("/");
         toast.success(t("welcome"));
       }
     } catch {

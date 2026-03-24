@@ -39,7 +39,7 @@ export function CartItemRow({ item, locale }: CartItemRowProps) {
         <h4 className="font-medium text-sm truncate">{displayName}</h4>
         {item.size && (
           <p className="text-xs text-muted-foreground">
-            {t("quantity") === "Тоо ширхэг" ? "Хэмжээ" : t("quantity")}: {item.size}
+            {t("size")}: {item.size}
           </p>
         )}
         <p className="font-semibold text-sm mt-1">
@@ -66,6 +66,7 @@ export function CartItemRow({ item, locale }: CartItemRowProps) {
             size="icon"
             className="h-8 w-8 sm:h-7 sm:w-7"
             aria-label="Тоо хэмжээ нэмэх"
+            disabled={!!(item.maxStock && item.quantity >= item.maxStock)}
             onClick={() =>
               updateQuantity(item.productId, item.quantity + 1, item.variantId)
             }
