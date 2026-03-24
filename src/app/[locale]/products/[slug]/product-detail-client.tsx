@@ -181,7 +181,6 @@ export function ProductDetailClient({
                     }`}
                   >
                     {variant.size}
-                    {variant.color && ` - ${variant.colorMn}`}
                   </button>
                 ))}
               </div>
