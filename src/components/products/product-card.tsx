@@ -65,15 +65,37 @@ export function ProductCard({ product }: ProductCardProps) {
       <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden h-full">
         <div className="relative bg-secondary aspect-[3/4] flex items-center justify-center overflow-hidden">
           {product.images && product.images.length > 0 ? (
-            <Image
-              src={product.images[0]}
-              alt={displayName}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            />
+            <>
+              <Image
+                src={product.images[0]}
+                alt={displayName}
+                fill
+                className={`object-cover transition-all duration-500 ${
+                  product.images.length > 1
+                    ? "group-hover:opacity-0 group-hover:scale-105"
+                    : "group-hover:scale-105"
+                }`}
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              />
+              {product.images.length > 1 && (
+                <Image
+                  src={product.images[1]}
+                  alt={displayName}
+                  fill
+                  className="object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                />
+              )}
+            </>
           ) : (
             <ShoppingBag className="h-16 w-16 text-muted-foreground/30 group-hover:scale-110 transition-transform" />
+          )}
+
+          {/* Image count indicator */}
+          {product.images && product.images.length > 1 && (
+            <div className="absolute top-2 right-2 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+              1/{product.images.length}
+            </div>
           )}
 
           {/* Badges */}
