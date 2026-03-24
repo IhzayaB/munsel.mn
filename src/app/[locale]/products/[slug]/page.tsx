@@ -52,14 +52,19 @@ export default async function ProductDetailPage({
     notFound();
   }
 
-  // Get related products from same category
-  const related = product.categoryId
+  // Get related products from same category (in stock only)
+  const relatedRaw = product.categoryId
     ? await db.query.products.findMany({
         where: eq(products.categoryId, product.categoryId),
         with: { category: true, variants: true },
-        limit: 5,
+        limit: 10,
       })
     : [];
+  const related = relatedRaw.filter((p) => {
+    if (p.id === product.id) return false;
+    if (!p.variants || p.variants.length === 0) return true;
+    return p.variants.some((v: { stock: number }) => v.stock > 0);
+  }).slice(0, 5);
 
   // Check if in stock
   const totalStock = product.variants.reduce((sum: number, v: { stock: number }) => sum + v.stock, 0);

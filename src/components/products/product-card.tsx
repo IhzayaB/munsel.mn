@@ -4,12 +4,14 @@ import { Link } from "@/i18n/routing";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Plus } from "lucide-react";
+import { ShoppingBag, Plus, Heart } from "lucide-react";
 import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 import { useCartStore } from "@/store/cart";
+import { useWishlistStore } from "@/store/wishlist";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { useState, useEffect } from "react";
 
 interface ProductCardProps {
   product: {
@@ -32,6 +34,13 @@ export function ProductCard({ product }: ProductCardProps) {
   const displayName = product.nameMn;
   const categoryName = product.category?.nameMn;
   const addItem = useCartStore((s) => s.addItem);
+  const toggleWishlist = useWishlistStore((s) => s.toggle);
+  const isWished = useWishlistStore((s) => s.has(product.id));
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const hasDiscount =
     product.compareAtPrice &&
@@ -58,6 +67,12 @@ export function ProductCard({ product }: ProductCardProps) {
       maxStock: firstVariant?.stock,
     });
     toast.success(tc("addedToCart"));
+  };
+
+  const handleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist(product.id);
   };
 
   return (
@@ -93,9 +108,24 @@ export function ProductCard({ product }: ProductCardProps) {
 
           {/* Image count indicator */}
           {product.images && product.images.length > 1 && (
-            <div className="absolute top-2 right-2 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+            <div className="absolute bottom-2 left-2 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded-full backdrop-blur-sm">
               1/{product.images.length}
             </div>
+          )}
+
+          {/* Wishlist heart */}
+          {mounted && (
+            <button
+              onClick={handleWishlist}
+              className="absolute top-2 right-2 z-10 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors shadow-sm"
+              aria-label="Хадгалах"
+            >
+              <Heart
+                className={`h-4 w-4 transition-colors ${
+                  isWished ? "fill-red-500 text-red-500" : "text-gray-600"
+                }`}
+              />
+            </button>
           )}
 
           {/* Badges */}

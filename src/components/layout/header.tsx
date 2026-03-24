@@ -12,8 +12,9 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { CartSheet } from "@/components/cart/cart-sheet";
+import { SearchOverlay } from "@/components/search-overlay";
 import { useCartStore } from "@/store/cart";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 
@@ -21,12 +22,26 @@ export function Header() {
   const t = useTranslations("common");
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [badgeBounce, setBadgeBounce] = useState(false);
   const totalItems = useCartStore((s) => s.getTotalItems());
+  const prevItems = useRef(0);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Bounce animation when cart items change
+  useEffect(() => {
+    if (mounted && totalItems > prevItems.current) {
+      setBadgeBounce(true);
+      const timer = setTimeout(() => setBadgeBounce(false), 400);
+      return () => clearTimeout(timer);
+    }
+    prevItems.current = totalItems;
+  }, [totalItems, mounted]);
+
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === "admin";
 
@@ -60,7 +75,7 @@ export function Header() {
         {/* Right side actions */}
         <div className="flex items-center gap-0.5 sm:gap-1">
           {/* Search */}
-          <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-10 sm:w-10" aria-label={t("search")} render={<Link href="/products" />}>
+          <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-10 sm:w-10" aria-label={t("search")} onClick={() => setSearchOpen(true)}>
             <Search className="h-5 w-5" />
           </Button>
           {isAdmin && (
@@ -74,7 +89,7 @@ export function Header() {
             <Button variant="ghost" size="icon" className="relative h-11 w-11 sm:h-10 sm:w-10" aria-label={t("cart")}>
               <ShoppingBag className="h-5 w-5" />
               {mounted && totalItems > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px]">
+                <Badge className={`absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] ${badgeBounce ? "cart-badge-bounce" : ""}`}>
                   {totalItems}
                 </Badge>
               )}
@@ -137,6 +152,7 @@ export function Header() {
           </Sheet>
         </div>
       </div>
+      <SearchOverlay open={searchOpen} onOpenChange={setSearchOpen} />
     </header>
   );
 }

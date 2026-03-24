@@ -3,6 +3,7 @@ import { products, categories } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { ProductsClient } from "./products-client";
 import type { Metadata } from "next";
+import type { Product, ProductVariant } from "@/lib/db/schema";
 
 export const revalidate = 60;
 
@@ -14,13 +15,19 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ProductsPage() {
-  const allProducts = await db.query.products.findMany({
+  const allProductsRaw = await db.query.products.findMany({
     where: eq(products.active, true),
     with: {
       category: true,
       variants: true,
     },
     orderBy: [desc(products.createdAt)],
+  });
+
+  // Filter out products with zero total stock
+  const allProducts = allProductsRaw.filter((p: Product & { variants: ProductVariant[] }) => {
+    if (!p.variants || p.variants.length === 0) return true;
+    return p.variants.some((v: ProductVariant) => v.stock > 0);
   });
 
   const allCategories = await db.query.categories.findMany();
