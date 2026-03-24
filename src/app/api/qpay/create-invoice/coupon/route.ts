@@ -1,14 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { coupons } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, gt, or, isNull, sql } from "drizzle-orm";
 
+// Check if any active coupons exist (no code param) or validate a specific coupon
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
   const subtotal = Number(req.nextUrl.searchParams.get("subtotal") || 0);
 
+  // If no code provided, just check if any active coupons exist
   if (!code) {
-    return NextResponse.json({ error: "Купон код оруулна уу" }, { status: 400 });
+    const activeCoupon = await db.query.coupons.findFirst({
+      where: and(
+        eq(coupons.active, true),
+        or(isNull(coupons.expiresAt), gt(coupons.expiresAt, new Date())),
+        or(isNull(coupons.maxUses), sql`${coupons.usedCount} < ${coupons.maxUses}`)
+      ),
+    });
+    return NextResponse.json({ available: !!activeCoupon });
   }
 
   const coupon = await db.query.coupons.findFirst({

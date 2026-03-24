@@ -72,13 +72,13 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        toast.error("И-мэйл эсвэл нууц үг буруу байна");
+        toast.error(t("invalidCredentials"));
       } else {
         router.push("/admin");
-        toast.success("Тавтай морил!");
+        toast.success(t("welcome"));
       }
     } catch {
-      toast.error("Алдаа гарлаа. Дахин оролдоно уу");
+      toast.error(t("loginError"));
     } finally {
       setLoading(false);
     }

@@ -25,15 +25,6 @@ interface Order {
   items: OrderItem[];
 }
 
-const statusLabels: Record<string, string> = {
-  pending: "Хүлээгдэж буй",
-  paid: "Төлөгдсөн",
-  processing: "Боловсруулж байна",
-  shipped: "Илгээсэн",
-  delivered: "Хүргэгдсэн",
-  cancelled: "Цуцлагдсан",
-};
-
 const statusColor = (status: string) => {
   switch (status) {
     case "paid": return "bg-green-100 text-green-700";
@@ -46,9 +37,11 @@ const statusColor = (status: string) => {
 
 export default function AccountOrdersPage() {
   const t = useTranslations("common");
+  const to = useTranslations("orders");
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [needsLogin, setNeedsLogin] = useState(false);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     fetch("/api/orders")
@@ -62,7 +55,7 @@ export default function AccountOrdersPage() {
       .then((data) => {
         if (Array.isArray(data)) setOrders(data);
       })
-      .catch(() => {})
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -74,24 +67,48 @@ export default function AccountOrdersPage() {
     );
   }
 
+  const statusLabels: Record<string, string> = {
+    pending: to("statusPending"),
+    paid: to("statusPaid"),
+    processing: to("statusProcessing"),
+    shipped: to("statusShipped"),
+    delivered: to("statusDelivered"),
+    cancelled: to("statusCancelled"),
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
       <h1 className="text-3xl font-bold mb-8">
-        Миний захиалгууд
+        {to("title")}
       </h1>
 
-      {orders.length === 0 ? (
+      {error ? (
         <Card>
           <CardContent className="text-center py-12">
             <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground mb-4">
-              {needsLogin ? "Захиалга харахын тулд нэвтэрнэ үү" : "Захиалга байхгүй байна"}
+              {t("fetchError")}
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="text-primary hover:underline font-medium"
+            >
+              {t("retry")}
+            </button>
+          </CardContent>
+        </Card>
+      ) : orders.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-12">
+            <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground mb-4">
+              {needsLogin ? to("loginRequired") : to("empty")}
             </p>
             <Link
               href={needsLogin ? "/login" : "/products"}
               className="text-primary hover:underline font-medium"
             >
-              {needsLogin ? "Нэвтрэх" : "Бүтээгдэхүүн үзэх"}
+              {needsLogin ? t("login") : to("viewProducts")}
             </Link>
           </CardContent>
         </Card>
@@ -118,7 +135,7 @@ export default function AccountOrdersPage() {
                         order.status
                       )}`}
                     >
-                      {statusLabels[order.status] ||
+                    {statusLabels[order.status] ||
                         order.status}
                     </span>
                   </div>

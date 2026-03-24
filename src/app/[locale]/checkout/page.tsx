@@ -61,12 +61,21 @@ export default function CheckoutPage() {
   // Coupon state
   const [couponCode, setCouponCode] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
+  const [couponsAvailable, setCouponsAvailable] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<{
     code: string;
     type: string;
     value: number;
     discount: number;
   } | null>(null);
+
+  // Check if any active coupons exist
+  useEffect(() => {
+    fetch("/api/qpay/create-invoice/coupon")
+      .then((res) => res.json())
+      .then((data) => setCouponsAvailable(data.available === true))
+      .catch(() => {});
+  }, []);
 
   const [form, setForm] = useState({
     name: "",
@@ -426,7 +435,8 @@ export default function CheckoutPage() {
                 </CardContent>
               </Card>
 
-              {/* Coupon Code */}
+              {/* Coupon Code - only show if active coupons exist */}
+              {couponsAvailable && (
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
@@ -471,6 +481,7 @@ export default function CheckoutPage() {
                   )}
                 </CardContent>
               </Card>
+              )}
 
               <Button
                 type="submit"

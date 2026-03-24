@@ -39,6 +39,11 @@ export function ProductDetailClient({
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
+  const handleVariantChange = (variant: typeof selectedVariant) => {
+    setSelectedVariant(variant);
+    setQuantity(1);
+  };
+
   const displayName = product.nameMn;
   const description = product.descriptionMn;
   const material = product.materialMn;
@@ -62,7 +67,7 @@ export function ProductDetailClient({
       image: product.images?.[0],
       maxStock: selectedVariant?.stock,
     });
-    toast.success("Сагсанд нэмэгдлээ!");
+    toast.success(tc("addedToCart"));
   };
 
   return (
@@ -102,6 +107,7 @@ export function ProductDetailClient({
                 <button
                   key={i}
                   onClick={() => setSelectedImage(i)}
+                  aria-label={`Зураг ${i + 1}`}
                   className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 ${
                     selectedImage === i
                       ? "border-primary"
@@ -162,8 +168,10 @@ export function ProductDetailClient({
                 {product.variants.map((variant) => (
                   <button
                     key={variant.id}
-                    onClick={() => setSelectedVariant(variant)}
+                    onClick={() => handleVariantChange(variant)}
                     disabled={variant.stock <= 0}
+                    aria-label={variant.stock <= 0 ? `${variant.size} - дууссан` : variant.size || undefined}
+                    aria-pressed={selectedVariant?.id === variant.id}
                     className={`px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors min-w-[48px] ${
                       selectedVariant?.id === variant.id
                         ? "border-primary bg-primary text-primary-foreground"
@@ -201,6 +209,7 @@ export function ProductDetailClient({
                 variant="ghost"
                 size="icon"
                 className="h-11 w-11"
+                aria-label="Тоо хэмжээ хасах"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
               >
                 <Minus className="h-4 w-4" />
@@ -210,6 +219,7 @@ export function ProductDetailClient({
                 variant="ghost"
                 size="icon"
                 className="h-11 w-11"
+                aria-label="Тоо хэмжээ нэмэх"
                 onClick={() => {
                   const maxQty = selectedVariant ? selectedVariant.stock : 99;
                   setQuantity(Math.min(quantity + 1, maxQty));

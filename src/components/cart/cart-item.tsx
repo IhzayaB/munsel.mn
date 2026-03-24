@@ -39,7 +39,7 @@ export function CartItemRow({ item, locale }: CartItemRowProps) {
         <h4 className="font-medium text-sm truncate">{displayName}</h4>
         {item.size && (
           <p className="text-xs text-muted-foreground">
-            Хэмжээ: {item.size}
+            {t("quantity") === "Тоо ширхэг" ? "Хэмжээ" : t("quantity")}: {item.size}
           </p>
         )}
         <p className="font-semibold text-sm mt-1">
@@ -51,6 +51,7 @@ export function CartItemRow({ item, locale }: CartItemRowProps) {
             variant="outline"
             size="icon"
             className="h-7 w-7"
+            aria-label="Тоо хэмжээ хасах"
             onClick={() =>
               updateQuantity(item.productId, item.quantity - 1, item.variantId)
             }
@@ -64,6 +65,7 @@ export function CartItemRow({ item, locale }: CartItemRowProps) {
             variant="outline"
             size="icon"
             className="h-7 w-7"
+            aria-label="Тоо хэмжээ нэмэх"
             onClick={() =>
               updateQuantity(item.productId, item.quantity + 1, item.variantId)
             }
@@ -75,6 +77,7 @@ export function CartItemRow({ item, locale }: CartItemRowProps) {
             variant="ghost"
             size="icon"
             className="h-7 w-7 ml-auto text-destructive hover:text-destructive"
+            aria-label="Хасах"
             onClick={() => removeItem(item.productId, item.variantId)}
           >
             <Trash2 className="h-3 w-3" />

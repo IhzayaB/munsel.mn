@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { ProductCard } from "@/components/products/product-card";
 import { ShoppingBag } from "lucide-react";
 
@@ -31,6 +32,8 @@ interface HomeClientProps {
 }
 
 export function HomeClient({ products, categories }: HomeClientProps) {
+  const t = useTranslations("home");
+  const tc = useTranslations("common");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   const filteredProducts = useMemo(() => {
@@ -40,7 +43,7 @@ export function HomeClient({ products, categories }: HomeClientProps) {
 
   return (
     <div className="container mx-auto px-4 py-8 lg:py-12">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6">Нярайн хувцас</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6">{t("title")}</h1>
 
       {/* Category pills */}
       {categories.length > 0 && (
@@ -53,7 +56,7 @@ export function HomeClient({ products, categories }: HomeClientProps) {
                 : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
             }`}
           >
-            Бүгд
+            {tc("all")}
           </button>
           {categories.map((cat) => (
             <button
@@ -76,7 +79,7 @@ export function HomeClient({ products, categories }: HomeClientProps) {
         <div className="text-center py-20">
           <ShoppingBag className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
           <p className="text-lg text-muted-foreground">
-            Энэ ангилалд бүтээгдэхүүн байхгүй байна
+            {tc("noCategoryProducts")}
           </p>
         </div>
       ) : (

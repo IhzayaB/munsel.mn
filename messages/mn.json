@@ -21,9 +21,20 @@
     "next": "Дараах",
     "previous": "Өмнөх",
     "allRightsReserved": "Бүх эрх хуулиар хамгаалагдсан",
-    "language": "Хэл"
+    "language": "Хэл",
+    "addedToCart": "Сагсанд нэмэгдлээ!",
+    "retry": "Дахин оролдох",
+    "goHome": "Нүүр хуудас руу буцах",
+    "errorTitle": "Алдаа гарлаа",
+    "errorDesc": "Уучлаарай, алдаа гарлаа. Дахин оролдоно уу.",
+    "notFoundTitle": "Хуудас олдсонгүй",
+    "notFoundDesc": "Уучлаарай, энэ хуудас олдсонгүй.",
+    "all": "Бүгд",
+    "noCategoryProducts": "Энэ ангилалд бүтээгдэхүүн байхгүй байна",
+    "fetchError": "Мэдээлэл ачаалахад алдаа гарлаа"
   },
   "home": {
+    "title": "Нярайн хувцас",
     "hero": {
       "title": "Таны бяцхан зүрхэнд зориулсан хувцас",
       "subtitle": "Хайр халамжаар бүтсэн дээд чанартай нярайн хувцас. Зөөлөн, тухтай, загварлаг.",
@@ -74,6 +85,7 @@
   "cart": {
     "title": "Миний сагс",
     "empty": "Таны сагс хоосон байна",
+    "emptySubtitle": "Дэлгүүрээс бүтээгдэхүүн нэмнэ үү",
     "continueShopping": "Дэлгүүр үргэлжлүүлэх",
     "subtotal": "Нийлбэр",
     "shipping": "Хүргэлт",
@@ -124,7 +136,22 @@
     "orContinueWith": "Эсвэл",
     "continueGoogle": "Google-ээр нэвтрэх",
     "continueFacebook": "Facebook-ээр нэвтрэх",
-    "continueX": "X-ээр нэвтрэх"
+    "continueX": "X-ээр нэвтрэх",
+    "invalidCredentials": "И-мэйл эсвэл нууц үг буруу байна",
+    "welcome": "Тавтай морил!",
+    "loginError": "Алдаа гарлаа. Дахин оролдоно уу"
+  },
+  "orders": {
+    "title": "Миний захиалгууд",
+    "empty": "Захиалга байхгүй байна",
+    "loginRequired": "Захиалга харахын тулд нэвтэрнэ үү",
+    "viewProducts": "Бүтээгдэхүүн үзэх",
+    "statusPending": "Хүлээгдэж буй",
+    "statusPaid": "Төлөгдсөн",
+    "statusProcessing": "Боловсруулж байна",
+    "statusShipped": "Илгээсэн",
+    "statusDelivered": "Хүргэгдсэн",
+    "statusCancelled": "Цуцлагдсан"
   },
   "footer": {
     "about": "Бидний тухай",

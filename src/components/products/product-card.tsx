@@ -9,6 +9,7 @@ import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 import { useCartStore } from "@/store/cart";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface ProductCardProps {
   product: {
@@ -27,6 +28,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const tc = useTranslations("common");
   const displayName = product.nameMn;
   const categoryName = product.category?.nameMn;
   const addItem = useCartStore((s) => s.addItem);
@@ -35,7 +37,6 @@ export function ProductCard({ product }: ProductCardProps) {
     product.compareAtPrice &&
     Number(product.compareAtPrice) > Number(product.price);
 
-  const hasVariants = product.variants && product.variants.length > 1;
   const firstVariant = product.variants?.[0];
   const inStock = firstVariant ? firstVariant.stock > 0 : true;
 
@@ -56,7 +57,7 @@ export function ProductCard({ product }: ProductCardProps) {
       image: product.images?.[0] ?? undefined,
       maxStock: firstVariant?.stock,
     });
-    toast.success("Сагсанд нэмэгдлээ!");
+    toast.success(tc("addedToCart"));
   };
 
   return (

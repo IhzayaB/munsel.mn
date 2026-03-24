@@ -60,18 +60,18 @@ export function Header() {
         {/* Right side actions */}
         <div className="flex items-center gap-1">
           {/* Search */}
-          <Button variant="ghost" size="icon" className="h-10 w-10" render={<Link href="/products" />}>
+          <Button variant="ghost" size="icon" className="h-10 w-10" aria-label={t("search")} render={<Link href="/products" />}>
             <Search className="h-5 w-5" />
           </Button>
           {isAdmin && (
-            <Button variant="ghost" size="icon" className="h-10 w-10" render={<Link href="/admin" />}>
+            <Button variant="ghost" size="icon" className="h-10 w-10" aria-label={t("admin")} render={<Link href="/admin" />}>
               <Settings className="h-5 w-5" />
             </Button>
           )}
 
           {/* Cart */}
           <CartSheet>
-            <Button variant="ghost" size="icon" className="relative h-10 w-10">
+            <Button variant="ghost" size="icon" className="relative h-10 w-10" aria-label={t("cart")}>
               <ShoppingBag className="h-5 w-5" />
               {mounted && totalItems > 0 && (
                 <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px]">

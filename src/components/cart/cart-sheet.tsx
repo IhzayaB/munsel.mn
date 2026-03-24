@@ -16,6 +16,7 @@ import { CartItemRow } from "./cart-item";
 import { Link } from "@/i18n/routing";
 import { ShoppingBag } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
+import { useState } from "react";
 
 interface CartSheetProps {
   children: React.ReactNode;
@@ -25,9 +26,10 @@ export function CartSheet({ children }: CartSheetProps) {
   const t = useTranslations("cart");
   const { items, getTotalPrice, getShippingCost, getGrandTotal } =
     useCartStore();
+  const [open, setOpen] = useState(false);
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger nativeButton={false} render={<span />}>{children}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-lg flex flex-col">
         <SheetHeader>
@@ -43,7 +45,7 @@ export function CartSheet({ children }: CartSheetProps) {
             <p className="text-lg font-medium text-muted-foreground mb-4">
               {t("empty")}
             </p>
-            <Button render={<Link href="/products" />}>
+            <Button render={<Link href="/products" onClick={() => setOpen(false)} />}>
               {t("continueShopping")}
             </Button>
           </div>
@@ -80,7 +82,7 @@ export function CartSheet({ children }: CartSheetProps) {
               <p className="text-xs text-muted-foreground">
                 {t("shippingNote")}
               </p>
-              <Button className="w-full mt-2" size="lg" render={<Link href="/checkout" />}>
+              <Button className="w-full mt-2" size="lg" render={<Link href="/checkout" onClick={() => setOpen(false)} />}>
                 {t("checkout")}
               </Button>
             </div>

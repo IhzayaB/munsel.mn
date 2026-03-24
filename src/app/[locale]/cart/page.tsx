@@ -27,7 +27,7 @@ export default function CartPage() {
           className="mx-auto mb-6 rounded-full opacity-40"
         />
         <h1 className="text-2xl font-bold mb-2">{t("empty")}</h1>
-        <p className="text-muted-foreground mb-6">Дэлгүүрээс бүтээгдэхүүн нэмнэ үү</p>
+        <p className="text-muted-foreground mb-6">{t("emptySubtitle")}</p>
         <Button size="lg" render={<Link href="/products" />}>
           {t("continueShopping")}
         </Button>
@@ -54,7 +54,7 @@ export default function CartPage() {
         {/* Summary */}
         <div className="bg-secondary rounded-xl p-5 sm:p-6 h-fit lg:sticky lg:top-24">
           <h2 className="font-bold text-lg mb-4">
-            Захиалгын товчхон
+            {t("checkout") === "Төлбөр төлөх" ? "Захиалгын товчхон" : t("checkout")}
           </h2>
 
           <div className="space-y-3 text-sm">
