@@ -6,6 +6,7 @@ import {
   ShoppingBag,
   Menu,
   Settings,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -31,7 +32,6 @@ export function Header() {
 
   const navLinks = [
     { href: "/" as const, label: t("home") },
-    { href: "/products" as const, label: t("products") },
   ];
 
   return (
@@ -57,25 +57,12 @@ export function Header() {
           />
         </Link>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                pathname === link.href
-                  ? "text-primary font-semibold"
-                  : "text-muted-foreground"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-
         {/* Right side actions */}
         <div className="flex items-center gap-1">
+          {/* Search */}
+          <Button variant="ghost" size="icon" className="h-10 w-10" render={<Link href="/products" />}>
+            <Search className="h-5 w-5" />
+          </Button>
           {isAdmin && (
             <Button variant="ghost" size="icon" className="h-10 w-10" render={<Link href="/admin" />}>
               <Settings className="h-5 w-5" />

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { orders, orderItems, products, productVariants } from "@/lib/db/schema";
+import { orders, orderItems, products, productVariants, coupons } from "@/lib/db/schema";
 import { createQPayInvoice } from "@/lib/qpay";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { generateOrderNumber, FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from "@/lib/utils";
 import { auth } from "@/lib/auth";
 import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { items, customer } = body;
+    const { items, customer, couponCode } = body;
 
     if (!items?.length || !customer?.name || !customer?.phone) {
       return NextResponse.json(
@@ -85,7 +85,31 @@ export async function POST(req: NextRequest) {
     }
 
     const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
-    const total = subtotal + shippingCost;
+
+    // Apply coupon if provided
+    let discount = 0;
+    let appliedCouponId: string | null = null;
+    if (couponCode) {
+      const coupon = await db.query.coupons.findFirst({
+        where: eq(coupons.code, String(couponCode).toUpperCase()),
+      });
+      if (coupon && coupon.active) {
+        const notExpired = !coupon.expiresAt || new Date(coupon.expiresAt) >= new Date();
+        const hasUses = !coupon.maxUses || coupon.usedCount < coupon.maxUses;
+        const meetsMin = !coupon.minOrderAmount || subtotal >= Number(coupon.minOrderAmount);
+        if (notExpired && hasUses && meetsMin) {
+          if (coupon.type === "fixed") {
+            discount = Number(coupon.value);
+          } else if (coupon.type === "percent") {
+            discount = Math.round(subtotal * Number(coupon.value) / 100);
+          }
+          discount = Math.min(discount, subtotal);
+          appliedCouponId = coupon.id;
+        }
+      }
+    }
+
+    const total = Math.max(0, subtotal + shippingCost - discount);
 
     const orderNumber = generateOrderNumber();
 
@@ -129,6 +153,13 @@ export async function POST(req: NextRequest) {
         price: (priceMap.get(item.productId) || 0).toString(),
       }))
     );
+
+    // Increment coupon used count
+    if (appliedCouponId) {
+      await db.update(coupons)
+        .set({ usedCount: sql`${coupons.usedCount} + 1` })
+        .where(eq(coupons.id, appliedCouponId));
+    }
 
     // Create QPay invoice
     const qpayInvoice = await createQPayInvoice(

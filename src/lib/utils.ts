@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { nanoid } from "nanoid"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -14,8 +15,8 @@ export function generateOrderNumber(): string {
   const prefix = `PJ${date.getFullYear().toString().slice(-2)}${String(
     date.getMonth() + 1
   ).padStart(2, "0")}`;
-  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-  return `${prefix}-${random}`;
+  const id = nanoid(8).toUpperCase();
+  return `${prefix}-${id}`;
 }
 
 export const FREE_SHIPPING_THRESHOLD = 50000;

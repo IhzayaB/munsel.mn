@@ -40,6 +40,8 @@ export function HomeClient({ products, categories }: HomeClientProps) {
 
   return (
     <div className="container mx-auto px-4 py-8 lg:py-12">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6">Нярайн хувцас</h1>
+
       {/* Category pills */}
       {categories.length > 0 && (
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">

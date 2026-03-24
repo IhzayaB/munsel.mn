@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useCartStore } from "@/store/cart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,12 +16,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, CheckCircle2, QrCode } from "lucide-react";
+import { Loader2, CheckCircle2, QrCode, Tag, X } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+
+interface BankUrl {
+  name: string;
+  description: string;
+  logo: string;
+  link: string;
+}
 
 const UB_DISTRICTS = [
   "Баянгол",
@@ -48,6 +55,18 @@ export default function CheckoutPage() {
   const [qrImage, setQrImage] = useState<string | null>(null);
   const [orderNumber, setOrderNumber] = useState<string>("");
   const [invoiceId, setInvoiceId] = useState<string>("");
+  const [bankUrls, setBankUrls] = useState<BankUrl[]>([]);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Coupon state
+  const [couponCode, setCouponCode] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    type: string;
+    value: number;
+    discount: number;
+  } | null>(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -84,6 +103,7 @@ export default function CheckoutPage() {
             color: item.color,
           })),
           customer: { ...form, address: fullAddress },
+          couponCode: appliedCoupon?.code || null,
         }),
       });
 
@@ -96,6 +116,7 @@ export default function CheckoutPage() {
       setOrderNumber(data.orderNumber);
       setQrImage(data.qrImage);
       setInvoiceId(data.invoiceId);
+      setBankUrls(data.urls || []);
       setStep("payment");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Захиалга үүсгэхэд алдаа гарлаа");
@@ -104,25 +125,63 @@ export default function CheckoutPage() {
     }
   };
 
-  const checkPayment = async () => {
-    setLoading(true);
+  const checkPayment = useCallback(async (manual = false) => {
+    if (manual) setLoading(true);
     try {
       const res = await fetch(`/api/qpay/callback?order=${orderNumber}&invoice=${invoiceId}`);
       const data = await res.json();
 
       if (data.paid) {
+        if (pollRef.current) clearInterval(pollRef.current);
         setStep("success");
         clearCart();
         toast.success(t("paymentSuccess"));
-      } else {
+      } else if (manual) {
         toast.info(t("paymentPending"));
       }
     } catch {
-      toast.error("Алдаа гарлаа");
+      if (manual) toast.error("Алдаа гарлаа");
     } finally {
-      setLoading(false);
+      if (manual) setLoading(false);
+    }
+  }, [orderNumber, invoiceId, clearCart, t]);
+
+  // Auto-poll payment status every 5 seconds
+  useEffect(() => {
+    if (step !== "payment" || !invoiceId) return;
+    pollRef.current = setInterval(() => checkPayment(false), 5000);
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [step, invoiceId, checkPayment]);
+
+  // Apply coupon code
+  const applyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    try {
+      const res = await fetch(`/api/qpay/create-invoice/coupon?code=${encodeURIComponent(couponCode.trim().toUpperCase())}&subtotal=${getTotalPrice()}`);
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Купон олдсонгүй");
+        return;
+      }
+      setAppliedCoupon(data);
+      toast.success(`Купон амжилттай: -${formatPrice(data.discount)}`);
+    } catch {
+      toast.error("Купон шалгахад алдаа гарлаа");
+    } finally {
+      setCouponLoading(false);
     }
   };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+  };
+
+  const discountAmount = appliedCoupon?.discount || 0;
+  const grandTotalWithDiscount = Math.max(0, getGrandTotal() - discountAmount);
 
   if (step === "success") {
     return (
@@ -193,10 +252,16 @@ export default function CheckoutPage() {
               <span>Хүргэлт</span>
               <span>{getShippingCost() === 0 ? "Үнэгүй" : formatPrice(getShippingCost())}</span>
             </div>
+            {appliedCoupon && (
+              <div className="flex justify-between text-green-600">
+                <span>Купон ({appliedCoupon.code})</span>
+                <span>-{formatPrice(appliedCoupon.discount)}</span>
+              </div>
+            )}
             <Separator />
             <div className="flex justify-between font-bold">
               <span>Нийт</span>
-              <span>{formatPrice(getGrandTotal())}</span>
+              <span>{formatPrice(grandTotalWithDiscount)}</span>
             </div>
           </div>
         </details>
@@ -361,6 +426,52 @@ export default function CheckoutPage() {
                 </CardContent>
               </Card>
 
+              {/* Coupon Code */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Tag className="h-4 w-4" />
+                    Купон код
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {appliedCoupon ? (
+                    <div className="flex items-center justify-between bg-green-50 dark:bg-green-950/30 rounded-lg p-3">
+                      <div>
+                        <p className="font-medium text-green-700 dark:text-green-400">
+                          {appliedCoupon.code}
+                        </p>
+                        <p className="text-sm text-green-600 dark:text-green-500">
+                          -{formatPrice(appliedCoupon.discount)}
+                        </p>
+                      </div>
+                      <Button variant="ghost" size="icon" onClick={removeCoupon} className="h-8 w-8">
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Input
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        placeholder="Купон код оруулах"
+                        className="h-12 text-base uppercase"
+                        onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), applyCoupon())}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={applyCoupon}
+                        disabled={couponLoading || !couponCode.trim()}
+                        className="h-12 px-6"
+                      >
+                        {couponLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Хэрэглэх"}
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
               <Button
                 type="submit"
                 size="lg"
@@ -368,7 +479,7 @@ export default function CheckoutPage() {
                 disabled={loading}
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t("placeOrder")} • {formatPrice(getGrandTotal())}
+                {t("placeOrder")} • {formatPrice(grandTotalWithDiscount)}
               </Button>
             </form>
           )}
@@ -381,8 +492,8 @@ export default function CheckoutPage() {
                   QPay төлбөр
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-center space-y-4">
-                <p className="text-muted-foreground text-sm sm:text-base">
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground text-sm sm:text-base text-center">
                   Банкны аппаараа QR кодыг уншуулна уу
                 </p>
 
@@ -398,18 +509,52 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                <p className="text-sm text-muted-foreground">
-                  {t("orderNumber")}: <strong>{orderNumber}</strong>
-                </p>
-                <p className="text-xl font-bold">
-                  {formatPrice(getGrandTotal())}
-                </p>
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground">
+                    {t("orderNumber")}: <strong>{orderNumber}</strong>
+                  </p>
+                  <p className="text-xl font-bold">
+                    {formatPrice(grandTotalWithDiscount)}
+                  </p>
+                </div>
+
+                {/* Bank app deep links for mobile */}
+                {bankUrls.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-center mb-3">Банкны аппаар төлөх</p>
+                    <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                      {bankUrls.map((bank) => (
+                        <a
+                          key={bank.name}
+                          href={bank.link}
+                          className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-accent transition-colors text-center"
+                        >
+                          <img
+                            src={bank.logo}
+                            alt={bank.description}
+                            width={40}
+                            height={40}
+                            className="rounded-lg"
+                          />
+                          <span className="text-[10px] leading-tight text-muted-foreground line-clamp-2">
+                            {bank.description}
+                          </span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2 text-sm text-muted-foreground justify-center">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Төлбөр хүлээж байна...
+                </div>
 
                 <Button
-                  onClick={checkPayment}
+                  onClick={() => checkPayment(true)}
                   disabled={loading}
-                  className="w-full h-14 text-base"
-                  size="lg"
+                  variant="outline"
+                  className="w-full"
                 >
                   {loading ? (
                     <>
@@ -459,10 +604,16 @@ export default function CheckoutPage() {
                     : formatPrice(getShippingCost())}
                 </span>
               </div>
+              {appliedCoupon && (
+                <div className="flex justify-between text-green-600">
+                  <span>Купон ({appliedCoupon.code})</span>
+                  <span>-{formatPrice(appliedCoupon.discount)}</span>
+                </div>
+              )}
               <Separator />
               <div className="flex justify-between font-bold text-lg">
                 <span>Нийт</span>
-                <span>{formatPrice(getGrandTotal())}</span>
+                <span>{formatPrice(grandTotalWithDiscount)}</span>
               </div>
             </div>
           </div>
