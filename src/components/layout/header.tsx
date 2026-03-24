@@ -12,7 +12,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { CartSheet } from "@/components/cart/cart-sheet";
 import { useCartStore } from "@/store/cart";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 
@@ -20,7 +20,12 @@ export function Header() {
   const t = useTranslations("common");
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const totalItems = useCartStore((s) => s.getTotalItems());
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === "admin";
 
@@ -81,7 +86,7 @@ export function Header() {
           <CartSheet>
             <Button variant="ghost" size="icon" className="relative h-10 w-10">
               <ShoppingBag className="h-5 w-5" />
-              {totalItems > 0 && (
+              {mounted && totalItems > 0 && (
                 <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px]">
                   {totalItems}
                 </Badge>

@@ -28,7 +28,7 @@ export function CartSheet({ children }: CartSheetProps) {
 
   return (
     <Sheet>
-      <SheetTrigger render={<span />}>{children}</SheetTrigger>
+      <SheetTrigger nativeButton={false} render={<span />}>{children}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-lg flex flex-col">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
