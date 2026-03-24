@@ -77,8 +77,8 @@ export default function AccountOrdersPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <h1 className="text-3xl font-bold mb-8">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-3xl">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-8">
         {to("title")}
       </h1>
 
@@ -116,8 +116,8 @@ export default function AccountOrdersPage() {
         <div className="space-y-4">
           {orders.map((order) => (
             <Card key={order.id}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0 mb-3 sm:mb-4">
                   <div>
                     <p className="font-mono text-sm font-bold">
                       #{order.orderNumber}
@@ -126,7 +126,7 @@ export default function AccountOrdersPage() {
                       {new Date(order.createdAt).toLocaleDateString("mn-MN")}
                     </p>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <span className="font-bold">
                       {formatPrice(order.total)}
                     </span>

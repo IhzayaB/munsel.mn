@@ -35,8 +35,8 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--baby-cream)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--baby-cream)]/60">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+    <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--baby-cream)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--baby-cream)]/60 safe-top">
+      <div className="container mx-auto flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <Image
@@ -58,20 +58,20 @@ export function Header() {
         </Link>
 
         {/* Right side actions */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5 sm:gap-1">
           {/* Search */}
-          <Button variant="ghost" size="icon" className="h-10 w-10" aria-label={t("search")} render={<Link href="/products" />}>
+          <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-10 sm:w-10" aria-label={t("search")} render={<Link href="/products" />}>
             <Search className="h-5 w-5" />
           </Button>
           {isAdmin && (
-            <Button variant="ghost" size="icon" className="h-10 w-10" aria-label={t("admin")} render={<Link href="/admin" />}>
+            <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-10 sm:w-10" aria-label={t("admin")} render={<Link href="/admin" />}>
               <Settings className="h-5 w-5" />
             </Button>
           )}
 
           {/* Cart */}
           <CartSheet>
-            <Button variant="ghost" size="icon" className="relative h-10 w-10" aria-label={t("cart")}>
+            <Button variant="ghost" size="icon" className="relative h-11 w-11 sm:h-10 sm:w-10" aria-label={t("cart")}>
               <ShoppingBag className="h-5 w-5" />
               {mounted && totalItems > 0 && (
                 <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px]">
@@ -83,7 +83,7 @@ export function Header() {
 
           {/* Mobile menu */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger className="md:hidden" render={<Button variant="ghost" size="icon" className="h-10 w-10" aria-label="Цэс нээх" />}>
+            <SheetTrigger className="md:hidden" render={<Button variant="ghost" size="icon" className="h-11 w-11 sm:h-10 sm:w-10" aria-label="Цэс нээх" />}>
               <Menu className="h-5 w-5" />
             </SheetTrigger>
             <SheetContent side="left" className="w-72 p-0">

@@ -42,12 +42,12 @@ export function HomeClient({ products, categories }: HomeClientProps) {
   }, [products, selectedCategory]);
 
   return (
-    <div className="container mx-auto px-4 py-8 lg:py-12">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6">{t("title")}</h1>
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-12">
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6">{t("title")}</h1>
 
       {/* Category pills */}
       {categories.length > 0 && (
-        <div className="flex gap-2 mb-8 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+        <div className="flex gap-2 mb-6 sm:mb-8 overflow-x-auto pb-2 -mx-3 px-3 sm:-mx-4 sm:px-4 scrollbar-hide">
           <button
             onClick={() => setSelectedCategory("all")}
             className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap shrink-0 ${
@@ -62,7 +62,7 @@ export function HomeClient({ products, categories }: HomeClientProps) {
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap shrink-0 ${
+              className={`px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap shrink-0 ${
                 selectedCategory === cat.id
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
@@ -77,13 +77,13 @@ export function HomeClient({ products, categories }: HomeClientProps) {
       {/* Products grid */}
       {filteredProducts.length === 0 ? (
         <div className="text-center py-20">
-          <ShoppingBag className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+          <ShoppingBag className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-4" />
           <p className="text-lg text-muted-foreground">
             {tc("noCategoryProducts")}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

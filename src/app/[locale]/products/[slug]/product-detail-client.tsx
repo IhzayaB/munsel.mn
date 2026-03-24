@@ -71,7 +71,7 @@ export function ProductDetailClient({
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
       {/* Breadcrumbs */}
       <Breadcrumbs
         items={[
@@ -83,10 +83,10 @@ export function ProductDetailClient({
         ]}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
         {/* Images */}
         <div>
-          <div className="aspect-square bg-secondary rounded-xl flex items-center justify-center overflow-hidden mb-4 relative">
+          <div className="aspect-square bg-secondary rounded-lg sm:rounded-xl flex items-center justify-center overflow-hidden mb-3 sm:mb-4 relative">
             {product.images && product.images.length > 0 ? (
               <Image
                 src={product.images[selectedImage]}
@@ -102,13 +102,13 @@ export function ProductDetailClient({
           </div>
           {/* Thumbnails */}
           {product.images && product.images.length > 1 && (
-            <div className="flex gap-2">
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
               {product.images.map((img, i) => (
                 <button
                   key={i}
                   onClick={() => setSelectedImage(i)}
                   aria-label={`Зураг ${i + 1}`}
-                  className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 ${
+                  className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border-2 shrink-0 ${
                     selectedImage === i
                       ? "border-primary"
                       : "border-transparent"
@@ -135,15 +135,15 @@ export function ProductDetailClient({
             </p>
           )}
 
-          <h1 className="text-2xl sm:text-3xl font-bold mb-4">{displayName}</h1>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4">{displayName}</h1>
 
           {/* Price */}
-          <div className="flex items-center gap-3 mb-6">
-            <span className="text-2xl sm:text-3xl font-bold text-primary">
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+            <span className="text-xl sm:text-2xl md:text-3xl font-bold text-primary">
               {formatPrice(product.price)}
             </span>
             {hasDiscount && (
-              <span className="text-xl text-muted-foreground line-through">
+            <span className="text-lg sm:text-xl text-muted-foreground line-through">
                 {formatPrice(product.compareAtPrice!)}
               </span>
             )}
@@ -162,7 +162,7 @@ export function ProductDetailClient({
 
           {/* Size selection */}
           {product.variants && product.variants.length > 0 && (
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <p className="font-medium mb-2">{t("selectSize")}</p>
               <div className="flex flex-wrap gap-2">
                 {product.variants.map((variant) => (
@@ -172,7 +172,7 @@ export function ProductDetailClient({
                     disabled={variant.stock <= 0}
                     aria-label={variant.stock <= 0 ? `${variant.size} - дууссан` : variant.size || undefined}
                     aria-pressed={selectedVariant?.id === variant.id}
-                    className={`px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors min-w-[48px] ${
+                    className={`px-3.5 py-2.5 sm:px-4 sm:py-2.5 rounded-lg border text-sm font-medium transition-colors min-w-[44px] min-h-[44px] ${
                       selectedVariant?.id === variant.id
                         ? "border-primary bg-primary text-primary-foreground"
                         : variant.stock <= 0
@@ -189,7 +189,7 @@ export function ProductDetailClient({
           )}
 
           {/* Stock status */}
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             {inStock ? (
               <p className="text-green-600 flex items-center gap-1 text-sm">
                 <Check className="h-4 w-4" />
@@ -203,22 +203,22 @@ export function ProductDetailClient({
           </div>
 
           {/* Quantity + Add to cart */}
-          <div className="flex items-center gap-3 mb-8">
-            <div className="flex items-center border rounded-lg">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6 sm:mb-8">
+            <div className="flex items-center border rounded-lg self-start">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-11 w-11"
+                className="h-12 w-12 sm:h-11 sm:w-11"
                 aria-label="Тоо хэмжээ хасах"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
               >
                 <Minus className="h-4 w-4" />
               </Button>
-              <span className="w-10 text-center font-medium">{quantity}</span>
+              <span className="w-12 text-center font-medium text-base">{quantity}</span>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-11 w-11"
+                className="h-12 w-12 sm:h-11 sm:w-11"
                 aria-label="Тоо хэмжээ нэмэх"
                 onClick={() => {
                   const maxQty = selectedVariant ? selectedVariant.stock : 99;
@@ -231,7 +231,7 @@ export function ProductDetailClient({
 
             <Button
               size="lg"
-              className="flex-1 h-12 text-base"
+              className="flex-1 h-14 sm:h-12 text-base"
               disabled={!inStock}
               onClick={handleAddToCart}
             >
@@ -272,9 +272,9 @@ export function ProductDetailClient({
 
       {/* Related Products */}
       {relatedProducts.length > 0 && (
-        <div className="mt-12 sm:mt-16">
-          <h2 className="text-xl sm:text-2xl font-bold mb-6">{t("relatedProducts")}</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="mt-8 sm:mt-12 lg:mt-16">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-6">{t("relatedProducts")}</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
             {relatedProducts.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}

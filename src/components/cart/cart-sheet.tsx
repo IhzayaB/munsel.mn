@@ -61,7 +61,7 @@ export function CartSheet({ children }: CartSheetProps) {
               ))}
             </div>
 
-            <div className="border-t pt-4 space-y-2">
+            <div className="border-t pt-4 space-y-2 safe-bottom">
               <div className="flex justify-between text-sm">
                 <span>{t("subtotal")}</span>
                 <span>{formatPrice(getTotalPrice())}</span>
@@ -82,7 +82,7 @@ export function CartSheet({ children }: CartSheetProps) {
               <p className="text-xs text-muted-foreground">
                 {t("shippingNote")}
               </p>
-              <Button className="w-full mt-2" size="lg" render={<Link href="/checkout" onClick={() => setOpen(false)} />}>
+              <Button className="w-full mt-2 h-12 text-base" size="lg" render={<Link href="/checkout" onClick={() => setOpen(false)} />}>
                 {t("checkout")}
               </Button>
             </div>

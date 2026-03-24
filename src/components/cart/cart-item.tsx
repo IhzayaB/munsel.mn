@@ -21,7 +21,7 @@ export function CartItemRow({ item, locale }: CartItemRowProps) {
   return (
     <div className="flex gap-3 p-3 bg-secondary/50 rounded-lg">
       {/* Product image */}
-      <div className="w-20 h-20 bg-secondary rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden">
+      <div className="w-20 h-20 sm:w-24 sm:h-24 bg-secondary rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden">
         {item.image ? (
           <Image
             src={item.image}
@@ -50,7 +50,7 @@ export function CartItemRow({ item, locale }: CartItemRowProps) {
           <Button
             variant="outline"
             size="icon"
-            className="h-7 w-7"
+            className="h-8 w-8 sm:h-7 sm:w-7"
             aria-label="Тоо хэмжээ хасах"
             onClick={() =>
               updateQuantity(item.productId, item.quantity - 1, item.variantId)
@@ -64,7 +64,7 @@ export function CartItemRow({ item, locale }: CartItemRowProps) {
           <Button
             variant="outline"
             size="icon"
-            className="h-7 w-7"
+            className="h-8 w-8 sm:h-7 sm:w-7"
             aria-label="Тоо хэмжээ нэмэх"
             onClick={() =>
               updateQuantity(item.productId, item.quantity + 1, item.variantId)
@@ -76,7 +76,7 @@ export function CartItemRow({ item, locale }: CartItemRowProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 ml-auto text-destructive hover:text-destructive"
+            className="h-8 w-8 sm:h-7 sm:w-7 ml-auto text-destructive hover:text-destructive"
             aria-label="Хасах"
             onClick={() => removeItem(item.productId, item.variantId)}
           >

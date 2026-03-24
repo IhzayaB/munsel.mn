@@ -46,25 +46,26 @@ export function ProductsClient({ products }: { products: Product[] }) {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-xl sm:text-2xl font-bold">Бүтээгдэхүүн ({filtered.length})</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <h1 className="text-lg sm:text-2xl font-bold">Бүтээгдэхүүн ({filtered.length})</h1>
         <div className="flex items-center gap-2">
-          <div className="relative">
+          <div className="relative flex-1 sm:flex-none">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              className="pl-9 w-[200px]"
+              className="pl-9 w-full sm:w-[200px] h-10"
               placeholder="Хайх..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             />
           </div>
-          <Button render={<Link href="/admin/products/new" />}>
-            <Plus className="mr-2 h-4 w-4" /> Нэмэх
+          <Button render={<Link href="/admin/products/new" />} className="shrink-0">
+            <Plus className="mr-1 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">Нэмэх</span><span className="sm:hidden">+</span>
           </Button>
         </div>
       </div>
 
-      <Card>
+      {/* Desktop table */}
+      <Card className="hidden md:block">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
@@ -114,6 +115,42 @@ export function ProductsClient({ products }: { products: Product[] }) {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Mobile card list */}
+      <div className="md:hidden space-y-2">
+        {paginated.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-8 text-muted-foreground">
+              {search ? "Хайлтын илэрц олдсонгүй" : "Бүтээгдэхүүн байхгүй"}
+            </CardContent>
+          </Card>
+        ) : (
+          paginated.map((product) => (
+            <Card key={product.id}>
+              <CardContent className="p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm truncate">{product.nameMn}</p>
+                    <p className="text-xs text-muted-foreground">{product.category?.nameMn || "—"} • {product.variants?.length || 0} хэмжээ</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="font-bold text-sm">{formatPrice(product.price)}</span>
+                      <Badge variant={product.active ? "default" : "secondary"} className="text-[10px] px-1.5 py-0">
+                        {product.active ? "Идэвхтэй" : "Идэвхгүй"}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button variant="ghost" size="icon" className="h-9 w-9" render={<Link href={`/admin/products/${product.id}/edit`} />}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <DeleteProductButton productId={product.id} productName={product.name} />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
 
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4">

@@ -38,7 +38,7 @@ export function AdminNavClient({ items }: { items: NavItem[] }) {
   const cleanPath = pathname.replace(/^\/mn/, "") || "/";
 
   return (
-    <nav className="flex gap-1 sm:gap-2 overflow-x-auto scrollbar-hide">
+    <nav className="flex gap-0.5 sm:gap-1 overflow-x-auto scrollbar-hide -mr-3 sm:mr-0 pr-3 sm:pr-0">
       {items.map((item) => {
         const Icon = iconMap[item.icon];
         const isActive = item.exact
@@ -49,14 +49,14 @@ export function AdminNavClient({ items }: { items: NavItem[] }) {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs sm:text-sm font-medium whitespace-nowrap transition-colors ${
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-md text-[11px] sm:text-sm font-medium whitespace-nowrap transition-colors ${
               isActive
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:text-foreground hover:bg-secondary"
             }`}
           >
-            <Icon className="h-3.5 w-3.5" />
-            {item.label}
+            <Icon className="h-3.5 w-3.5 shrink-0" />
+            <span className="hidden sm:inline">{item.label}</span>
           </Link>
         );
       })}

@@ -53,7 +53,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#f5fafa" />
         <meta name="format-detection" content="telephone=no" />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col safe-bottom">{children}</body>
     </html>
   );
 }

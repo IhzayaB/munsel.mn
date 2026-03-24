@@ -162,20 +162,20 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-xl sm:text-2xl font-bold">Захиалга ({filtered.length})</h1>
+      <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <h1 className="text-lg sm:text-2xl font-bold">Захиалга ({filtered.length})</h1>
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="relative">
+          <div className="relative flex-1 min-w-[140px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              className="pl-9 w-[180px]"
+              className="pl-9 h-10 w-full"
               placeholder="Хайх..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             />
           </div>
           <Select value={statusFilter} onValueChange={(v) => { if (v) { setStatusFilter(v); setPage(1); } }}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-[120px] sm:w-[140px] h-10">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -185,16 +185,16 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
               ))}
             </SelectContent>
           </Select>
-          <Button variant="outline" size="sm" onClick={exportCSV}>
-            <Download className="mr-1 h-4 w-4" /> CSV
+          <Button variant="outline" size="sm" onClick={exportCSV} className="h-10 shrink-0">
+            <Download className="mr-1 h-4 w-4" /> <span className="hidden sm:inline">CSV</span>
           </Button>
         </div>
       </div>
 
       {/* Bulk actions */}
       {selectedIds.size > 0 && (
-        <div className="flex items-center gap-2 mb-4 p-3 bg-secondary/50 rounded-lg">
-          <span className="text-sm font-medium">{selectedIds.size} сонгогдсон:</span>
+        <div className="flex items-center gap-1.5 sm:gap-2 mb-4 p-2 sm:p-3 bg-secondary/50 rounded-lg overflow-x-auto scrollbar-hide">
+          <span className="text-xs sm:text-sm font-medium whitespace-nowrap">{selectedIds.size} сонгогдсон:</span>
           {STATUSES.map((s) => (
             <Button key={s.value} variant="outline" size="sm" className="text-xs h-7" onClick={() => handleBulkStatus(s.value)}>
               {s.label}
@@ -219,7 +219,7 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
 
           {paginated.map((order) => (
             <Card key={order.id}>
-              <CardContent className="p-4 sm:p-6">
+              <CardContent className="p-3 sm:p-4 md:p-6">
                 <div className="flex items-start gap-3">
                   <input
                     type="checkbox"
@@ -227,7 +227,7 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
                     checked={selectedIds.has(order.id)}
                     onChange={() => toggleSelect(order.id)}
                   />
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 flex-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 flex-1 min-w-0">
                     <div
                       className="cursor-pointer flex-1 min-w-0"
                       onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
@@ -239,13 +239,13 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
                         {order.shippingAddress}, {order.city}{order.district ? `, ${order.district}` : ""}
                       </p>
                     </div>
-                    <div className="flex items-center gap-4 shrink-0">
+                    <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                       <div className="text-right">
-                        <p className="font-bold text-lg">{formatPrice(order.total)}</p>
+                        <p className="font-bold text-base sm:text-lg">{formatPrice(order.total)}</p>
                         <p className="text-xs text-muted-foreground">{order.items?.length || 0} бараа</p>
                       </div>
                       <Select value={order.status} onValueChange={(v) => v && handleStatusChange(order.id, v)}>
-                        <SelectTrigger className="w-[140px]">
+                        <SelectTrigger className="w-[110px] sm:w-[140px] h-9">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusColor(order.status)}`}>
                             {STATUSES.find((s) => s.value === order.status)?.label || order.status}
                           </span>

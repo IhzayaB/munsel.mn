@@ -194,7 +194,7 @@ export default function CheckoutPage() {
 
   if (step === "success") {
     return (
-      <div className="container mx-auto px-4 py-16 text-center max-w-lg">
+      <div className="container mx-auto px-3 sm:px-4 py-12 sm:py-16 text-center max-w-lg">
         <CheckCircle2 className="h-20 w-20 text-green-500 mx-auto mb-6" />
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">{t("orderPlaced")}</h1>
         <p className="text-muted-foreground mb-2">{t("paymentSuccess")}</p>
@@ -210,7 +210,7 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
+      <div className="container mx-auto px-3 sm:px-4 py-12 sm:py-16 text-center">
         <p className="text-lg text-muted-foreground mb-4">
           Таны сагс хоосон байна
         </p>
@@ -222,7 +222,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 sm:py-8">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8 pb-4 sm:pb-8">
       <Breadcrumbs
         items={[
           { label: "Сагс", href: "/cart" },
@@ -276,7 +276,7 @@ export default function CheckoutPage() {
         </details>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
         <div className="lg:col-span-2">
           {step === "info" && (
             <form onSubmit={handleSubmitOrder} className="space-y-5">
@@ -486,7 +486,7 @@ export default function CheckoutPage() {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full h-14 text-base"
+                className="w-full h-14 text-base sticky bottom-3 sm:static sm:bottom-auto shadow-lg sm:shadow-none"
                 disabled={loading}
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -533,12 +533,12 @@ export default function CheckoutPage() {
                 {bankUrls.length > 0 && (
                   <div>
                     <p className="text-sm font-medium text-center mb-3">Банкны аппаар төлөх</p>
-                    <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3">
                       {bankUrls.map((bank) => (
                         <a
                           key={bank.name}
                           href={bank.link}
-                          className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-accent transition-colors text-center"
+                          className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-accent active:bg-accent transition-colors text-center"
                         >
                           <img
                             src={bank.logo}

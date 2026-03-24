@@ -77,11 +77,11 @@ export function ProductsClient({ products, categories }: ProductsClientProps) {
   }, [products, search, categoryFilter, sortBy]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
       <Breadcrumbs items={[{ label: t("title") }]} />
 
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">{t("title")}</h1>
         <p className="text-muted-foreground">
           {filteredProducts.length}{" "}
           {"бүтээгдэхүүн"}
@@ -89,46 +89,44 @@ export function ProductsClient({ products, categories }: ProductsClientProps) {
       </div>
 
       {/* Filters bar */}
-      <div className="flex flex-col md:flex-row gap-4 mb-8">
-        <div className="relative flex-1">
+      <div className="flex flex-col gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Бүтээгдэхүүн хайх..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
+            className="pl-10 h-12 text-base"
           />
         </div>
 
-        <Select value={categoryFilter} onValueChange={(v) => v && setCategoryFilter(v)}>
-          <SelectTrigger className="w-full md:w-48">
-            <SelectValue placeholder={t("category")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("allCategories")}</SelectItem>
-            {categories.map((cat) => (
-              <SelectItem key={cat.id} value={cat.id}>
-                {cat.nameMn}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex gap-2">
+          <Select value={categoryFilter} onValueChange={(v) => v && setCategoryFilter(v)}>
+            <SelectTrigger className="flex-1 h-11 sm:h-10 sm:w-48 sm:flex-none">
+              <SelectValue placeholder={t("category")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("allCategories")}</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.nameMn}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <Select value={sortBy} onValueChange={(v) => v && setSortBy(v)}>
-          <SelectTrigger className="w-full md:w-48">
-            <SelectValue placeholder={t("sort")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="newest">{t("sortOptions.newest")}</SelectItem>
-            <SelectItem value="priceAsc">
-              {t("sortOptions.priceAsc")}
-            </SelectItem>
-            <SelectItem value="priceDesc">
-              {t("sortOptions.priceDesc")}
-            </SelectItem>
-            <SelectItem value="name">{t("sortOptions.name")}</SelectItem>
-          </SelectContent>
-        </Select>
+          <Select value={sortBy} onValueChange={(v) => v && setSortBy(v)}>
+            <SelectTrigger className="flex-1 h-11 sm:h-10 sm:w-48 sm:flex-none">
+              <SelectValue placeholder={t("sort")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">{t("sortOptions.newest")}</SelectItem>
+              <SelectItem value="priceAsc">{t("sortOptions.priceAsc")}</SelectItem>
+              <SelectItem value="priceDesc">{t("sortOptions.priceDesc")}</SelectItem>
+              <SelectItem value="name">{t("sortOptions.name")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Product grid */}
@@ -143,7 +141,7 @@ export function ProductsClient({ products, categories }: ProductsClientProps) {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

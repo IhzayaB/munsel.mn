@@ -12,10 +12,10 @@ export function Footer() {
 
   return (
     <footer className="bg-[var(--baby-charcoal)] text-gray-300">
-      <div className="container mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-10">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
           {/* Brand + socials */}
-          <div className="flex flex-col items-center md:items-start gap-4">
+          <div className="col-span-2 md:col-span-1 flex flex-col items-center md:items-start gap-3 sm:gap-4">
             <div className="flex items-center gap-2">
               <Image
                 src="/logo.png"
@@ -52,7 +52,7 @@ export function Footer() {
           </div>
 
           {/* Quick Links */}
-          <div className="flex flex-col items-center md:items-start gap-3">
+          <div className="flex flex-col items-start gap-2 sm:gap-3">
             <h3 className="text-sm font-semibold text-white uppercase tracking-wider">
               {tf("quickLinks")}
             </h3>
@@ -64,7 +64,7 @@ export function Footer() {
           </div>
 
           {/* Contact */}
-          <div className="flex flex-col items-center md:items-start gap-3">
+          <div className="flex flex-col items-start gap-2 sm:gap-3">
             <h3 className="text-sm font-semibold text-white uppercase tracking-wider">
               {tf("contact")}
             </h3>

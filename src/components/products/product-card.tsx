@@ -63,7 +63,7 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Link href={`/products/${product.slug}`}>
       <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden h-full">
-        <div className="relative bg-secondary h-64 flex items-center justify-center overflow-hidden">
+        <div className="relative bg-secondary aspect-[3/4] flex items-center justify-center overflow-hidden">
           {product.images && product.images.length > 0 ? (
             <Image
               src={product.images[0]}
@@ -107,26 +107,26 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
 
-        <CardContent className="p-4">
+        <CardContent className="p-2.5 sm:p-4">
           {categoryName && (
-            <p className="text-xs text-muted-foreground mb-1">
+            <p className="text-[11px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">
               {categoryName}
             </p>
           )}
-          <h3 className="font-semibold text-foreground mb-1 line-clamp-2 text-sm sm:text-base">
+          <h3 className="font-semibold text-foreground mb-0.5 sm:mb-1 line-clamp-2 text-[13px] leading-tight sm:text-base">
             {displayName}
           </h3>
           {product.ageRange && (
-            <p className="text-xs text-muted-foreground mb-2">
+            <p className="text-[11px] sm:text-xs text-muted-foreground mb-1 sm:mb-2">
               {product.ageRange}
             </p>
           )}
-          <div className="flex items-center gap-2">
-            <p className="text-base sm:text-lg font-bold text-primary">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <p className="text-sm sm:text-lg font-bold text-primary">
               {formatPrice(product.price)}
             </p>
             {hasDiscount && (
-              <p className="text-xs sm:text-sm text-muted-foreground line-through">
+              <p className="text-[11px] sm:text-sm text-muted-foreground line-through">
                 {formatPrice(product.compareAtPrice!)}
               </p>
             )}

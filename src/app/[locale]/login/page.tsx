@@ -85,7 +85,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-[60vh]">
+    <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-16 flex items-center justify-center min-h-[60vh]">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <Image
