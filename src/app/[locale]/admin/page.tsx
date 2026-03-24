@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import Link from "next/link";
-import { AnalyticsPanel } from "./analytics-panel";
 
 export default async function AdminDashboardPage() {
   const now = new Date();
@@ -381,8 +380,6 @@ export default async function AdminDashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Website Analytics */}
-      <AnalyticsPanel />
     </div>
   );
 }

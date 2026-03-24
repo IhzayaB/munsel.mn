@@ -11,41 +11,6 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U pajama -d pajama_mn"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  umami:
-    image: ghcr.io/umami-software/umami:postgresql-latest
-    container_name: pajama_umami
-    restart: unless-stopped
-    ports:
-      - "3001:3000"
-    environment:
-      DATABASE_URL: postgresql://umami:umami_secret@umami_db:5432/umami
-      APP_SECRET: pajama-umami-secret-change-me
-    depends_on:
-      umami_db:
-        condition: service_healthy
-
-  umami_db:
-    image: postgres:16-alpine
-    container_name: pajama_umami_db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: umami
-      POSTGRES_PASSWORD: umami_secret
-      POSTGRES_DB: umami
-    volumes:
-      - umami_pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U umami -d umami"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
 volumes:
   pgdata:
-  umami_pgdata:

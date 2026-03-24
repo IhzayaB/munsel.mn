@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { UmamiAnalytics } from "@/components/umami-analytics";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -56,10 +55,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#f5fafa" />
         <meta name="format-detection" content="telephone=no" />
       </head>
-      <body className="min-h-full flex flex-col safe-bottom">
-        {children}
-        <UmamiAnalytics />
-      </body>
+      <body className="min-h-full flex flex-col safe-bottom">{children}</body>
     </html>
   );
 }
