@@ -17,7 +17,6 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
     title: "Хүргэлт",
     keys: [
       { key: "SHIPPING_COST", label: "Хүргэлтийн үнэ (₮)", placeholder: "7000", type: "number" },
-      { key: "FREE_SHIPPING_THRESHOLD", label: "Үнэгүй хүргэлтийн доод дүн (₮)", placeholder: "50000", type: "number" },
     ],
   },
   {

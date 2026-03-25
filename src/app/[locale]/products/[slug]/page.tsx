@@ -62,6 +62,7 @@ export default async function ProductDetailPage({
     : [];
   const related = relatedRaw.filter((p) => {
     if (p.id === product.id) return false;
+    if (!p.active) return false;
     if (!p.variants || p.variants.length === 0) return true;
     return p.variants.some((v: { stock: number }) => v.stock > 0);
   }).slice(0, 5);
