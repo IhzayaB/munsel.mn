@@ -21,7 +21,10 @@ export function DeleteProductButton({
       const res = await fetch(`/api/admin/products/${productId}`, {
         method: "DELETE",
       });
-      if (!res.ok) throw new Error("Failed");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed");
+      }
       const data = await res.json();
       if (data.softDeleted) {
         toast.success("Захиалгатай тул идэвхгүй болголоо");
@@ -29,8 +32,8 @@ export function DeleteProductButton({
         toast.success("Бүтээгдэхүүн устгагдлаа");
       }
       router.refresh();
-    } catch {
-      toast.error("Бүтээгдэхүүн устгахад алдаа гарлаа");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Бүтээгдэхүүн устгахад алдаа гарлаа");
     }
   };
 

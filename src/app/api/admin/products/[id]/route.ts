@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { products, productVariants, orderItems } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
 // GET single product (admin only)
@@ -100,12 +100,20 @@ export async function DELETE(
 
     const { id } = await params;
 
+    // Check if product exists
+    const product = await db.query.products.findFirst({
+      where: eq(products.id, id),
+    });
+    if (!product) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
     // Check if any order items reference this product
     const existingOrderItem = await db.query.orderItems.findFirst({
       where: eq(orderItems.productId, id),
     });
 
-    if (existingOrderItem) {
+    if (existingOrderItem && product.active) {
       // Soft delete: deactivate product to preserve order history
       await db
         .update(products)
@@ -114,7 +122,13 @@ export async function DELETE(
       return NextResponse.json({ success: true, softDeleted: true });
     }
 
-    // Hard delete: no orders reference this product
+    // Hard delete: either no orders reference this product, or it's already inactive
+    // Remove order item references first (set productId to null via raw SQL since FK is NOT NULL)
+    if (existingOrderItem) {
+      await db.execute(
+        sql`UPDATE order_items SET product_id = NULL, variant_id = NULL WHERE product_id = ${id}`
+      );
+    }
     await db.delete(productVariants).where(eq(productVariants.productId, id));
     await db.delete(products).where(eq(products.id, id));
 

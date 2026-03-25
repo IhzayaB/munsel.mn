@@ -167,7 +167,6 @@ export const orderItems = pgTable("order_items", {
     .notNull()
     .references(() => orders.id, { onDelete: "cascade" }),
   productId: uuid("product_id")
-    .notNull()
     .references(() => products.id),
   variantId: uuid("variant_id").references(() => productVariants.id),
   name: varchar("name", { length: 255 }).notNull(),
