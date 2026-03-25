@@ -105,11 +105,7 @@ export function Header() {
             <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-10 sm:w-10" aria-label={t("account")} render={<Link href="/account/orders" />}>
               <User className="h-5 w-5" />
             </Button>
-          ) : (
-            <Button variant="ghost" size="icon" className="hidden sm:flex h-10 w-10" aria-label={t("login")} render={<Link href="/login" />}>
-              <User className="h-5 w-5" />
-            </Button>
-          )}
+          ) : null}
 
           {/* Cart */}
           <CartSheet>
@@ -171,16 +167,6 @@ export function Header() {
                     >
                       <Settings className="h-4 w-4" />
                       {t("admin")}
-                    </Link>
-                  )}
-                  {!session && (
-                    <Link
-                      href="/login"
-                      onClick={() => setMobileOpen(false)}
-                      className="text-base font-medium py-3 px-3 rounded-lg transition-colors hover:bg-accent hover:text-primary text-foreground flex items-center gap-2"
-                    >
-                      <User className="h-4 w-4" />
-                      {t("login")}
                     </Link>
                   )}
                   {session && !isAdmin && (
