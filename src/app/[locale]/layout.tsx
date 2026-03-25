@@ -5,9 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Providers } from "@/components/providers";
-import dynamic from "next/dynamic";
-
-const BackToTop = dynamic(() => import("@/components/back-to-top").then(m => m.BackToTop), { ssr: false });
+import { BackToTop } from "@/components/back-to-top";
 
 export default async function LocaleLayout({
   children,
