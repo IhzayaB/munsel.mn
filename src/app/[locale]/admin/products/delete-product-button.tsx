@@ -22,7 +22,12 @@ export function DeleteProductButton({
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed");
-      toast.success("Бүтээгдэхүүн устгагдлаа");
+      const data = await res.json();
+      if (data.softDeleted) {
+        toast.success("Захиалгатай тул идэвхгүй болголоо");
+      } else {
+        toast.success("Бүтээгдэхүүн устгагдлаа");
+      }
       router.refresh();
     } catch {
       toast.error("Бүтээгдэхүүн устгахад алдаа гарлаа");

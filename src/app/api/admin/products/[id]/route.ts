@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { products, productVariants } from "@/lib/db/schema";
+import { products, productVariants, orderItems } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
@@ -99,6 +99,22 @@ export async function DELETE(
     }
 
     const { id } = await params;
+
+    // Check if any order items reference this product
+    const existingOrderItem = await db.query.orderItems.findFirst({
+      where: eq(orderItems.productId, id),
+    });
+
+    if (existingOrderItem) {
+      // Soft delete: deactivate product to preserve order history
+      await db
+        .update(products)
+        .set({ active: false, updatedAt: new Date() })
+        .where(eq(products.id, id));
+      return NextResponse.json({ success: true, softDeleted: true });
+    }
+
+    // Hard delete: no orders reference this product
     await db.delete(productVariants).where(eq(productVariants.productId, id));
     await db.delete(products).where(eq(products.id, id));
 
