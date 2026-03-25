@@ -76,12 +76,23 @@ export default function NewProductPage() {
     );
   };
 
-  // Auto-generate slug from English name
-  const generateSlug = (name: string) =>
-    name
+  // Auto-generate slug from name
+  const generateSlug = (name: string) => {
+    const map: Record<string, string> = {
+      а: "a", б: "b", в: "v", г: "g", д: "d", е: "ye", ё: "yo",
+      ж: "j", з: "z", и: "i", й: "i", к: "k", л: "l", м: "m",
+      н: "n", о: "o", ө: "u", п: "p", р: "r", с: "s", т: "t",
+      у: "u", ү: "u", ф: "f", х: "kh", ц: "ts", ч: "ch",
+      ш: "sh", щ: "sh", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya",
+    };
+    return name
       .toLowerCase()
+      .split("")
+      .map((c) => map[c] ?? c)
+      .join("")
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "");
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -183,33 +194,21 @@ export default function NewProductPage() {
             <CardTitle>Үндсэн мэдээлэл</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Нэр (Англи)</Label>
-                <Input
-                  value={form.name}
-                  onChange={(e) => {
-                    setForm({
-                      ...form,
-                      name: e.target.value,
-                      slug: generateSlug(e.target.value),
-                    });
-                  }}
-                  placeholder="Soft Cotton Onesie"
-                  required
-                />
-              </div>
-              <div>
-                <Label>Нэр (Монгол)</Label>
-                <Input
-                  value={form.nameMn}
-                  onChange={(e) =>
-                    setForm({ ...form, nameMn: e.target.value })
-                  }
-                  placeholder="Зөөлөн хөвөн комбинезон"
-                  required
-                />
-              </div>
+            <div>
+              <Label>Нэр</Label>
+              <Input
+                value={form.nameMn}
+                onChange={(e) => {
+                  setForm({
+                    ...form,
+                    nameMn: e.target.value,
+                    name: e.target.value,
+                    slug: generateSlug(e.target.value),
+                  });
+                }}
+                placeholder="Зөөлөн хөвөн комбинезон"
+                required
+              />
             </div>
 
             <div>
@@ -241,27 +240,15 @@ export default function NewProductPage() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Тайлбар (Англи)</Label>
-                <Textarea
-                  value={form.description}
-                  onChange={(e) =>
-                    setForm({ ...form, description: e.target.value })
-                  }
-                  rows={3}
-                />
-              </div>
-              <div>
-                <Label>Тайлбар (Монгол)</Label>
-                <Textarea
-                  value={form.descriptionMn}
-                  onChange={(e) =>
-                    setForm({ ...form, descriptionMn: e.target.value })
-                  }
-                  rows={3}
-                />
-              </div>
+            <div>
+              <Label>Тайлбар</Label>
+              <Textarea
+                value={form.descriptionMn}
+                onChange={(e) =>
+                  setForm({ ...form, descriptionMn: e.target.value, description: e.target.value })
+                }
+                rows={3}
+              />
             </div>
           </CardContent>
         </Card>
@@ -306,27 +293,15 @@ export default function NewProductPage() {
             <CardTitle>Дэлгэрэнгүй</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Материал (Англи)</Label>
-                <Input
-                  value={form.material}
-                  onChange={(e) =>
-                    setForm({ ...form, material: e.target.value })
-                  }
-                  placeholder="100% Organic Cotton"
-                />
-              </div>
-              <div>
-                <Label>Материал (Монгол)</Label>
-                <Input
-                  value={form.materialMn}
-                  onChange={(e) =>
-                    setForm({ ...form, materialMn: e.target.value })
-                  }
-                  placeholder="100% Органик хөвөн"
-                />
-              </div>
+            <div>
+              <Label>Материал</Label>
+              <Input
+                value={form.materialMn}
+                onChange={(e) =>
+                  setForm({ ...form, materialMn: e.target.value, material: e.target.value })
+                }
+                placeholder="100% Органик хөвөн"
+              />
             </div>
             <div>
               <Label>Насны ангилал</Label>
@@ -386,22 +361,13 @@ export default function NewProductPage() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs">Өнгө (Англи)</Label>
-                  <Input
-                    value={variant.color}
-                    onChange={(e) =>
-                      updateVariant(i, "color", e.target.value)
-                    }
-                    placeholder="White"
-                  />
-                </div>
-                <div>
                   <Label className="text-xs">Өнгө</Label>
                   <Input
                     value={variant.colorMn}
-                    onChange={(e) =>
-                      updateVariant(i, "colorMn", e.target.value)
-                    }
+                    onChange={(e) => {
+                      updateVariant(i, "colorMn", e.target.value);
+                      updateVariant(i, "color", e.target.value);
+                    }}
                     placeholder="Цагаан"
                   />
                 </div>

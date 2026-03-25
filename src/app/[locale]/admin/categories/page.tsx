@@ -48,8 +48,22 @@ export default function AdminCategoriesPage() {
 
   useEffect(() => { fetchCategories(); }, []);
 
-  const generateSlug = (name: string) =>
-    name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const generateSlug = (name: string) => {
+    const map: Record<string, string> = {
+      а: "a", б: "b", в: "v", г: "g", д: "d", е: "ye", ё: "yo",
+      ж: "j", з: "z", и: "i", й: "i", к: "k", л: "l", м: "m",
+      н: "n", о: "o", ө: "u", п: "p", р: "r", с: "s", т: "t",
+      у: "u", ү: "u", ф: "f", х: "kh", ц: "ts", ч: "ch",
+      ш: "sh", щ: "sh", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya",
+    };
+    return name
+      .toLowerCase()
+      .split("")
+      .map((c) => map[c] ?? c)
+      .join("")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -165,20 +179,14 @@ export default function AdminCategoriesPage() {
                 )}
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Нэр (Англи)</Label>
-                <Input
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value, ...(!editingId ? { slug: generateSlug(e.target.value) } : {}) })}
-                  placeholder="Onesies"
-                  required
-                />
-              </div>
-              <div>
-                <Label>Нэр (Монгол)</Label>
-                <Input value={form.nameMn} onChange={(e) => setForm({ ...form, nameMn: e.target.value })} placeholder="Комбинезон" required />
-              </div>
+            <div>
+              <Label>Нэр</Label>
+              <Input
+                value={form.nameMn}
+                onChange={(e) => setForm({ ...form, nameMn: e.target.value, name: e.target.value, ...(!editingId ? { slug: generateSlug(e.target.value) } : {}) })}
+                placeholder="Комбинезон"
+                required
+              />
             </div>
             <div>
               <Label>Slug</Label>

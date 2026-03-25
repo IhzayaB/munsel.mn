@@ -223,15 +223,9 @@ export default function EditProductPage() {
         <Card>
           <CardHeader><CardTitle>Үндсэн мэдээлэл</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Нэр (Англи)</Label>
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-              </div>
-              <div>
-                <Label>Нэр (Монгол)</Label>
-                <Input value={form.nameMn} onChange={(e) => setForm({ ...form, nameMn: e.target.value })} required />
-              </div>
+            <div>
+              <Label>Нэр</Label>
+              <Input value={form.nameMn} onChange={(e) => setForm({ ...form, nameMn: e.target.value, name: e.target.value })} required />
             </div>
             <div>
               <Label>Slug</Label>
@@ -252,15 +246,9 @@ export default function EditProductPage() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Тайлбар (Англи)</Label>
-                <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} />
-              </div>
-              <div>
-                <Label>Тайлбар (Монгол)</Label>
-                <Textarea value={form.descriptionMn} onChange={(e) => setForm({ ...form, descriptionMn: e.target.value })} rows={3} />
-              </div>
+            <div>
+              <Label>Тайлбар</Label>
+              <Textarea value={form.descriptionMn} onChange={(e) => setForm({ ...form, descriptionMn: e.target.value, description: e.target.value })} rows={3} />
             </div>
           </CardContent>
         </Card>
@@ -286,15 +274,9 @@ export default function EditProductPage() {
         <Card>
           <CardHeader><CardTitle>Дэлгэрэнгүй</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Материал (Англи)</Label>
-                <Input value={form.material} onChange={(e) => setForm({ ...form, material: e.target.value })} />
-              </div>
-              <div>
-                <Label>Материал (Монгол)</Label>
-                <Input value={form.materialMn} onChange={(e) => setForm({ ...form, materialMn: e.target.value })} />
-              </div>
+            <div>
+              <Label>Материал</Label>
+              <Input value={form.materialMn} onChange={(e) => setForm({ ...form, materialMn: e.target.value, material: e.target.value })} />
             </div>
             <div>
               <Label>Насны ангилал</Label>
@@ -334,12 +316,8 @@ export default function EditProductPage() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs">Өнгө (Англи)</Label>
-                  <Input value={variant.color} onChange={(e) => updateVariant(i, "color", e.target.value)} />
-                </div>
-                <div>
                   <Label className="text-xs">Өнгө</Label>
-                  <Input value={variant.colorMn} onChange={(e) => updateVariant(i, "colorMn", e.target.value)} />
+                  <Input value={variant.colorMn} onChange={(e) => { updateVariant(i, "colorMn", e.target.value); updateVariant(i, "color", e.target.value); }} />
                 </div>
                 <div>
                   <Label className="text-xs">Нөөц</Label>
