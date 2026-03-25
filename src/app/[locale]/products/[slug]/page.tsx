@@ -7,15 +7,6 @@ import type { Metadata } from "next";
 
 export const revalidate = 60;
 
-// Pre-generate product pages at build time
-export async function generateStaticParams() {
-  const allProducts = await db.query.products.findMany({
-    where: eq(products.active, true),
-    columns: { slug: true },
-  });
-  return allProducts.map((p) => ({ slug: p.slug }));
-}
-
 export async function generateMetadata({
   params,
 }: {

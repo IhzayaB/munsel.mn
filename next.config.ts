@@ -4,7 +4,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["cloudinary"],
+  serverExternalPackages: ["cloudinary", "postgres"],
   images: {
     remotePatterns: [
       {
@@ -14,9 +14,6 @@ const nextConfig: NextConfig = {
     ],
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
-  },
-  experimental: {
-    optimizeCss: true,
   },
   async headers() {
     return [
