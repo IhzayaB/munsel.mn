@@ -20,4 +20,4 @@ export function generateOrderNumber(): string {
 }
 
 export const FREE_SHIPPING_THRESHOLD = 50000;
-export const SHIPPING_COST = 5000;
+export const SHIPPING_COST = 7000;

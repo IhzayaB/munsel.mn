@@ -17,6 +17,10 @@ export interface CartItem {
 
 interface CartState {
   items: CartItem[];
+  shippingCost: number;
+  freeShippingThreshold: number;
+  _settingsFetched: boolean;
+  fetchShippingSettings: () => Promise<void>;
   addItem: (item: CartItem) => void;
   removeItem: (productId: string, variantId?: string) => void;
   updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
@@ -31,6 +35,26 @@ export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
+      shippingCost: SHIPPING_COST,
+      freeShippingThreshold: FREE_SHIPPING_THRESHOLD,
+      _settingsFetched: false,
+
+      fetchShippingSettings: async () => {
+        if (get()._settingsFetched) return;
+        try {
+          const res = await fetch("/api/settings/public");
+          if (res.ok) {
+            const data = await res.json();
+            set({
+              shippingCost: Number(data.shippingCost) || SHIPPING_COST,
+              freeShippingThreshold: Number(data.freeShippingThreshold) || FREE_SHIPPING_THRESHOLD,
+              _settingsFetched: true,
+            });
+          }
+        } catch {
+          // keep defaults
+        }
+      },
 
       addItem: (item) =>
         set((state) => {
@@ -91,13 +115,14 @@ export const useCartStore = create<CartState>()(
 
       getShippingCost: () => {
         const total = get().getTotalPrice();
-        return total >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+        return total >= get().freeShippingThreshold ? 0 : get().shippingCost;
       },
 
       getGrandTotal: () => get().getTotalPrice() + get().getShippingCost(),
     }),
     {
       name: "pajama-cart",
+      partialize: (state) => ({ items: state.items }),
     }
   )
 );

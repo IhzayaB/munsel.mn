@@ -3,7 +3,8 @@ import { db } from "@/lib/db";
 import { orders, orderItems, products, productVariants, coupons } from "@/lib/db/schema";
 import { createQPayInvoice } from "@/lib/qpay";
 import { eq, inArray, sql } from "drizzle-orm";
-import { generateOrderNumber, FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from "@/lib/utils";
+import { generateOrderNumber } from "@/lib/utils";
+import { getShippingSettings } from "@/lib/settings";
 import { auth } from "@/lib/auth";
 import { rateLimitAsync, getRateLimitKey } from "@/lib/rate-limit";
 
@@ -84,7 +85,8 @@ export async function POST(req: NextRequest) {
       subtotal += realPrice * item.quantity;
     }
 
-    const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+    const { shippingCost: shippingFee, freeShippingThreshold } = await getShippingSettings();
+    const shippingCost = subtotal >= freeShippingThreshold ? 0 : shippingFee;
 
     // Apply coupon if provided
     let discount = 0;
