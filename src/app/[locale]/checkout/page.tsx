@@ -311,7 +311,7 @@ export default function CheckoutPage() {
             </div>
             <div className="flex justify-between">
               <span>{t("deliveryFee")}</span>
-              <span>{getShippingCost() === 0 ? t("free") : formatPrice(getShippingCost())}</span>
+              <span>{formatPrice(getShippingCost())}</span>
             </div>
             {appliedCoupon && (
               <div className="flex justify-between text-green-600">
@@ -665,11 +665,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between">
                 <span>{t("deliveryFee")}</span>
-                <span>
-                  {getShippingCost() === 0
-                    ? t("free")
-                    : formatPrice(getShippingCost())}
-                </span>
+                <span>{formatPrice(getShippingCost())}</span>
               </div>
               {appliedCoupon && (
                 <div className="flex justify-between text-green-600">

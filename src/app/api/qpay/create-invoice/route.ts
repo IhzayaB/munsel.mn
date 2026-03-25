@@ -85,8 +85,7 @@ export async function POST(req: NextRequest) {
       subtotal += realPrice * item.quantity;
     }
 
-    const { shippingCost: shippingFee, freeShippingThreshold } = await getShippingSettings();
-    const shippingCost = subtotal >= freeShippingThreshold ? 0 : shippingFee;
+    const { shippingCost } = await getShippingSettings();
 
     // Apply coupon if provided
     let discount = 0;

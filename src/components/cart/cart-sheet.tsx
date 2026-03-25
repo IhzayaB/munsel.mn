@@ -68,11 +68,7 @@ export function CartSheet({ children }: CartSheetProps) {
               </div>
               <div className="flex justify-between text-sm">
                 <span>{t("shipping")}</span>
-                <span>
-                  {getShippingCost() === 0
-                    ? t("freeShipping")
-                    : formatPrice(getShippingCost())}
-                </span>
+                <span>{formatPrice(getShippingCost())}</span>
               </div>
               <Separator />
               <div className="flex justify-between font-bold text-lg">
