@@ -129,11 +129,11 @@ export default function EditProductPage() {
 
     try {
       const res = await fetch("/api/upload", { method: "POST", body: formData });
-      if (!res.ok) throw new Error("Upload failed");
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Upload failed");
       setImages([...images, ...data.urls]);
-    } catch {
-      toast.error("Зураг оруулахад алдаа гарлаа");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Зураг оруулахад алдаа гарлаа");
     } finally {
       setUploading(false);
     }
