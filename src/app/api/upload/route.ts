@@ -3,6 +3,9 @@ import { auth } from "@/lib/auth";
 import { v2 as cloudinary } from "cloudinary";
 import { rateLimitAsync, getRateLimitKey } from "@/lib/rate-limit";
 
+// Allow larger request bodies for image uploads (default is 4.5MB on Vercel)
+export const maxDuration = 60; // seconds
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
