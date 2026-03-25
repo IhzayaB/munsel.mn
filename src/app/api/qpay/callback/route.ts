@@ -5,7 +5,7 @@ import { checkQPayPayment } from "@/lib/qpay";
 import { eq, sql } from "drizzle-orm";
 import { sendOrderConfirmation } from "@/lib/email";
 import { formatPrice } from "@/lib/utils";
-import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
+import { rateLimitAsync, getRateLimitKey } from "@/lib/rate-limit";
 
 async function handlePaymentConfirmed(orderNumber: string, paymentId: string) {
   // Idempotency guard: only process if order is still pending
@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
   try {
     // Rate limit: 20 checks per minute per IP (user polling)
     const rlKey = getRateLimitKey(req, "qpay-check");
-    const rl = rateLimit(rlKey, { limit: 20, windowMs: 60_000 });
+    const rl = await rateLimitAsync(rlKey, { limit: 20, windowMs: 60_000 });
     if (!rl.success) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
@@ -85,8 +85,20 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Check payment status via QPay
-    const paymentResult = await checkQPayPayment(invoiceId);
+    // Verify the invoice belongs to this order to prevent payment bypass
+    const order = await db.query.orders.findFirst({
+      where: eq(orders.orderNumber, orderNumber),
+    });
+
+    if (!order || order.qpayInvoiceId !== invoiceId) {
+      return NextResponse.json(
+        { error: "Invalid order/invoice pair" },
+        { status: 400 }
+      );
+    }
+
+    // Check payment status via QPay using the verified invoice ID
+    const paymentResult = await checkQPayPayment(order.qpayInvoiceId);
 
     if (paymentResult.count > 0) {
       const paymentInfo = paymentResult.rows[0];
@@ -113,7 +125,7 @@ export async function POST(req: NextRequest) {
   try {
     // Rate limit: 10 callbacks per minute per IP
     const rlKey = getRateLimitKey(req, "qpay-callback");
-    const rl = rateLimit(rlKey, { limit: 10, windowMs: 60_000 });
+    const rl = await rateLimitAsync(rlKey, { limit: 10, windowMs: 60_000 });
     if (!rl.success) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }

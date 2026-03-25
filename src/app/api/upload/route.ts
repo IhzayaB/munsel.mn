@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { v2 as cloudinary } from "cloudinary";
-import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
+import { rateLimitAsync, getRateLimitKey } from "@/lib/rate-limit";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
     // Rate limit: 30 uploads per minute
     const rlKey = getRateLimitKey(req, "upload");
-    const rl = rateLimit(rlKey, { limit: 30, windowMs: 60_000 });
+    const rl = await rateLimitAsync(rlKey, { limit: 30, windowMs: 60_000 });
     if (!rl.success) {
       return NextResponse.json({ error: "Too many uploads" }, { status: 429 });
     }

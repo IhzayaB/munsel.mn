@@ -34,9 +34,13 @@ export const metadata: Metadata = {
     images: ["/logo.png"],
   },
   icons: {
-    icon: "/logo.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/logo.png", type: "image/png", sizes: "512x512" },
+    ],
     apple: "/logo.png",
   },
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
@@ -54,6 +58,7 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
         <meta name="theme-color" content="#f5fafa" />
         <meta name="format-detection" content="telephone=no" />
+        <link rel="manifest" href="/manifest.json" />
       </head>
       <body className="min-h-full flex flex-col safe-bottom">{children}</body>
     </html>

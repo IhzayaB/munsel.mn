@@ -46,7 +46,7 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
       html: `
         <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f5fafa">
           <div style="text-align:center;padding:20px 0">
-            <img src="https://pajama-mn.vercel.app/logo.png" alt="Pajama.mn" width="60" height="60" style="border-radius:50%" />
+            <img src="${process.env.NEXT_PUBLIC_SITE_URL || 'https://pajama.mn'}/logo.png" alt="Pajama.mn" width="60" height="60" style="border-radius:50%" />
             <h1 style="color:#409ba0;margin:10px 0 0;font-size:24px">Pajama.mn</h1>
           </div>
           

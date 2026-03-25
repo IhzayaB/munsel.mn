@@ -2,9 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { coupons } from "@/lib/db/schema";
 import { eq, and, gt, or, isNull, sql } from "drizzle-orm";
+import { rateLimitAsync, getRateLimitKey } from "@/lib/rate-limit";
 
 // Check if any active coupons exist (no code param) or validate a specific coupon
 export async function GET(req: NextRequest) {
+  // Rate limit: 10 coupon checks per minute per IP
+  const rlKey = getRateLimitKey(req, "coupon-check");
+  const rl = await rateLimitAsync(rlKey, { limit: 10, windowMs: 60_000 });
+  if (!rl.success) {
+    return NextResponse.json({ error: "Хэт олон хүсэлт" }, { status: 429 });
+  }
+
   const code = req.nextUrl.searchParams.get("code");
   const subtotal = Number(req.nextUrl.searchParams.get("subtotal") || 0);
 

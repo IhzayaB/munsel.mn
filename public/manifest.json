@@ -1,0 +1,15 @@
+{
+  "name": "Pajama.mn — Нярайн хувцас",
+  "short_name": "Pajama.mn",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FDFAF6",
+  "theme_color": "#409ba0",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

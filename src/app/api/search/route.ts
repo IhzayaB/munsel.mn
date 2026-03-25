@@ -2,9 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { products } from "@/lib/db/schema";
 import { eq, or, ilike, and, desc } from "drizzle-orm";
+import { rateLimitAsync, getRateLimitKey } from "@/lib/rate-limit";
 
 export async function GET(req: NextRequest) {
   try {
+    // Rate limit: 30 searches per minute per IP
+    const rlKey = getRateLimitKey(req, "search");
+    const rl = await rateLimitAsync(rlKey, { limit: 30, windowMs: 60_000 });
+    if (!rl.success) {
+      return NextResponse.json([], { status: 429 });
+    }
+
     const q = req.nextUrl.searchParams.get("q")?.trim();
     if (!q || q.length < 1) {
       return NextResponse.json([]);
