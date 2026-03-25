@@ -43,7 +43,9 @@ export function HomeClient({ products, categories }: HomeClientProps) {
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-12">
-      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6">{t("title")}</h1>
+      <div className="mb-5 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">{t("title")}</h1>
+      </div>
 
       {/* Category pills */}
       {categories.length > 0 && (
@@ -76,14 +78,14 @@ export function HomeClient({ products, categories }: HomeClientProps) {
 
       {/* Products grid */}
       {filteredProducts.length === 0 ? (
-        <div className="text-center py-20">
-          <ShoppingBag className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-4" />
-          <p className="text-lg text-muted-foreground">
+        <div className="text-center py-16 sm:py-20">
+          <ShoppingBag className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground/40 mx-auto mb-4" />
+          <p className="text-base sm:text-lg text-muted-foreground">
             {tc("noCategoryProducts")}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 animate-fade-in-up">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

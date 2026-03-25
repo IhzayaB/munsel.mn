@@ -77,7 +77,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/products/${product.slug}`}>
-      <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden h-full">
+      <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden h-full border-transparent hover:border-primary/10">
         <div className="relative bg-secondary aspect-[3/4] flex items-center justify-center overflow-hidden">
           {product.images && product.images.length > 0 ? (
             <>
@@ -161,11 +161,11 @@ export function ProductCard({ product }: ProductCardProps) {
 
         <CardContent className="p-2.5 sm:p-4">
           {categoryName && (
-            <p className="text-[11px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">
+            <p className="text-[11px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1 truncate">
               {categoryName}
             </p>
           )}
-          <h3 className="font-semibold text-foreground mb-0.5 sm:mb-1 line-clamp-2 text-[13px] leading-tight sm:text-base">
+          <h3 className="font-semibold text-foreground mb-0.5 sm:mb-1 line-clamp-2 text-[13px] leading-tight sm:text-sm sm:leading-snug">
             {displayName}
           </h3>
           {product.ageRange && (

@@ -13,9 +13,9 @@ export function Footer() {
   return (
     <footer className="bg-[var(--baby-charcoal)] text-gray-300">
       <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-10">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
           {/* Brand + socials */}
-          <div className="col-span-2 md:col-span-1 flex flex-col items-center md:items-start gap-3 sm:gap-4">
+          <div className="col-span-2 md:col-span-2 flex flex-col items-center md:items-start gap-3 sm:gap-4">
             <div className="flex items-center gap-2">
               <Image
                 src="/logo.png"
@@ -34,7 +34,7 @@ export function Footer() {
                 href="https://www.instagram.com/pajama.mn/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="h-9 w-9 rounded-full bg-gray-700 flex items-center justify-center hover:bg-[var(--baby-peach)] transition-colors focus-visible:ring-2 focus-visible:ring-primary"
+                className="h-9 w-9 rounded-full bg-gray-700 flex items-center justify-center hover:bg-[var(--baby-peach)] hover:text-white transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary"
                 aria-label="Instagram"
               >
                 <Instagram className="h-4 w-4" />
@@ -43,7 +43,7 @@ export function Footer() {
                 href="https://www.facebook.com/Pajama.mn"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="h-9 w-9 rounded-full bg-gray-700 flex items-center justify-center hover:bg-[var(--baby-teal)] transition-colors focus-visible:ring-2 focus-visible:ring-primary"
+                className="h-9 w-9 rounded-full bg-gray-700 flex items-center justify-center hover:bg-[var(--baby-teal)] hover:text-white transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary"
                 aria-label="Facebook"
               >
                 <Facebook className="h-4 w-4" />
@@ -57,9 +57,8 @@ export function Footer() {
               {tf("quickLinks")}
             </h3>
             <nav className="flex flex-col gap-2 text-sm">
-              <Link href="/" className="hover:text-white transition-colors">{tc("home")}</Link>
-              <Link href="/products" className="hover:text-white transition-colors">{tc("products")}</Link>
-              <Link href="/cart" className="hover:text-white transition-colors">{tc("cart")}</Link>
+              <Link href="/" className="hover:text-white transition-colors duration-200">{tc("home")}</Link>
+              <Link href="/products" className="hover:text-white transition-colors duration-200">{tc("products")}</Link>
             </nav>
           </div>
 
@@ -70,13 +69,13 @@ export function Footer() {
             </h3>
             <ul className="flex flex-col gap-2 text-sm">
               <li>
-                <a href="tel:+97688029180" className="flex items-center gap-2 hover:text-white transition-colors">
+                <a href="tel:+97688029180" className="flex items-center gap-2 hover:text-white transition-colors duration-200">
                   <Phone className="h-4 w-4 shrink-0" />
                   <span>+976 8802-9180</span>
                 </a>
               </li>
               <li>
-                <a href="mailto:info@pajama.mn" className="flex items-center gap-2 hover:text-white transition-colors">
+                <a href="mailto:info@pajama.mn" className="flex items-center gap-2 hover:text-white transition-colors duration-200">
                   <Mail className="h-4 w-4 shrink-0" />
                   <span>info@pajama.mn</span>
                 </a>
