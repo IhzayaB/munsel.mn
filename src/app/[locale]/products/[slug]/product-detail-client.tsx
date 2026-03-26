@@ -140,7 +140,7 @@ export function ProductDetailClient({
       name: product.name,
       nameMn: product.nameMn,
       price: Number(product.price),
-      size: selectedVariant?.size,
+      size: selectedVariant?.size || undefined,
       color: selectedVariant?.color || undefined,
       quantity,
       image: product.images?.[0],
@@ -278,7 +278,7 @@ export function ProductDetailClient({
           </div>
 
           {/* Size selection */}
-          {product.variants && product.variants.length > 0 && (
+          {product.variants && product.variants.length > 0 && product.variants.some(v => v.size) && (
             <div className="mb-4 sm:mb-6">
               <div className="flex items-center justify-between mb-2">
                 <p className="font-medium">{t("selectSize")}</p>

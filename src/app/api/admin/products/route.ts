@@ -80,14 +80,14 @@ export async function POST(req: NextRequest) {
       await db.insert(productVariants).values(
         variants.map(
           (v: {
-            size: string;
+            size?: string;
             color?: string;
             colorMn?: string;
             stock: number;
             sku?: string;
           }) => ({
             productId: product.id,
-            size: v.size,
+            size: v.size || null,
             color: v.color || null,
             colorMn: v.colorMn || null,
             stock: v.stock || 0,

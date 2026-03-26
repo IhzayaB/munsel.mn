@@ -126,7 +126,7 @@ export const productVariants = pgTable("product_variants", {
   productId: uuid("product_id")
     .notNull()
     .references(() => products.id, { onDelete: "cascade" }),
-  size: varchar("size", { length: 20 }).notNull(),
+  size: varchar("size", { length: 20 }),
   color: varchar("color", { length: 50 }),
   colorMn: varchar("color_mn", { length: 50 }),
   stock: integer("stock").default(0).notNull(),

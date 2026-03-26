@@ -94,9 +94,9 @@ export async function PUT(
       await db.delete(productVariants).where(eq(productVariants.productId, id));
       if (variants.length > 0) {
         await db.insert(productVariants).values(
-          variants.map((v: { size: string; color?: string; colorMn?: string; stock: number; sku?: string }) => ({
+          variants.map((v: { size?: string; color?: string; colorMn?: string; stock: number; sku?: string }) => ({
             productId: id,
-            size: v.size,
+            size: v.size || null,
             color: v.color || null,
             colorMn: v.colorMn || null,
             stock: v.stock || 0,

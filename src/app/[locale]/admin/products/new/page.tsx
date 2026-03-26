@@ -24,7 +24,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 const SIZES = [
-  "NB", "0-3M", "3-6M", "6-9M", "9-12M",
+  "", "NB", "0-3M", "3-6M", "6-9M", "9-12M",
   "12-18M", "18-24M", "2T", "3T", "4T",
 ];
 
@@ -52,7 +52,7 @@ export default function NewProductPage() {
   });
 
   const [variants, setVariants] = useState([
-    { size: "NB", color: "", colorMn: "", stock: 10, sku: "" },
+    { size: "", color: "", colorMn: "", stock: 10, sku: "" },
   ]);
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export default function NewProductPage() {
   const addVariant = () => {
     setVariants([
       ...variants,
-      { size: "0-3M", color: "", colorMn: "", stock: 10, sku: "" },
+      { size: "", color: "", colorMn: "", stock: 10, sku: "" },
     ]);
   };
 
@@ -349,16 +349,16 @@ export default function NewProductPage() {
                 <div>
                   <Label className="text-xs">Хэмжээ</Label>
                   <Select
-                    value={variant.size}
-                    onValueChange={(v) => v && updateVariant(i, "size", v)}
+                    value={variant.size || "__none__"}
+                    onValueChange={(v) => updateVariant(i, "size", v === "__none__" ? "" : (v ?? ""))}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {SIZES.map((s) => (
-                        <SelectItem key={s} value={s}>
-                          {s}
+                        <SelectItem key={s || "__none__"} value={s || "__none__"}>
+                          {s || "Хэмжээгүй"}
                         </SelectItem>
                       ))}
                     </SelectContent>

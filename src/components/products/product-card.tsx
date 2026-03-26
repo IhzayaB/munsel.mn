@@ -25,7 +25,7 @@ interface ProductCardProps {
     featured?: boolean | null;
     ageRange?: string | null;
     category?: { name: string; nameMn: string } | null;
-    variants?: Array<{ id: string; size?: string; stock: number }> | null;
+    variants?: Array<{ id: string; size?: string | null; stock: number }> | null;
   };
 }
 
@@ -61,7 +61,7 @@ export function ProductCard({ product }: ProductCardProps) {
       name: product.name,
       nameMn: product.nameMn,
       price: Number(product.price),
-      size: firstVariant?.size,
+      size: firstVariant?.size || undefined,
       quantity: 1,
       image: product.images?.[0] ?? undefined,
       maxStock: firstVariant?.stock,
