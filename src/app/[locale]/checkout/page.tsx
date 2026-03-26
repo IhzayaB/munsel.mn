@@ -596,13 +596,27 @@ export default function CheckoutPage() {
                           href={bank.link}
                           className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-accent active:bg-accent transition-colors text-center"
                         >
-                          <img
-                            src={bank.logo}
-                            alt={bank.description}
-                            width={40}
-                            height={40}
-                            className="rounded-lg"
-                          />
+                          {bank.logo ? (
+                            <img
+                              src={bank.logo}
+                              alt={bank.description}
+                              width={40}
+                              height={40}
+                              className="rounded-lg"
+                              onError={(e) => {
+                                const target = e.currentTarget;
+                                target.style.display = "none";
+                                const fallback = target.nextElementSibling as HTMLElement;
+                                if (fallback) fallback.style.display = "flex";
+                              }}
+                            />
+                          ) : null}
+                          <div
+                            className="items-center justify-center w-10 h-10 rounded-lg bg-muted text-muted-foreground text-xs font-bold"
+                            style={{ display: bank.logo ? "none" : "flex" }}
+                          >
+                            {bank.description?.charAt(0) || bank.name?.charAt(0) || "?"}
+                          </div>
                           <span className="text-[10px] leading-tight text-muted-foreground line-clamp-2">
                             {bank.description}
                           </span>
