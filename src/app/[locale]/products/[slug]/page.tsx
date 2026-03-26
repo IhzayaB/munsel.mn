@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { products } from "@/lib/db/schema";
-import { eq, or } from "drizzle-orm";
+import { eq, or, sql } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { redirect } from "next/navigation";
 import { ProductDetailClient } from "./product-detail-client";
@@ -17,9 +17,11 @@ export async function generateMetadata({
   const { slug } = await params;
   const sanitized = sanitizeSlug(slug);
   const product = await db.query.products.findFirst({
-    where: sanitized && sanitized !== slug
-      ? or(eq(products.slug, slug), eq(products.slug, sanitized))
-      : eq(products.slug, slug),
+    where: or(
+      eq(products.slug, slug),
+      eq(sql`trim(${products.slug})`, slug),
+      ...(sanitized && sanitized !== slug ? [eq(products.slug, sanitized)] : [])
+    ),
   });
 
   if (!product) return { title: "Олдсонгүй" };
@@ -58,9 +60,11 @@ export default async function ProductDetailPage({
   const sanitized = sanitizeSlug(slug);
 
   const product = await db.query.products.findFirst({
-    where: sanitized && sanitized !== slug
-      ? or(eq(products.slug, slug), eq(products.slug, sanitized))
-      : eq(products.slug, slug),
+    where: or(
+      eq(products.slug, slug),
+      eq(sql`trim(${products.slug})`, slug),
+      ...(sanitized && sanitized !== slug ? [eq(products.slug, sanitized)] : [])
+    ),
     with: {
       category: true,
       variants: true,
@@ -71,9 +75,10 @@ export default async function ProductDetailPage({
     notFound();
   }
 
-  // Redirect to canonical slug URL if the current slug has spaces or bad characters
-  if (product.slug !== slug) {
-    redirect(`/products/${product.slug}`);
+  // Redirect to canonical (clean) slug URL if the current slug differs
+  const canonicalSlug = sanitizeSlug(product.slug);
+  if (canonicalSlug && canonicalSlug !== slug) {
+    redirect(`/products/${canonicalSlug}`);
   }
 
   // Get related products from same category (in stock only)

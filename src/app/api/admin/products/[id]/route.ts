@@ -76,7 +76,7 @@ export async function PUT(
     await db
       .update(products)
       .set({
-        name, nameMn, slug: cleanSlug || slug,
+        name, nameMn, slug: cleanSlug || (slug ? slug.trim() : undefined),
         description: description || null,
         descriptionMn: descriptionMn || null,
         price, compareAtPrice: compareAtPrice || null,
