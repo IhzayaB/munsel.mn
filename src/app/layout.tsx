@@ -23,15 +23,13 @@ export const metadata: Metadata = {
     title: "Pajama.mn — Нярайн хувцас",
     description: "Монголын шилдэг нярайн хувцасны онлайн дэлгүүр",
     siteName: "Pajama.mn",
-    images: [{ url: "/logo.png", width: 512, height: 512 }],
     locale: "mn_MN",
     type: "website",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Pajama.mn — Нярайн хувцас",
     description: "Монголын шилдэг нярайн хувцасны онлайн дэлгүүр",
-    images: ["/logo.png"],
   },
   icons: {
     icon: [

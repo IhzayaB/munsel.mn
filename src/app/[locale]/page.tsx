@@ -14,7 +14,6 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: "pajama.mn — Нярайн хувцас",
       description: "Монголын шилдэг нярай, бяцхан хүүхдийн хувцасны онлайн дэлгүүр",
-      images: [{ url: "/logo.png", width: 512, height: 512 }],
       siteName: "Pajama.mn",
     },
   };

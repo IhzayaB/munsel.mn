@@ -150,6 +150,8 @@ export const orders = pgTable("orders", {
   subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
   shippingCost: decimal("shipping_cost", { precision: 10, scale: 2 }).default("0"),
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
+  discount: decimal("discount", { precision: 10, scale: 2 }).default("0"),
+  couponCode: varchar("coupon_code", { length: 50 }),
   qpayInvoiceId: varchar("qpay_invoice_id", { length: 255 }),
   qpayPaymentId: varchar("qpay_payment_id", { length: 255 }),
   notes: text("notes"),

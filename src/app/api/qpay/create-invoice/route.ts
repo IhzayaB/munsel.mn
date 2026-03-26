@@ -129,6 +129,8 @@ export async function POST(req: NextRequest) {
         notes: sanitizedCustomer.notes,
         subtotal: subtotal.toString(),
         shippingCost: shippingCost.toString(),
+        discount: discount.toString(),
+        couponCode: couponCode ? String(couponCode).toUpperCase() : null,
         total: total.toString(),
         status: "pending",
       })

@@ -37,6 +37,8 @@ interface Order {
   total: string;
   subtotal: string;
   shippingCost: string;
+  discount?: string | null;
+  couponCode?: string | null;
   notes?: string | null;
   createdAt: string;
   items: OrderItem[];
@@ -286,6 +288,12 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
                         <span>Хүргэлт</span>
                         <span>{formatPrice(order.shippingCost)}</span>
                       </div>
+                      {order.discount && Number(order.discount) > 0 && (
+                        <div className="flex justify-between text-sm text-green-600">
+                          <span>Хөнгөлөлт{order.couponCode ? ` (${order.couponCode})` : ""}</span>
+                          <span>-{formatPrice(order.discount)}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between font-bold">
                         <span>Нийт</span>
                         <span>{formatPrice(order.total)}</span>
