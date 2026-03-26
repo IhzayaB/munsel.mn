@@ -27,7 +27,18 @@ export async function generateMetadata({
     description: desc || `${name} - нярайн хувцас`,
     openGraph: {
       title: name,
-      description: desc || undefined,
+      description: desc || `${name} - нярайн хувцас`,
+      type: "website",
+      siteName: "Pajama.mn",
+      locale: "mn_MN",
+      images: product.images?.[0]
+        ? [{ url: product.images[0], width: 1200, height: 1200, alt: name }]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: name,
+      description: desc || `${name} - нярайн хувцас`,
       images: product.images?.[0] ? [product.images[0]] : undefined,
     },
   };
