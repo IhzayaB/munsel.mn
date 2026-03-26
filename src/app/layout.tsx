@@ -26,14 +26,20 @@ export const metadata: Metadata = {
     locale: "mn_MN",
     type: "website",
     url: process.env.NEXT_PUBLIC_SITE_URL || "https://pajama.mn",
+    images: [
+      {
+        url: "/api/og",
+        width: 1200,
+        height: 630,
+        alt: "Pajama.mn — Нярайн хувцасны онлайн дэлгүүр",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Pajama.mn — Нярайн хувцас",
     description: "Монголын шилдэг нярайн хувцасны онлайн дэлгүүр",
-  },
-  other: {
-    "fb:app_id": "",
+    images: ["/api/og"],
   },
   icons: {
     icon: [

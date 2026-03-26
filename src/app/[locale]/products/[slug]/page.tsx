@@ -28,6 +28,7 @@ export async function generateMetadata({
 
   const name = product.nameMn;
   const desc = product.descriptionMn;
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://pajama.mn";
 
   return {
     title: `${name} — pajama.mn`,
@@ -38,15 +39,20 @@ export async function generateMetadata({
       type: "website",
       siteName: "Pajama.mn",
       locale: "mn_MN",
-      images: product.images?.[0]
-        ? [{ url: product.images[0], width: 1200, height: 630, alt: name }]
-        : undefined,
+      images: [
+        {
+          url: `${baseUrl}/api/og/product?slug=${encodeURIComponent(slug)}`,
+          width: 1200,
+          height: 630,
+          alt: name,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: name,
       description: desc || `${name} - нярайн хувцас`,
-      images: product.images?.[0] ? [product.images[0]] : undefined,
+      images: [`${baseUrl}/api/og/product?slug=${encodeURIComponent(slug)}`],
     },
   };
 }
