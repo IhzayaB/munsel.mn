@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { compressImage } from "@/lib/compress-image";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
@@ -101,7 +102,8 @@ export default function NewProductPage() {
     setUploading(true);
     const formData = new FormData();
     for (const file of Array.from(files)) {
-      formData.append("files", file);
+      const compressed = await compressImage(file);
+      formData.append("files", compressed);
     }
 
     try {
