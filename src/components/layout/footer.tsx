@@ -26,9 +26,6 @@ export function Footer() {
               />
               <span className="text-xl font-bold text-white">Pajama.mn</span>
             </div>
-            <p className="text-sm text-gray-400 text-center md:text-left max-w-xs">
-              {tf("aboutText")}
-            </p>
             <div className="flex gap-3">
               <a
                 href="https://www.instagram.com/pajama.mn/"
