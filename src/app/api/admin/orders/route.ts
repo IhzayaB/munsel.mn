@@ -4,6 +4,15 @@ import { orders } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
+const VALID_TRANSITIONS: Record<string, string[]> = {
+  pending: ["paid", "cancelled"],
+  paid: ["processing", "cancelled"],
+  processing: ["shipped", "cancelled"],
+  shipped: ["delivered"],
+  delivered: [],
+  cancelled: [],
+};
+
 export async function PATCH(req: NextRequest) {
   try {
     const session = await auth();
@@ -17,6 +26,23 @@ export async function PATCH(req: NextRequest) {
     const validStatuses = ["pending", "paid", "processing", "shipped", "delivered", "cancelled"];
     if (!orderId || !validStatuses.includes(status)) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    }
+
+    // Verify order exists
+    const order = await db.query.orders.findFirst({
+      where: eq(orders.id, orderId),
+    });
+    if (!order) {
+      return NextResponse.json({ error: "Захиалга олдсонгүй" }, { status: 404 });
+    }
+
+    // Validate status transition
+    const allowed = VALID_TRANSITIONS[order.status] || [];
+    if (!allowed.includes(status)) {
+      return NextResponse.json(
+        { error: `"${order.status}" төлвөөс "${status}" төлөвт шилжих боломжгүй` },
+        { status: 400 }
+      );
     }
 
     await db

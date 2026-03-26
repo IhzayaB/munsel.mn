@@ -93,11 +93,14 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderId, status: newStatus }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed");
+      }
       setOrders(orders.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o)));
       toast.success("Төлөв шинэчлэгдлээ");
-    } catch {
-      toast.error("Төлөв шинэчлэхэд алдаа гарлаа");
+    } catch (err) {
+      toast.error(err instanceof Error && err.message !== "Failed" ? err.message : "Төлөв шинэчлэхэд алдаа гарлаа");
     }
   };
 

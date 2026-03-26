@@ -12,17 +12,23 @@ export async function PATCH(req: NextRequest) {
     }
 
     const { updates } = await req.json();
-    if (!Array.isArray(updates)) {
-      return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+    if (!Array.isArray(updates) || updates.length === 0) {
+      return NextResponse.json({ error: "Invalid or empty data" }, { status: 400 });
     }
 
+    if (updates.length > 500) {
+      return NextResponse.json({ error: "Хэт олон шинэчлэлт (дээд тал нь 500)" }, { status: 400 });
+    }
+
+    let updatedCount = 0;
     for (const u of updates) {
       if (u.id && typeof u.stock === "number" && u.stock >= 0) {
-        await db.update(productVariants).set({ stock: Math.floor(u.stock) }).where(eq(productVariants.id, u.id));
+        await db.update(productVariants).set({ stock: Math.max(0, Math.floor(u.stock)) }).where(eq(productVariants.id, u.id));
+        updatedCount++;
       }
     }
 
-    return NextResponse.json({ success: true, count: updates.length });
+    return NextResponse.json({ success: true, count: updatedCount });
   } catch (error) {
     console.error("Bulk stock update error:", error);
     return NextResponse.json({ error: "Failed" }, { status: 500 });

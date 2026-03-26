@@ -58,6 +58,19 @@ export async function PUT(
       }
     }
 
+    // Verify product exists
+    const existing = await db.query.products.findFirst({
+      where: eq(products.id, id),
+    });
+    if (!existing) {
+      return NextResponse.json({ error: "Бүтээгдэхүүн олдсонгүй" }, { status: 404 });
+    }
+
+    // Validate price
+    if (price !== undefined && (isNaN(Number(price)) || Number(price) <= 0)) {
+      return NextResponse.json({ error: "Үнэ эерэг тоо байх ёстой" }, { status: 400 });
+    }
+
     await db
       .update(products)
       .set({

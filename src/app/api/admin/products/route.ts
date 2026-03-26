@@ -36,6 +36,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (isNaN(Number(price)) || Number(price) <= 0) {
+      return NextResponse.json(
+        { error: "Үнэ эерэг тоо байх ёстой" },
+        { status: 400 }
+      );
+    }
+
     // Check slug uniqueness
     const existingSlug = await db.query.products.findFirst({
       where: eq(products.slug, slug),
@@ -108,6 +115,7 @@ export async function GET() {
     }
     const allProducts = await db.query.products.findMany({
       with: { category: true, variants: true },
+      orderBy: (products, { desc }) => [desc(products.createdAt)],
     });
     return NextResponse.json(allProducts);
   } catch (error) {

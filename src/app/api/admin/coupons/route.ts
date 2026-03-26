@@ -27,9 +27,21 @@ export async function POST(req: NextRequest) {
     if (type !== "fixed" && type !== "percent") {
       return NextResponse.json({ error: "Type must be 'fixed' or 'percent'" }, { status: 400 });
     }
-    if (type === "percent" && (Number(value) < 0 || Number(value) > 100)) {
-      return NextResponse.json({ error: "Percent value must be 0-100" }, { status: 400 });
+    if (isNaN(Number(value)) || Number(value) <= 0) {
+      return NextResponse.json({ error: "Утга эерэг тоо байх ёстой" }, { status: 400 });
     }
+    if (type === "percent" && Number(value) > 100) {
+      return NextResponse.json({ error: "Хувийн утга 0-100 байх ёстой" }, { status: 400 });
+    }
+
+    // Check for duplicate code
+    const existing = await db.query.coupons.findFirst({
+      where: eq(coupons.code, code.toUpperCase()),
+    });
+    if (existing) {
+      return NextResponse.json({ error: "Энэ код аль хэдийн бүртгэгдсэн байна" }, { status: 409 });
+    }
+
     const [coupon] = await db.insert(coupons).values({
       code: code.toUpperCase(),
       type,
@@ -53,7 +65,9 @@ export async function PATCH(req: NextRequest) {
     }
     const body = await req.json();
     const { id, active } = body;
-    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    if (!id || typeof active !== "boolean") {
+      return NextResponse.json({ error: "Missing id or invalid active value" }, { status: 400 });
+    }
     await db.update(coupons).set({ active }).where(eq(coupons.id, id));
     return NextResponse.json({ success: true });
   } catch (error) {
