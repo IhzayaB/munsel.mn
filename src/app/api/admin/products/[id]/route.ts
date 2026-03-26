@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { products, productVariants, orderItems } from "@/lib/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, and, ne, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
 // GET single product (admin only)
@@ -44,6 +44,19 @@ export async function PUT(
       price, compareAtPrice, material, materialMn,
       ageRange, featured, active, images, categoryId, variants,
     } = body;
+
+    // Check slug uniqueness (exclude current product)
+    if (slug) {
+      const existingSlug = await db.query.products.findFirst({
+        where: and(eq(products.slug, slug), ne(products.id, id)),
+      });
+      if (existingSlug) {
+        return NextResponse.json(
+          { error: "Slug аль хэдийн бүртгэгдсэн байна. Өөр нэр оруулна уу." },
+          { status: 409 }
+        );
+      }
+    }
 
     await db
       .update(products)

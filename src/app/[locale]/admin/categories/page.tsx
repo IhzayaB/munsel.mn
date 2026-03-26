@@ -22,9 +22,10 @@ interface Category {
   description?: string | null;
   descriptionMn?: string | null;
   image?: string | null;
+  priority: number;
 }
 
-const emptyForm = { name: "", nameMn: "", slug: "", description: "", descriptionMn: "", image: "" };
+const emptyForm = { name: "", nameMn: "", slug: "", description: "", descriptionMn: "", image: "", priority: 0 };
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -92,6 +93,7 @@ export default function AdminCategoriesPage() {
       description: cat.description || "",
       descriptionMn: cat.descriptionMn || "",
       image: cat.image || "",
+      priority: cat.priority ?? 0,
     });
   };
 
@@ -111,31 +113,37 @@ export default function AdminCategoriesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed");
+      }
       toast.success(editingId ? "Ангилал шинэчлэгдлээ!" : "Ангилал нэмэгдлээ!");
       cancelEdit();
       fetchCategories();
-    } catch {
-      toast.error("Алдаа гарлаа");
+    } catch (err) {
+      toast.error(err instanceof Error && err.message !== "Failed" ? err.message : "Алдаа гарлаа");
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`"${name}" ангиллыг устгах уу?`)) return;
+    if (!confirm(`"${name}" ангиллыг устгах уу? Энэ ангилалтай бүтээгдэхүүнүүд ангилалгүй болно.`)) return;
     try {
       const res = await fetch("/api/admin/categories", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed");
+      }
       toast.success("Ангилал устгагдлаа");
       if (editingId === id) cancelEdit();
       fetchCategories();
-    } catch {
-      toast.error("Ангилал устгахад алдаа гарлаа");
+    } catch (err) {
+      toast.error(err instanceof Error && err.message !== "Failed" ? err.message : "Ангилал устгахад алдаа гарлаа");
     }
   };
 
@@ -192,6 +200,15 @@ export default function AdminCategoriesPage() {
               <Label>Slug</Label>
               <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} required />
             </div>
+            <div>
+              <Label>Эрэмбэ (өндөр тоо = эхэнд харагдана)</Label>
+              <Input
+                type="number"
+                value={form.priority}
+                onChange={(e) => setForm({ ...form, priority: parseInt(e.target.value) || 0 })}
+                placeholder="0"
+              />
+            </div>
             <div className="flex gap-2">
               <Button type="submit" disabled={saving}>
                 {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -222,7 +239,7 @@ export default function AdminCategoriesPage() {
                     )}
                     <div className="min-w-0">
                       <p className="font-medium truncate">{cat.nameMn}</p>
-                      <p className="text-xs text-muted-foreground">{cat.name} • /{cat.slug}</p>
+                      <p className="text-xs text-muted-foreground">{cat.name} • /{cat.slug} • Эрэмбэ: {cat.priority}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">

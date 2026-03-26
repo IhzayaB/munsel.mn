@@ -131,12 +131,15 @@ export default function NewProductPage() {
         body: JSON.stringify({ ...form, images, variants }),
       });
 
-      if (!res.ok) throw new Error("Failed to create product");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to create product");
+      }
 
       toast.success("Бүтээгдэхүүн амжилттай үүсгэлээ!");
       router.push("/admin/products");
-    } catch {
-      toast.error("Бүтээгдэхүүн үүсгэхэд алдаа гарлаа");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Бүтээгдэхүүн үүсгэхэд алдаа гарлаа");
     } finally {
       setLoading(false);
     }
@@ -226,13 +229,14 @@ export default function NewProductPage() {
             <div>
               <Label>Ангилал</Label>
               <Select
-                value={form.categoryId}
-                onValueChange={(v) => v && setForm({ ...form, categoryId: v })}
+                value={form.categoryId || "__none__"}
+                onValueChange={(v) => setForm({ ...form, categoryId: v === "__none__" ? "" : (v ?? "") })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Ангилал сонгох" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="__none__">Ангилалгүй</SelectItem>
                   {categories.map((c) => (
                     <SelectItem key={c.id} value={c.id}>{c.nameMn}</SelectItem>
                   ))}

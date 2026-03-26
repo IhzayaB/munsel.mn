@@ -154,12 +154,15 @@ export default function EditProductPage() {
         body: JSON.stringify({ ...form, images, variants }),
       });
 
-      if (!res.ok) throw new Error("Failed to update product");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to update product");
+      }
 
       toast.success("Бүтээгдэхүүн амжилттай шинэчлэгдлээ!");
       router.push("/admin/products");
-    } catch {
-      toast.error("Бүтээгдэхүүн шинэчлэхэд алдаа гарлаа");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Бүтээгдэхүүн шинэчлэхэд алдаа гарлаа");
     } finally {
       setLoading(false);
     }
@@ -234,11 +237,12 @@ export default function EditProductPage() {
 
             <div>
               <Label>Ангилал</Label>
-              <Select value={form.categoryId} onValueChange={(v) => v && setForm({ ...form, categoryId: v })}>
+              <Select value={form.categoryId || "__none__"} onValueChange={(v) => setForm({ ...form, categoryId: v === "__none__" ? "" : (v ?? "") })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Ангилал сонгох" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="__none__">Ангилалгүй</SelectItem>
                   {categories.map((c) => (
                     <SelectItem key={c.id} value={c.id}>{c.nameMn}</SelectItem>
                   ))}

@@ -61,12 +61,15 @@ export default function AdminCouponsPage() {
           maxUses: form.maxUses ? parseInt(form.maxUses) : null,
         }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed");
+      }
       toast.success("Купон нэмэгдлээ!");
       setForm({ code: "", type: "percent", value: "", minOrderAmount: "", maxUses: "", expiresAt: "" });
       fetchCoupons();
-    } catch {
-      toast.error("Купон нэмэхэд алдаа гарлаа");
+    } catch (err) {
+      toast.error(err instanceof Error && err.message !== "Failed" ? err.message : "Купон нэмэхэд алдаа гарлаа");
     } finally {
       setSaving(false);
     }

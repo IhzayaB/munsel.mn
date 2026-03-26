@@ -9,6 +9,7 @@ interface Category {
   id: string;
   name: string;
   nameMn: string;
+  priority?: number;
 }
 
 interface Product {

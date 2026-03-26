@@ -91,6 +91,7 @@ export const categories = pgTable("categories", {
   description: text("description"),
   descriptionMn: text("description_mn"),
   image: text("image"),
+  priority: integer("priority").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -104,7 +105,7 @@ export const products = pgTable("products", {
   descriptionMn: text("description_mn"),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   compareAtPrice: decimal("compare_at_price", { precision: 10, scale: 2 }),
-  categoryId: uuid("category_id").references(() => categories.id),
+  categoryId: uuid("category_id").references(() => categories.id, { onDelete: "set null" }),
   images: jsonb("images").$type<string[]>().default([]),
   featured: boolean("featured").default(false),
   active: boolean("active").default(true),

@@ -33,7 +33,9 @@ export default async function HomePage() {
     return p.variants.some((v: ProductVariant) => v.stock > 0);
   });
 
-  const allCategories = await db.query.categories.findMany();
+  const allCategories = await db.query.categories.findMany({
+    orderBy: [desc(categories.priority)],
+  });
 
   const jsonLd = {
     "@context": "https://schema.org",

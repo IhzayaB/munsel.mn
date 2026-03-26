@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { products, productVariants } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
@@ -32,6 +33,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
+      );
+    }
+
+    // Check slug uniqueness
+    const existingSlug = await db.query.products.findFirst({
+      where: eq(products.slug, slug),
+    });
+    if (existingSlug) {
+      return NextResponse.json(
+        { error: "Slug аль хэдийн бүртгэгдсэн байна. Өөр нэр оруулна уу." },
+        { status: 409 }
       );
     }
 

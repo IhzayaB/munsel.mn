@@ -15,6 +15,13 @@
       "when": 1774424586896,
       "tag": "0001_tough_lizard",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774490298128,
+      "tag": "0002_add_category_priority",
+      "breakpoints": true
     }
   ]
 }
