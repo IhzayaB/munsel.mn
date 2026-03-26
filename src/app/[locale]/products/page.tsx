@@ -11,6 +11,18 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Бүтээгдэхүүн — pajama.mn",
     description: "Нярайн хувцас, комбинезон, малгай болон бусад бүтээгдэхүүнүүд",
+    openGraph: {
+      title: "Бүтээгдэхүүн — pajama.mn",
+      description: "Нярайн хувцас, комбинезон, малгай болон бусад бүтээгдэхүүнүүд",
+      siteName: "Pajama.mn",
+      locale: "mn_MN",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Бүтээгдэхүүн — pajama.mn",
+      description: "Нярайн хувцас, комбинезон, малгай болон бусад бүтээгдэхүүнүүд",
+    },
   };
 }
 

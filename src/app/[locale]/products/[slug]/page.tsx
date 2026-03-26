@@ -39,7 +39,7 @@ export async function generateMetadata({
       siteName: "Pajama.mn",
       locale: "mn_MN",
       images: product.images?.[0]
-        ? [{ url: product.images[0], width: 1200, height: 1200, alt: name }]
+        ? [{ url: product.images[0], width: 1200, height: 630, alt: name }]
         : undefined,
     },
     twitter: {

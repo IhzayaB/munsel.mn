@@ -15,6 +15,14 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "pajama.mn — Нярайн хувцас",
       description: "Монголын шилдэг нярай, бяцхан хүүхдийн хувцасны онлайн дэлгүүр",
       siteName: "Pajama.mn",
+      locale: "mn_MN",
+      type: "website",
+      url: process.env.NEXT_PUBLIC_SITE_URL || "https://pajama.mn",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "pajama.mn — Нярайн хувцас",
+      description: "Монголын шилдэг нярай, бяцхан хүүхдийн хувцасны онлайн дэлгүүр",
     },
   };
 }
