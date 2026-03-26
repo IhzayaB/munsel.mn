@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { products, productVariants, orderItems } from "@/lib/db/schema";
 import { eq, and, ne, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { sanitizeSlug } from "@/lib/utils";
 
 // GET single product (admin only)
 export async function GET(
@@ -45,10 +46,11 @@ export async function PUT(
       ageRange, featured, active, images, categoryId, variants,
     } = body;
 
-    // Check slug uniqueness (exclude current product)
-    if (slug) {
+    // Sanitize and check slug uniqueness (exclude current product)
+    const cleanSlug = slug ? sanitizeSlug(slug) : undefined;
+    if (cleanSlug) {
       const existingSlug = await db.query.products.findFirst({
-        where: and(eq(products.slug, slug), ne(products.id, id)),
+        where: and(eq(products.slug, cleanSlug), ne(products.id, id)),
       });
       if (existingSlug) {
         return NextResponse.json(
@@ -74,7 +76,7 @@ export async function PUT(
     await db
       .update(products)
       .set({
-        name, nameMn, slug,
+        name, nameMn, slug: cleanSlug || slug,
         description: description || null,
         descriptionMn: descriptionMn || null,
         price, compareAtPrice: compareAtPrice || null,

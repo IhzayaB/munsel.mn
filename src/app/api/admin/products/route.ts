@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { products, productVariants } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { sanitizeSlug } from "@/lib/utils";
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,6 +37,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Sanitize slug
+    const cleanSlug = sanitizeSlug(slug);
+    if (!cleanSlug) {
+      return NextResponse.json(
+        { error: "Slug буруу байна" },
+        { status: 400 }
+      );
+    }
+
     if (isNaN(Number(price)) || Number(price) <= 0) {
       return NextResponse.json(
         { error: "Үнэ эерэг тоо байх ёстой" },
@@ -45,7 +55,7 @@ export async function POST(req: NextRequest) {
 
     // Check slug uniqueness
     const existingSlug = await db.query.products.findFirst({
-      where: eq(products.slug, slug),
+      where: eq(products.slug, cleanSlug),
     });
     if (existingSlug) {
       return NextResponse.json(
@@ -60,7 +70,7 @@ export async function POST(req: NextRequest) {
       .values({
         name,
         nameMn,
-        slug,
+        slug: cleanSlug,
         description: description || null,
         descriptionMn: descriptionMn || null,
         price,

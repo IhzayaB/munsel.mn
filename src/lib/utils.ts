@@ -19,5 +19,23 @@ export function generateOrderNumber(): string {
   return `${prefix}-${id}`;
 }
 
+export function sanitizeSlug(value: string): string {
+  const map: Record<string, string> = {
+    а: "a", б: "b", в: "v", г: "g", д: "d", е: "ye", ё: "yo",
+    ж: "j", з: "z", и: "i", й: "i", к: "k", л: "l", м: "m",
+    н: "n", о: "o", ө: "u", п: "p", р: "r", с: "s", т: "t",
+    у: "u", ү: "u", ф: "f", х: "kh", ц: "ts", ч: "ch",
+    ш: "sh", щ: "sh", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya",
+  };
+  return value
+    .toLowerCase()
+    .trim()
+    .split("")
+    .map((c) => map[c] ?? c)
+    .join("")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 export const FREE_SHIPPING_THRESHOLD = 50000;
 export const SHIPPING_COST = 7000;

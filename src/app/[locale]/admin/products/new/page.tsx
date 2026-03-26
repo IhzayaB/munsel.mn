@@ -221,7 +221,7 @@ export default function NewProductPage() {
               <Input
                 value={form.slug}
                 onChange={(e) =>
-                  setForm({ ...form, slug: e.target.value })
+                  setForm({ ...form, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-|-$/g, "") })
                 }
                 placeholder="soft-cotton-onesie"
                 required

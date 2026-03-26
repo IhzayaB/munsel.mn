@@ -1,9 +1,11 @@
 import { db } from "@/lib/db";
 import { products } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { ProductDetailClient } from "./product-detail-client";
 import type { Metadata } from "next";
+import { sanitizeSlug } from "@/lib/utils";
 
 export const revalidate = 60;
 
@@ -13,8 +15,11 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  const sanitized = sanitizeSlug(slug);
   const product = await db.query.products.findFirst({
-    where: eq(products.slug, slug),
+    where: sanitized && sanitized !== slug
+      ? or(eq(products.slug, slug), eq(products.slug, sanitized))
+      : eq(products.slug, slug),
   });
 
   if (!product) return { title: "Олдсонгүй" };
@@ -50,9 +55,12 @@ export default async function ProductDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const sanitized = sanitizeSlug(slug);
 
   const product = await db.query.products.findFirst({
-    where: eq(products.slug, slug),
+    where: sanitized && sanitized !== slug
+      ? or(eq(products.slug, slug), eq(products.slug, sanitized))
+      : eq(products.slug, slug),
     with: {
       category: true,
       variants: true,
@@ -61,6 +69,11 @@ export default async function ProductDetailPage({
 
   if (!product) {
     notFound();
+  }
+
+  // Redirect to canonical slug URL if the current slug has spaces or bad characters
+  if (product.slug !== slug) {
+    redirect(`/products/${product.slug}`);
   }
 
   // Get related products from same category (in stock only)

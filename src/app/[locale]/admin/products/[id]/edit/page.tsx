@@ -234,7 +234,7 @@ export default function EditProductPage() {
             </div>
             <div>
               <Label>Slug</Label>
-              <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} required />
+              <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-|-$/g, "") })} required />
             </div>
 
             <div>
