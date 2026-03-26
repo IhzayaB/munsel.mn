@@ -43,7 +43,14 @@ export function CartItemRow({ item, locale }: CartItemRowProps) {
           </p>
         )}
         <p className="font-semibold text-sm mt-1">
-          {formatPrice(item.price)}
+          {item.quantity > 1 ? (
+            <>
+              <span className="text-muted-foreground font-normal">{formatPrice(item.price)} × {item.quantity} = </span>
+              {formatPrice(item.price * item.quantity)}
+            </>
+          ) : (
+            formatPrice(item.price)
+          )}
         </p>
 
         <div className="flex items-center gap-2 mt-2">
