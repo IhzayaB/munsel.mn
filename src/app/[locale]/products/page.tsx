@@ -30,7 +30,9 @@ export default async function ProductsPage() {
     return p.variants.some((v: ProductVariant) => v.stock > 0);
   });
 
-  const allCategories = await db.query.categories.findMany();
+  const allCategories = await db.query.categories.findMany({
+    orderBy: [desc(categories.priority)],
+  });
 
   return (
     <ProductsClient
