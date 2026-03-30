@@ -6,12 +6,14 @@ const montserrat = Montserrat({
   variable: "--font-sans",
   subsets: ["latin", "cyrillic"],
   display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-geist-mono",
-  subsets: ["latin", "cyrillic"],
+  subsets: ["latin"],
   display: "swap",
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
@@ -67,6 +69,8 @@ export default function RootLayout({
         <meta name="theme-color" content="#f5fafa" />
         <meta name="format-detection" content="telephone=no" />
         <link rel="manifest" href="/manifest.json" />
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
       </head>
       <body className="min-h-full flex flex-col safe-bottom">{children}</body>
     </html>

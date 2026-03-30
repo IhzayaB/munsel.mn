@@ -1,11 +1,10 @@
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-import { Toaster } from "@/components/ui/sonner";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Providers } from "@/components/providers";
-import { BackToTop } from "@/components/back-to-top";
+import { BackToTop, Toaster } from "@/components/lazy-client";
 
 export default async function LocaleLayout({
   children,

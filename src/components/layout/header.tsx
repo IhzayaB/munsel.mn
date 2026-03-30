@@ -10,12 +10,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CartSheet } from "@/components/cart/cart-sheet";
-import { SearchOverlay } from "@/components/search-overlay";
 import { useCartStore } from "@/store/cart";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
+
+const CartSheet = lazy(() => import("@/components/cart/cart-sheet").then(m => ({ default: m.CartSheet })));
+const SearchOverlay = lazy(() => import("@/components/search-overlay").then(m => ({ default: m.SearchOverlay })));
 
 export function Header() {
   const t = useTranslations("common");
@@ -85,19 +86,27 @@ export function Header() {
           ) : null}
 
           {/* Cart */}
-          <CartSheet>
+          <Suspense fallback={
             <Button variant="ghost" size="icon" className="relative h-11 w-11 sm:h-10 sm:w-10" aria-label={t("cart")}>
               <ShoppingBag className="h-5 w-5" />
-              {mounted && totalItems > 0 && (
-                <Badge className={`absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] ${badgeBounce ? "cart-badge-bounce" : ""}`}>
-                  {totalItems}
-                </Badge>
-              )}
             </Button>
-          </CartSheet>
+          }>
+            <CartSheet>
+              <Button variant="ghost" size="icon" className="relative h-11 w-11 sm:h-10 sm:w-10" aria-label={t("cart")}>
+                <ShoppingBag className="h-5 w-5" />
+                {mounted && totalItems > 0 && (
+                  <Badge className={`absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] ${badgeBounce ? "cart-badge-bounce" : ""}`}>
+                    {totalItems}
+                  </Badge>
+                )}
+              </Button>
+            </CartSheet>
+          </Suspense>
         </div>
       </div>
-      <SearchOverlay open={searchOpen} onOpenChange={setSearchOpen} />
+      <Suspense fallback={null}>
+        <SearchOverlay open={searchOpen} onOpenChange={setSearchOpen} />
+      </Suspense>
     </header>
   );
 }
