@@ -44,10 +44,19 @@ export default async function HomePage() {
   });
 
   // Filter out products with zero total stock
-  const allProducts = allProductsRaw.filter((p: Product & { variants: ProductVariant[] }) => {
-    if (!p.variants || p.variants.length === 0) return true;
-    return p.variants.some((v: ProductVariant) => v.stock > 0);
-  });
+  const allProducts = allProductsRaw
+    .filter((p: Product & { variants: ProductVariant[] }) => {
+      if (!p.variants || p.variants.length === 0) return true;
+      return p.variants.some((v: ProductVariant) => v.stock > 0);
+    })
+    .sort((a: Product & { category: Category | null }, b: Product & { category: Category | null }) => {
+      // Sort by category priority (high → low), then featured, then newest
+      const priA = a.category?.priority ?? 0;
+      const priB = b.category?.priority ?? 0;
+      if (priB !== priA) return priB - priA;
+      if (a.featured !== b.featured) return a.featured ? -1 : 1;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
   const allCategories = await db.query.categories.findMany({
     orderBy: [desc(categories.priority)],
