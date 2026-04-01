@@ -1,14 +1,34 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { users } from "@/lib/db/schema";
-import { sql, desc } from "drizzle-orm";
+import { users, orders } from "@/lib/db/schema";
+import { sql, desc, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const session = await auth();
     if (!session || session.user?.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = req.nextUrl.searchParams.get("userId");
+
+    // If a specific user is requested, return their orders
+    if (userId) {
+      const userOrders = await db
+        .select({
+          id: orders.id,
+          orderNumber: orders.orderNumber,
+          status: orders.status,
+          total: orders.total,
+          createdAt: orders.createdAt,
+        })
+        .from(orders)
+        .where(eq(orders.userId, userId))
+        .orderBy(desc(orders.createdAt))
+        .limit(20);
+
+      return NextResponse.json({ orders: userOrders });
     }
 
     const customerList = await db

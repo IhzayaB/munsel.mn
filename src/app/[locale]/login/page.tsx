@@ -75,7 +75,7 @@ export default function LoginPage() {
         toast.error(t("invalidCredentials"));
       } else {
         router.push("/");
-        toast.success(t("welcome"));
+        toast.success(t("welcome"), { duration: 2000 });
       }
     } catch {
       toast.error(t("loginError"));

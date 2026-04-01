@@ -287,7 +287,7 @@ export default async function AdminDashboardPage() {
                 {lowStockItems.length > 0 && <AlertTriangle className="h-4 w-4 text-orange-500" />}
                 Бага үлдэгдэлтэй
               </CardTitle>
-              <Link href="/admin/products" className="text-xs text-primary hover:underline">
+              <Link href="/admin/stock" className="text-xs text-primary hover:underline">
                 Бүтээгдэхүүн →
               </Link>
             </div>

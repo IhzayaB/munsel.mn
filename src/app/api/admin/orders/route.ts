@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { orders } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
 export async function PATCH(req: NextRequest) {
@@ -36,5 +36,46 @@ export async function PATCH(req: NextRequest) {
   } catch (error) {
     console.error("Update order status error:", error);
     return NextResponse.json({ error: "Failed to update" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session || session.user?.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { orderIds } = body as { orderIds: string[] };
+
+    if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
+      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    }
+
+    // Safety: only allow deleting cancelled orders
+    const toDelete = await db.query.orders.findMany({
+      where: inArray(orders.id, orderIds),
+      columns: { id: true, status: true },
+    });
+
+    const nonCancelled = toDelete.filter((o) => o.status !== "cancelled");
+    if (nonCancelled.length > 0) {
+      return NextResponse.json(
+        { error: "Зөвхөн цуцлагдсан захиалгыг устгах боломжтой" },
+        { status: 400 }
+      );
+    }
+
+    const validIds = toDelete.map((o) => o.id);
+    if (validIds.length > 0) {
+      // orderItems cascade-deletes automatically
+      await db.delete(orders).where(inArray(orders.id, validIds));
+    }
+
+    return NextResponse.json({ success: true, deleted: validIds.length });
+  } catch (error) {
+    console.error("Delete orders error:", error);
+    return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
   }
 }

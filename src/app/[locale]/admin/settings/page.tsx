@@ -40,7 +40,7 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
     keys: [
       { key: "QPAY_INVOICE_CODE", label: "Invoice Code", placeholder: "" },
       { key: "QPAY_USERNAME", label: "Username", placeholder: "" },
-      { key: "QPAY_PASSWORD", label: "Password", placeholder: "" },
+      { key: "QPAY_PASSWORD", label: "Password", placeholder: "", type: "password" },
     ],
   },
 ];
@@ -113,6 +113,12 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       ))}
+
+      <div className="flex justify-end">
+        <Button onClick={handleSave} disabled={saving}>
+          {saving ? "Хадгалж байна..." : "Хадгалах"}
+        </Button>
+      </div>
     </div>
   );
 }

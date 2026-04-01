@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Plus, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
+import { Loader2, Plus, Trash2, ToggleLeft, ToggleRight, Pencil, X } from "lucide-react";
 import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils";
 
@@ -23,18 +23,21 @@ interface Coupon {
   expiresAt?: string | null;
 }
 
+const emptyForm = {
+  code: "",
+  type: "percent",
+  value: "",
+  minOrderAmount: "",
+  maxUses: "",
+  expiresAt: "",
+};
+
 export default function AdminCouponsPage() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({
-    code: "",
-    type: "percent",
-    value: "",
-    minOrderAmount: "",
-    maxUses: "",
-    expiresAt: "",
-  });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState(emptyForm);
 
   const fetchCoupons = async () => {
     try {
@@ -49,27 +52,64 @@ export default function AdminCouponsPage() {
 
   useEffect(() => { fetchCoupons(); }, []);
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const startEdit = (c: Coupon) => {
+    setEditingId(c.id);
+    setForm({
+      code: c.code,
+      type: c.type,
+      value: c.value,
+      minOrderAmount: c.minOrderAmount || "",
+      maxUses: c.maxUses?.toString() || "",
+      expiresAt: c.expiresAt ? new Date(c.expiresAt).toISOString().split("T")[0] : "",
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await fetch("/api/admin/coupons", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form,
-          maxUses: form.maxUses ? parseInt(form.maxUses) : null,
-        }),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Failed");
+      if (editingId) {
+        // Update
+        const res = await fetch("/api/admin/coupons", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: editingId,
+            ...form,
+            maxUses: form.maxUses ? parseInt(form.maxUses) : null,
+          }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || "Failed");
+        }
+        toast.success("Купон шинэчлэгдлээ!");
+      } else {
+        // Create
+        const res = await fetch("/api/admin/coupons", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...form,
+            maxUses: form.maxUses ? parseInt(form.maxUses) : null,
+          }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || "Failed");
+        }
+        toast.success("Купон нэмэгдлээ!");
       }
-      toast.success("Купон нэмэгдлээ!");
-      setForm({ code: "", type: "percent", value: "", minOrderAmount: "", maxUses: "", expiresAt: "" });
+      setEditingId(null);
+      setForm(emptyForm);
       fetchCoupons();
     } catch (err) {
-      toast.error(err instanceof Error && err.message !== "Failed" ? err.message : "Купон нэмэхэд алдаа гарлаа");
+      toast.error(err instanceof Error && err.message !== "Failed" ? err.message : "Алдаа гарлаа");
     } finally {
       setSaving(false);
     }
@@ -97,11 +137,14 @@ export default function AdminCouponsPage() {
         body: JSON.stringify({ id }),
       });
       setCoupons(coupons.filter((c) => c.id !== id));
+      if (editingId === id) cancelEdit();
       toast.success("Купон устгагдлаа");
     } catch {
       toast.error("Алдаа гарлаа");
     }
   };
+
+  const isExpired = (c: Coupon) => c.expiresAt && new Date(c.expiresAt) < new Date();
 
   if (loading) return <div className="py-16 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto" /></div>;
 
@@ -110,9 +153,18 @@ export default function AdminCouponsPage() {
       <h1 className="text-xl sm:text-2xl font-bold mb-6">Купон / Хямдрал</h1>
 
       <Card className="mb-8">
-        <CardHeader><CardTitle>Купон нэмэх</CardTitle></CardHeader>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>{editingId ? "Купон засах" : "Купон нэмэх"}</CardTitle>
+            {editingId && (
+              <Button variant="ghost" size="sm" onClick={cancelEdit}>
+                <X className="h-4 w-4 mr-1" /> Болих
+              </Button>
+            )}
+          </div>
+        </CardHeader>
         <CardContent>
-          <form onSubmit={handleCreate} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div>
                 <Label>Код</Label>
@@ -154,7 +206,11 @@ export default function AdminCouponsPage() {
             </div>
             <Button type="submit" disabled={saving}>
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Plus className="mr-2 h-4 w-4" /> Нэмэх
+              {editingId ? (
+                <><Pencil className="mr-2 h-4 w-4" /> Шинэчлэх</>
+              ) : (
+                <><Plus className="mr-2 h-4 w-4" /> Нэмэх</>
+              )}
             </Button>
           </form>
         </CardContent>
@@ -167,32 +223,38 @@ export default function AdminCouponsPage() {
             <p className="text-muted-foreground text-center py-4">Купон байхгүй</p>
           ) : (
             <div className="space-y-3">
-              {coupons.map((c) => (
-                <div key={c.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <code className="font-bold text-sm">{c.code}</code>
-                      <Badge variant={c.active ? "default" : "secondary"}>
-                        {c.active ? "Идэвхтэй" : "Идэвхгүй"}
-                      </Badge>
+              {coupons.map((c) => {
+                const expired = isExpired(c);
+                return (
+                  <div key={c.id} className={`flex items-center justify-between p-3 rounded-lg ${editingId === c.id ? "bg-primary/5 border border-primary" : "bg-secondary/50"}`}>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <code className="font-bold text-sm">{c.code}</code>
+                        <Badge variant={c.active && !expired ? "default" : "secondary"}>
+                          {expired ? "Хугацаа дууссан" : c.active ? "Идэвхтэй" : "Идэвхгүй"}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {c.type === "percent" ? `${c.value}%` : formatPrice(c.value)} хямдрал
+                        {c.minOrderAmount ? ` • Доод ${formatPrice(c.minOrderAmount)}` : ""}
+                        {c.maxUses ? ` • ${c.usedCount}/${c.maxUses} ашиглагдсан` : ` • ${c.usedCount} удаа`}
+                        {c.expiresAt ? ` • ${new Date(c.expiresAt).toLocaleDateString("mn-MN")} хүртэл` : ""}
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {c.type === "percent" ? `${c.value}%` : formatPrice(c.value)} хямдрал
-                      {c.minOrderAmount ? ` • Доод ${formatPrice(c.minOrderAmount)}` : ""}
-                      {c.maxUses ? ` • ${c.usedCount}/${c.maxUses} ашиглагдсан` : ` • ${c.usedCount} удаа`}
-                      {c.expiresAt ? ` • ${new Date(c.expiresAt).toLocaleDateString("mn-MN")} хүртэл` : ""}
-                    </p>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button variant="ghost" size="icon" onClick={() => startEdit(c)} title="Засах">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => toggleActive(c.id, c.active)}>
+                        {c.active ? <ToggleRight className="h-5 w-5 text-primary" /> : <ToggleLeft className="h-5 w-5" />}
+                      </Button>
+                      <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(c.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Button variant="ghost" size="icon" onClick={() => toggleActive(c.id, c.active)}>
-                      {c.active ? <ToggleRight className="h-5 w-5 text-primary" /> : <ToggleLeft className="h-5 w-5" />}
-                    </Button>
-                    <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(c.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>

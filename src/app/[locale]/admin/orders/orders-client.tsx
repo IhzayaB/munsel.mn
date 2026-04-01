@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Download, Trash2, Calendar } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -60,8 +60,12 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "highest" | "lowest">("newest");
   const [page, setPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
 
   const statusColor = (status: string) =>
     STATUSES.find((s) => s.value === status)?.color || "bg-gray-100 text-gray-700";
@@ -70,6 +74,16 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
     let result = orders;
     if (statusFilter !== "all") {
       result = result.filter((o) => o.status === statusFilter);
+    }
+    if (dateFrom) {
+      const from = new Date(dateFrom);
+      from.setHours(0, 0, 0, 0);
+      result = result.filter((o) => new Date(o.createdAt) >= from);
+    }
+    if (dateTo) {
+      const to = new Date(dateTo);
+      to.setHours(23, 59, 59, 999);
+      result = result.filter((o) => new Date(o.createdAt) <= to);
     }
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -81,8 +95,17 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
           o.customerEmail.toLowerCase().includes(q)
       );
     }
+    // Sort
+    result = [...result].sort((a, b) => {
+      switch (sortOrder) {
+        case "oldest": return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case "highest": return Number(b.total) - Number(a.total);
+        case "lowest": return Number(a.total) - Number(b.total);
+        default: return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
     return result;
-  }, [orders, search, statusFilter]);
+  }, [orders, search, statusFilter, dateFrom, dateTo, sortOrder]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
@@ -140,6 +163,57 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
     }
   };
 
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!confirm("Энэ захиалгыг бүрмөсөн устгах уу?")) return;
+    try {
+      const res = await fetch("/api/admin/orders", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderIds: [orderId] }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed");
+      }
+      setOrders(orders.filter((o) => o.id !== orderId));
+      setSelectedIds((prev) => { const n = new Set(prev); n.delete(orderId); return n; });
+      toast.success("Захиалга устгагдлаа");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Устгахад алдаа гарлаа");
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    const cancelledIds = Array.from(selectedIds).filter(
+      (id) => orders.find((o) => o.id === id)?.status === "cancelled"
+    );
+    if (cancelledIds.length === 0) {
+      toast.error("Зөвхөн цуцлагдсан захиалгыг устгах боломжтой");
+      return;
+    }
+    if (!confirm(`${cancelledIds.length} цуцлагдсан захиалгыг бүрмөсөн устгах уу?`)) return;
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/admin/orders", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderIds: cancelledIds }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed");
+      }
+      const deletedSet = new Set(cancelledIds);
+      setOrders(orders.filter((o) => !deletedSet.has(o.id)));
+      setSelectedIds(new Set());
+      toast.success(`${cancelledIds.length} захиалга устгагдлаа`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Устгахад алдаа гарлаа");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const exportCSV = () => {
     const rows = [["Дугаар", "Нэр", "Утас", "И-мэйл", "Хаяг", "Хот", "Төлөв", "Нийт", "Огноо"]];
     filtered.forEach((o) => {
@@ -194,6 +268,40 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
             <Download className="mr-1 h-4 w-4" /> <span className="hidden sm:inline">CSV</span>
           </Button>
         </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5">
+            <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+            <Input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
+              className="h-9 w-[130px] text-xs"
+            />
+            <span className="text-xs text-muted-foreground">–</span>
+            <Input
+              type="date"
+              value={dateTo}
+              onChange={(e) => { setDateTo(e.target.value); setPage(1); }}
+              className="h-9 w-[130px] text-xs"
+            />
+            {(dateFrom || dateTo) && (
+              <Button variant="ghost" size="sm" className="h-9 text-xs px-2" onClick={() => { setDateFrom(""); setDateTo(""); setPage(1); }}>
+                Цэвэрлэх
+              </Button>
+            )}
+          </div>
+          <Select value={sortOrder} onValueChange={(v) => { if (v) setSortOrder(v as typeof sortOrder); }}>
+            <SelectTrigger className="w-[130px] h-9 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Сүүлийнх эхлээд</SelectItem>
+              <SelectItem value="oldest">Эртнийх эхлээд</SelectItem>
+              <SelectItem value="highest">Үнэ буурах</SelectItem>
+              <SelectItem value="lowest">Үнэ өсөх</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Bulk actions */}
@@ -205,6 +313,15 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
               {s.label}
             </Button>
           ))}
+          <Button
+            variant="destructive"
+            size="sm"
+            className="text-xs h-7 ml-1"
+            onClick={handleBulkDelete}
+            disabled={deleting}
+          >
+            <Trash2 className="mr-1 h-3 w-3" /> Устгах
+          </Button>
         </div>
       )}
 
@@ -298,6 +415,18 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
                         <span>Нийт</span>
                         <span>{formatPrice(order.total)}</span>
                       </div>
+                      {order.status === "cancelled" && (
+                        <div className="pt-3 border-t mt-2">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="w-full sm:w-auto text-xs"
+                            onClick={(e) => { e.stopPropagation(); handleDeleteOrder(order.id); }}
+                          >
+                            <Trash2 className="mr-1 h-3 w-3" /> Захиалга устгах
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

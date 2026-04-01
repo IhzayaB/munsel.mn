@@ -1,11 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState, useMemo } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatPrice } from "@/lib/utils";
-import { Search, Users } from "lucide-react";
+import { Search, Users, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Loader2, ArrowUpDown } from "lucide-react";
+
+interface CustomerOrder {
+  id: string;
+  orderNumber: string;
+  status: string;
+  total: string;
+  createdAt: string;
+}
 
 interface Customer {
   id: string;
@@ -18,10 +34,26 @@ interface Customer {
   totalSpent: string;
 }
 
+const STATUS_LABELS: Record<string, { label: string; color: string }> = {
+  pending: { label: "Хүлээгдэж буй", color: "bg-yellow-100 text-yellow-700" },
+  paid: { label: "Төлөгдсөн", color: "bg-green-100 text-green-700" },
+  processing: { label: "Бэлтгэж буй", color: "bg-blue-100 text-blue-700" },
+  shipped: { label: "Илгээсэн", color: "bg-indigo-100 text-indigo-700" },
+  delivered: { label: "Хүргэсэн", color: "bg-purple-100 text-purple-700" },
+  cancelled: { label: "Цуцлагдсан", color: "bg-red-100 text-red-700" },
+};
+
+const PAGE_SIZE = 20;
+
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState<"newest" | "orders" | "spent">("newest");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [customerOrders, setCustomerOrders] = useState<Record<string, CustomerOrder[]>>({});
+  const [loadingOrders, setLoadingOrders] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/customers")
@@ -33,86 +65,182 @@ export default function CustomersPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  const filtered = customers.filter((c) => {
-    const q = search.toLowerCase();
-    return (
-      (c.name || "").toLowerCase().includes(q) ||
-      c.email.toLowerCase().includes(q) ||
-      (c.phone || "").includes(q)
-    );
-  });
+  const filtered = useMemo(() => {
+    let result = customers;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (c) =>
+          (c.name || "").toLowerCase().includes(q) ||
+          c.email.toLowerCase().includes(q) ||
+          (c.phone || "").includes(q)
+      );
+    }
+    result = [...result].sort((a, b) => {
+      switch (sortBy) {
+        case "orders": return b.orderCount - a.orderCount;
+        case "spent": return Number(b.totalSpent) - Number(a.totalSpent);
+        default: return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
+    return result;
+  }, [customers, search, sortBy]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paginated = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const toggleExpand = async (customerId: string) => {
+    if (expandedId === customerId) {
+      setExpandedId(null);
+      return;
+    }
+    setExpandedId(customerId);
+    if (!customerOrders[customerId]) {
+      setLoadingOrders(customerId);
+      try {
+        const res = await fetch(`/api/admin/customers?userId=${customerId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setCustomerOrders((prev) => ({ ...prev, [customerId]: data.orders || [] }));
+        }
+      } catch { /* silent */ }
+      setLoadingOrders(null);
+    }
+  };
 
   if (loading) {
-    return <div className="p-6">Ачааллаж байна...</div>;
+    return <div className="py-16 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto" /></div>;
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Users className="h-6 w-6" /> Хэрэглэгчид
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2">
+          <Users className="h-5 w-5 sm:h-6 sm:w-6" /> Хэрэглэгчид
+          <Badge variant="secondary" className="text-xs">{customers.length}</Badge>
         </h1>
-        <Badge variant="secondary">{customers.length} хэрэглэгч</Badge>
-      </div>
-
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Нэр, и-мэйл, утсаар хайх..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
-        />
-      </div>
-
-      <Card>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-muted-foreground">
-                  <th className="text-left py-3 px-4 font-medium">Нэр</th>
-                  <th className="text-left py-3 px-4 font-medium">И-мэйл</th>
-                  <th className="text-left py-3 px-4 font-medium">Утас</th>
-                  <th className="text-left py-3 px-4 font-medium">Үүрэг</th>
-                  <th className="text-center py-3 px-4 font-medium">Захиалга</th>
-                  <th className="text-right py-3 px-4 font-medium">Нийт зарцуулсан</th>
-                  <th className="text-right py-3 px-4 font-medium">Бүртгэсэн</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="text-center py-8 text-muted-foreground">
-                      Хэрэглэгч олдсонгүй
-                    </td>
-                  </tr>
-                ) : (
-                  filtered.map((c) => (
-                    <tr key={c.id} className="border-b last:border-0 hover:bg-secondary/50">
-                      <td className="py-3 px-4 font-medium">{c.name || "—"}</td>
-                      <td className="py-3 px-4 text-muted-foreground">{c.email}</td>
-                      <td className="py-3 px-4">{c.phone || "—"}</td>
-                      <td className="py-3 px-4">
-                        <Badge variant={c.role === "admin" ? "default" : "secondary"}>
-                          {c.role === "admin" ? "Админ" : "Хэрэглэгч"}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-4 text-center">{c.orderCount}</td>
-                      <td className="py-3 px-4 text-right font-medium">
-                        {formatPrice(c.totalSpent)}
-                      </td>
-                      <td className="py-3 px-4 text-right text-muted-foreground text-xs">
-                        {new Date(c.createdAt).toLocaleDateString("mn-MN")}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1 sm:flex-none">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Нэр, и-мэйл, утас..."
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              className="pl-9 h-10 w-full sm:w-[220px]"
+            />
           </div>
-        </CardContent>
-      </Card>
+          <Select value={sortBy} onValueChange={(v) => { if (v) { setSortBy(v as typeof sortBy); setPage(1); } }}>
+            <SelectTrigger className="w-[130px] h-10 text-xs">
+              <ArrowUpDown className="h-3 w-3 mr-1" /> <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Шинэ эхлээд</SelectItem>
+              <SelectItem value="orders">Захиалгаар</SelectItem>
+              <SelectItem value="spent">Зарцуулсанаар</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {filtered.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-12 text-muted-foreground">
+            Хэрэглэгч олдсонгүй
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-2">
+          {paginated.map((c) => (
+            <Card key={c.id}>
+              <CardContent className="p-3 sm:p-4">
+                <div
+                  className="flex items-center justify-between gap-3 cursor-pointer"
+                  onClick={() => toggleExpand(c.id)}
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-medium text-sm">{c.name || "—"}</p>
+                      <Badge variant={c.role === "admin" ? "default" : "secondary"} className="text-[10px] px-1.5 py-0">
+                        {c.role === "admin" ? "Админ" : "Хэрэглэгч"}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">{c.email} {c.phone ? `• ${c.phone}` : ""}</p>
+                  </div>
+                  <div className="flex items-center gap-3 sm:gap-6 shrink-0 text-right">
+                    <div className="hidden sm:block">
+                      <p className="text-sm font-bold">{c.orderCount}</p>
+                      <p className="text-[10px] text-muted-foreground">захиалга</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold">{formatPrice(c.totalSpent)}</p>
+                      <p className="text-[10px] text-muted-foreground">зарцуулсан</p>
+                    </div>
+                    {expandedId === c.id ? (
+                      <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </div>
+                </div>
+
+                {expandedId === c.id && (
+                  <div className="mt-3 pt-3 border-t">
+                    <div className="flex gap-4 text-xs text-muted-foreground mb-3">
+                      <span>Бүртгэсэн: {new Date(c.createdAt).toLocaleDateString("mn-MN")}</span>
+                      <span>Захиалга: {c.orderCount}</span>
+                      {c.phone && <span>Утас: {c.phone}</span>}
+                    </div>
+                    {loadingOrders === c.id ? (
+                      <div className="flex items-center justify-center py-4">
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : customerOrders[c.id]?.length ? (
+                      <div className="space-y-1.5">
+                        <p className="text-xs font-medium text-muted-foreground mb-2">Захиалгын түүх</p>
+                        {customerOrders[c.id].map((o) => {
+                          const sc = STATUS_LABELS[o.status] || { label: o.status, color: "bg-gray-100 text-gray-700" };
+                          return (
+                            <div key={o.id} className="flex items-center justify-between text-sm py-1.5 px-2 bg-secondary/30 rounded">
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-xs">#{o.orderNumber}</span>
+                                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${sc.color}`}>{sc.label}</span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <span className="font-medium text-xs">{formatPrice(o.total)}</span>
+                                <span className="text-[10px] text-muted-foreground">{new Date(o.createdAt).toLocaleDateString("mn-MN")}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground text-center py-3">Захиалга байхгүй</p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-4">
+          <p className="text-sm text-muted-foreground">
+            {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filtered.length)} / {filtered.length}
+          </p>
+          <div className="flex items-center gap-1">
+            <Button variant="outline" size="icon" disabled={safePage <= 1} onClick={() => setPage(safePage - 1)}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm px-3">{safePage} / {totalPages}</span>
+            <Button variant="outline" size="icon" disabled={safePage >= totalPages} onClick={() => setPage(safePage + 1)}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
