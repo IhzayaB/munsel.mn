@@ -48,9 +48,8 @@ export async function sendOrderSms(data: OrderSmsData): Promise<void> {
 
   const body = [
     `Pajama.mn ✅`,
-    `${data.customerName}, #${data.orderNumber} захиалга ${data.total} амжилттай төлөгдлөө.`,
-    `Хүргэлтийн мэдээллийг бид тантай холбогдож мэдэгдэнэ.`,
-    `Баярлалаа!`,
+    `#${data.orderNumber} дугаартай захиалга амжилттай баталгаажлаа.`,
+    `Биднийг сонгосон танд баярлалаа.`,
   ].join("\n");
 
   const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
