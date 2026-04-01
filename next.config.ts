@@ -6,14 +6,11 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 const nextConfig: NextConfig = {
   serverExternalPackages: ["cloudinary", "postgres"],
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "res.cloudinary.com",
-      },
-    ],
-    formats: ["image/avif", "image/webp"],
-    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
+    // Custom loader: serves Cloudinary images directly from Cloudinary CDN
+    // with f_auto/q_auto/w_{size} transforms, bypassing Vercel Image Optimization.
+    // This eliminates all Vercel image transformation/cache usage.
+    loaderFile: "./src/lib/image-loader.ts",
+    // These control the srcSet widths Next.js generates (still relevant with custom loader)
     deviceSizes: [640, 750, 828, 1080, 1200],
     imageSizes: [48, 80, 160, 320, 480],
   },

@@ -11,7 +11,7 @@ import { useCartStore } from "@/store/cart";
 import { useWishlistStore } from "@/store/wishlist";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface ProductCardProps {
   product: {
@@ -37,10 +37,18 @@ export function ProductCard({ product }: ProductCardProps) {
   const toggleWishlist = useWishlistStore((s) => s.toggle);
   const isWished = useWishlistStore((s) => s.has(product.id));
   const [mounted, setMounted] = useState(false);
+  // Defer hover image loading until actual mouse interaction.
+  // Mobile: never loads (no mouseenter) → saves ~50% of product image requests.
+  // Desktop: loads on first hover, cached for subsequent hovers.
+  const [hoverReady, setHoverReady] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const enableHover = useCallback(() => {
+    if (!hoverReady) setHoverReady(true);
+  }, [hoverReady]);
 
   const hasDiscount =
     product.compareAtPrice &&
@@ -77,7 +85,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/products/${product.slug}`}>
-      <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden h-full border-transparent hover:border-primary/10">
+      <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden h-full border-transparent hover:border-primary/10" onMouseEnter={enableHover}>
         <div className="relative bg-secondary aspect-[3/4] flex items-center justify-center overflow-hidden">
           {product.images && product.images.length > 0 ? (
             <>
@@ -86,13 +94,13 @@ export function ProductCard({ product }: ProductCardProps) {
                 alt={displayName}
                 fill
                 className={`object-cover transition-all duration-500 ${
-                  product.images.length > 1
+                  hoverReady && product.images.length > 1
                     ? "group-hover:opacity-0 group-hover:scale-105"
                     : "group-hover:scale-105"
                 }`}
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               />
-              {product.images.length > 1 && (
+              {hoverReady && product.images.length > 1 && (
                 <Image
                   src={product.images[1]}
                   alt={displayName}

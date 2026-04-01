@@ -29,6 +29,7 @@ export function CartItemRow({ item, locale }: CartItemRowProps) {
             width={80}
             height={80}
             className="rounded-md object-cover w-full h-full"
+            sizes="96px"
           />
         ) : (
           <span className="text-2xl">👶</span>
