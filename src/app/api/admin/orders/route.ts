@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { orders } from "@/lib/db/schema";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, isNull } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
 export async function PATCH(req: NextRequest) {
@@ -69,8 +69,11 @@ export async function DELETE(req: NextRequest) {
 
     const validIds = toDelete.map((o) => o.id);
     if (validIds.length > 0) {
-      // orderItems cascade-deletes automatically
-      await db.delete(orders).where(inArray(orders.id, validIds));
+      // Soft-delete: mark as deleted instead of permanently removing
+      await db
+        .update(orders)
+        .set({ deletedAt: new Date(), updatedAt: new Date() })
+        .where(inArray(orders.id, validIds));
     }
 
     return NextResponse.json({ success: true, deleted: validIds.length });

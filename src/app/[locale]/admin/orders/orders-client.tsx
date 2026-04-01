@@ -145,6 +145,11 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
 
   const handleBulkStatus = async (newStatus: string) => {
     if (selectedIds.size === 0) return;
+    // Prevent accidentally cancelling many orders at once
+    if (newStatus === "cancelled" && selectedIds.size > 5) {
+      toast.error(`${selectedIds.size} захиалгыг нэг дор цуцлах боломжгүй. 5-аас бага сонгоно уу`);
+      return;
+    }
     try {
       await Promise.all(
         Array.from(selectedIds).map((id) =>
@@ -191,7 +196,12 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
       toast.error("Зөвхөн цуцлагдсан захиалгыг устгах боломжтой");
       return;
     }
-    if (!confirm(`${cancelledIds.length} цуцлагдсан захиалгыг бүрмөсөн устгах уу?`)) return;
+    const confirmText = `${cancelledIds.length} цуцлагдсан захиалгыг устгахдаа итгэлтэй байна уу?\n\nУстгахын тулд "УСТГАХ" гэж бичнэ үү:`;
+    const userInput = prompt(confirmText);
+    if (userInput !== "УСТГАХ") {
+      if (userInput !== null) toast.error('"УСТГАХ" гэж бичээгүй тул цуцлагдлаа');
+      return;
+    }
     setDeleting(true);
     try {
       const res = await fetch("/api/admin/orders", {

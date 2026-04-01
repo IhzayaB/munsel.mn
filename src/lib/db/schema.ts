@@ -155,6 +155,7 @@ export const orders = pgTable("orders", {
   qpayInvoiceId: varchar("qpay_invoice_id", { length: 255 }),
   qpayPaymentId: varchar("qpay_payment_id", { length: 255 }),
   notes: text("notes"),
+  deletedAt: timestamp("deleted_at", { mode: "date" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ([
