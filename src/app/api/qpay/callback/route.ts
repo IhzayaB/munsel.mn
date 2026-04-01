@@ -4,6 +4,7 @@ import { orders, orderItems, productVariants } from "@/lib/db/schema";
 import { checkQPayPayment } from "@/lib/qpay";
 import { eq, sql } from "drizzle-orm";
 import { sendOrderConfirmation } from "@/lib/email";
+import { sendOrderSms } from "@/lib/sms";
 import { formatPrice } from "@/lib/utils";
 import { rateLimitAsync, getRateLimitKey } from "@/lib/rate-limit";
 
@@ -62,6 +63,16 @@ async function handlePaymentConfirmed(orderNumber: string, paymentId: string) {
       total: formatPrice(order.total),
       shippingAddress: order.shippingAddress || "",
       city: order.city || "",
+    });
+  }
+
+  // Send SMS confirmation
+  if (order.customerPhone) {
+    await sendOrderSms({
+      orderNumber: order.orderNumber,
+      customerName: order.customerName,
+      customerPhone: order.customerPhone,
+      total: formatPrice(order.total),
     });
   }
 }
