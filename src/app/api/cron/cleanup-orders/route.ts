@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { orders, coupons } from "@/lib/db/schema";
-import { eq, and, lt, sql } from "drizzle-orm";
+import { eq, and, lt, sql, isNull } from "drizzle-orm";
 
 const STALE_MINUTES = 30;
 
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
   try {
     const cutoff = new Date(Date.now() - STALE_MINUTES * 60 * 1000);
 
-    // Find pending orders older than cutoff
+    // Find pending orders older than cutoff (exclude soft-deleted)
     const staleOrders = await db
       .select({
         id: orders.id,
@@ -26,7 +26,8 @@ export async function GET(req: NextRequest) {
       .where(
         and(
           eq(orders.status, "pending"),
-          lt(orders.createdAt, cutoff)
+          lt(orders.createdAt, cutoff),
+          isNull(orders.deletedAt)
         )
       );
 

@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { products, orders, orderItems, users, productVariants } from "@/lib/db/schema";
-import { count, eq, sql, desc, and, gte } from "drizzle-orm";
+import { count, eq, sql, desc, and, gte, isNull } from "drizzle-orm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -38,23 +38,24 @@ export default async function AdminDashboardPage() {
     dailyRevenue,
   ] = await Promise.all([
     db.select({ count: count() }).from(products),
-    db.select({ count: count() }).from(orders),
+    db.select({ count: count() }).from(orders).where(isNull(orders.deletedAt)),
     db.select({ count: count() }).from(users),
     db
       .select({ total: sql<string>`COALESCE(SUM(${orders.total}::numeric), 0)` })
       .from(orders)
-      .where(eq(orders.status, "paid")),
+      .where(and(eq(orders.status, "paid"), isNull(orders.deletedAt))),
     db
       .select({ count: count() })
       .from(orders)
-      .where(gte(orders.createdAt, sevenDaysAgo)),
+      .where(and(gte(orders.createdAt, sevenDaysAgo), isNull(orders.deletedAt))),
     db
       .select({ total: sql<string>`COALESCE(SUM(${orders.total}::numeric), 0)` })
       .from(orders)
-      .where(and(eq(orders.status, "paid"), gte(orders.createdAt, thirtyDaysAgo))),
+      .where(and(eq(orders.status, "paid"), gte(orders.createdAt, thirtyDaysAgo), isNull(orders.deletedAt))),
     db
       .select({ status: orders.status, count: count() })
       .from(orders)
+      .where(isNull(orders.deletedAt))
       .groupBy(orders.status),
     db
       .select({
@@ -81,6 +82,7 @@ export default async function AdminDashboardPage() {
       .orderBy(productVariants.stock)
       .limit(10),
     db.query.orders.findMany({
+      where: isNull(orders.deletedAt),
       orderBy: (orders, { desc }) => [desc(orders.createdAt)],
       limit: 8,
       with: { items: true },
@@ -92,7 +94,7 @@ export default async function AdminDashboardPage() {
         count: count(),
       })
       .from(orders)
-      .where(and(gte(orders.createdAt, sevenDaysAgo), eq(orders.status, "paid")))
+      .where(and(gte(orders.createdAt, sevenDaysAgo), eq(orders.status, "paid"), isNull(orders.deletedAt)))
       .groupBy(sql`TO_CHAR(${orders.createdAt}, 'MM/DD')`)
       .orderBy(sql`TO_CHAR(${orders.createdAt}, 'MM/DD')`),
   ]);

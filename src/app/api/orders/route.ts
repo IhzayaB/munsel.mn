@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { orders, orderItems } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, isNull } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
 export async function GET() {
@@ -12,7 +12,7 @@ export async function GET() {
     }
 
     const userOrders = await db.query.orders.findMany({
-      where: eq(orders.userId, session.user.id),
+      where: and(eq(orders.userId, session.user.id), isNull(orders.deletedAt)),
       with: { items: true },
       orderBy: [desc(orders.createdAt)],
     });
