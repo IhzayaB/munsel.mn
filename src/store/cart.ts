@@ -114,7 +114,9 @@ export const useCartStore = create<CartState>()(
         ),
 
       getShippingCost: () => {
-        return get().shippingCost;
+        const { shippingCost, freeShippingThreshold } = get();
+        const subtotal = get().getTotalPrice();
+        return subtotal >= freeShippingThreshold ? 0 : shippingCost;
       },
 
       getGrandTotal: () => get().getTotalPrice() + get().getShippingCost(),

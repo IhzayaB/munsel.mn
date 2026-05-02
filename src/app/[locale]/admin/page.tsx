@@ -65,6 +65,11 @@ export default async function AdminDashboardPage() {
         totalRevenue: sql<string>`SUM(${orderItems.price}::numeric * ${orderItems.quantity})`.as("total_revenue"),
       })
       .from(orderItems)
+      .innerJoin(orders, eq(orderItems.orderId, orders.id))
+      .where(and(
+        sql`${orders.status} IN ('paid', 'processing', 'shipped', 'delivered')`,
+        isNull(orders.deletedAt)
+      ))
       .groupBy(orderItems.productId, orderItems.name)
       .orderBy(sql`total_qty DESC`)
       .limit(5),

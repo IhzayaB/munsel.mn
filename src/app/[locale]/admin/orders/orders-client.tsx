@@ -151,18 +151,29 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
       return;
     }
     try {
-      await Promise.all(
-        Array.from(selectedIds).map((id) =>
-          fetch("/api/admin/orders", {
+      const results = await Promise.allSettled(
+        Array.from(selectedIds).map(async (id) => {
+          const res = await fetch("/api/admin/orders", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ orderId: id, status: newStatus }),
-          })
-        )
+          });
+          if (!res.ok) throw new Error(id);
+          return id;
+        })
       );
-      setOrders(orders.map((o) => (selectedIds.has(o.id) ? { ...o, status: newStatus } : o)));
+      const succeeded = results
+        .filter((r): r is PromiseFulfilledResult<string> => r.status === "fulfilled")
+        .map((r) => r.value);
+      const failedCount = results.filter((r) => r.status === "rejected").length;
+      const succeededSet = new Set(succeeded);
+      setOrders(orders.map((o) => (succeededSet.has(o.id) ? { ...o, status: newStatus } : o)));
       setSelectedIds(new Set());
-      toast.success(`${selectedIds.size} захиалгын төлөв шинэчлэгдлээ`);
+      if (failedCount > 0) {
+        toast.warning(`${succeeded.length} амжилттай, ${failedCount} алдаатай`);
+      } else {
+        toast.success(`${succeeded.length} захиалгын төлөв шинэчлэгдлээ`);
+      }
     } catch {
       toast.error("Алдаа гарлаа");
     }
@@ -239,7 +250,13 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
         new Date(o.createdAt).toLocaleDateString("mn-MN"),
       ]);
     });
-    const csv = rows.map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
+    // Escape CSV: double-quote internal quotes, prefix formula chars with tab
+    const escapeCSV = (val: string) => {
+      let escaped = val.replace(/"/g, '""');
+      if (/^[=+\-@\t\r]/.test(escaped)) escaped = "\t" + escaped;
+      return escaped;
+    };
+    const csv = rows.map((r) => r.map((c) => `"${escapeCSV(c)}"`).join(",")).join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

@@ -3,6 +3,9 @@ import { db } from "@/lib/db";
 import { storeSettings } from "@/lib/db/schema";
 import { auth } from "@/lib/auth";
 
+// Sensitive keys that should be masked in responses
+const SENSITIVE_KEYS = ["QPAY_PASSWORD", "QPAY_SECRET"];
+
 export async function GET() {
   try {
     const session = await auth();
@@ -11,7 +14,14 @@ export async function GET() {
     }
     const all = await db.select().from(storeSettings);
     const map: Record<string, string> = {};
-    all.forEach((s) => { map[s.key] = s.value; });
+    all.forEach((s) => {
+      if (SENSITIVE_KEYS.includes(s.key) && s.value) {
+        // Mask sensitive values: show only last 4 chars
+        map[s.key] = s.value.length > 4 ? "••••" + s.value.slice(-4) : "••••";
+      } else {
+        map[s.key] = s.value;
+      }
+    });
     return NextResponse.json(map);
   } catch (error) {
     console.error("Fetch settings error:", error);
@@ -36,7 +46,23 @@ export async function PUT(req: NextRequest) {
       ([key, value]) => key.trim() && typeof value === "string"
     );
 
-    for (const [key, value] of entries) {
+    // Allowed settings keys whitelist
+    const ALLOWED_KEYS = [
+      "SHIPPING_COST", "FREE_SHIPPING_THRESHOLD",
+      "QPAY_INVOICE_CODE", "QPAY_USERNAME", "QPAY_PASSWORD",
+      "STORE_NAME", "STORE_PHONE", "STORE_EMAIL", "STORE_ADDRESS",
+    ];
+
+    const validEntries = entries.filter(([key]) => ALLOWED_KEYS.includes(key.trim()));
+    if (validEntries.length === 0 && entries.length > 0) {
+      return NextResponse.json({ error: "Invalid settings keys" }, { status: 400 });
+    }
+
+    for (const [key, value] of validEntries) {
+      // Don't overwrite sensitive fields with masked placeholder values
+      if (SENSITIVE_KEYS.includes(key.trim()) && value.startsWith("••••")) {
+        continue;
+      }
       await db
         .insert(storeSettings)
         .values({ key: key.trim(), value: value.trim() })

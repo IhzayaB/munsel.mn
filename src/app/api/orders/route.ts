@@ -15,6 +15,7 @@ export async function GET() {
       where: and(eq(orders.userId, session.user.id), isNull(orders.deletedAt)),
       with: { items: true },
       orderBy: [desc(orders.createdAt)],
+      limit: 50,
     });
 
     return NextResponse.json(userOrders);

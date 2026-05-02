@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { orders, orderItems, productVariants } from "@/lib/db/schema";
+import { orders, orderItems } from "@/lib/db/schema";
 import { checkQPayPayment } from "@/lib/qpay";
 import { eq, sql } from "drizzle-orm";
 import { sendOrderConfirmation } from "@/lib/email";
@@ -14,8 +14,8 @@ async function handlePaymentConfirmed(orderNumber: string, paymentId: string) {
     where: eq(orders.orderNumber, orderNumber),
   });
 
-  if (!existingOrder || existingOrder.status === "paid") {
-    return; // Already processed or not found
+  if (!existingOrder || existingOrder.status !== "pending") {
+    return; // Already processed, not found, or in a later state
   }
 
   // Update order status
@@ -36,15 +36,17 @@ async function handlePaymentConfirmed(orderNumber: string, paymentId: string) {
 
   if (!order) return;
 
-  // Decrement stock for each variant
+  // Decrement stock for each variant (atomic: only decrement if sufficient stock)
   for (const item of order.items) {
     if (item.variantId) {
-      await db
-        .update(productVariants)
-        .set({
-          stock: sql`GREATEST(${productVariants.stock} - ${item.quantity}, 0)`,
-        })
-        .where(eq(productVariants.id, item.variantId));
+      await db.execute(
+        sql`UPDATE product_variants SET stock = stock - ${item.quantity} WHERE id = ${item.variantId} AND stock >= ${item.quantity}`
+      );
+      // If stock was already 0, the WHERE clause prevents going negative
+      // (fallback: if stock < quantity, set to 0)
+      await db.execute(
+        sql`UPDATE product_variants SET stock = 0 WHERE id = ${item.variantId} AND stock < 0`
+      );
     }
   }
 

@@ -67,7 +67,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger }) {
       if (user) {
         // For OAuth users, look up role from DB
         if (account?.provider !== "credentials") {
@@ -81,6 +81,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           token.id = user.id;
         }
       }
+
+      // Refresh role from DB periodically (on token refresh or session update)
+      if (trigger === "update" || (!user && token.id)) {
+        const dbUser = await db.query.users.findFirst({
+          where: eq(users.id, token.id as string),
+          columns: { role: true },
+        });
+        if (dbUser) {
+          token.role = dbUser.role;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
