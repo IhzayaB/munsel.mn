@@ -73,38 +73,79 @@ export async function PUT(
       return NextResponse.json({ error: "Үнэ эерэг тоо байх ёстой" }, { status: 400 });
     }
 
+    // Build update object only with provided fields
+    const updateData: Record<string, unknown> = { updatedAt: new Date() };
+    if (name !== undefined) updateData.name = name;
+    if (nameMn !== undefined) updateData.nameMn = nameMn;
+    if (cleanSlug) updateData.slug = cleanSlug;
+    if (description !== undefined) updateData.description = description || null;
+    if (descriptionMn !== undefined) updateData.descriptionMn = descriptionMn || null;
+    if (price !== undefined) updateData.price = price;
+    if (compareAtPrice !== undefined) updateData.compareAtPrice = compareAtPrice || null;
+    if (material !== undefined) updateData.material = material || null;
+    if (materialMn !== undefined) updateData.materialMn = materialMn || null;
+    if (ageRange !== undefined) updateData.ageRange = ageRange || null;
+    if (featured !== undefined) updateData.featured = !!featured;
+    if (active !== undefined) updateData.active = !!active;
+    if (images !== undefined) updateData.images = images || [];
+    if (categoryId !== undefined) updateData.categoryId = categoryId || null;
+
     await db
       .update(products)
-      .set({
-        name, nameMn, slug: cleanSlug || (slug ? slug.trim() : undefined),
-        description: description || null,
-        descriptionMn: descriptionMn || null,
-        price, compareAtPrice: compareAtPrice || null,
-        material: material || null,
-        materialMn: materialMn || null,
-        ageRange: ageRange || null,
-        featured: featured || false,
-        active: active !== false,
-        images: images || [],
-        categoryId: categoryId || null,
-        updatedAt: new Date(),
-      })
+      .set(updateData)
       .where(eq(products.id, id));
 
-    // Replace variants
+    // Update variants (safely handle FK constraints from order_items)
     if (variants) {
-      await db.delete(productVariants).where(eq(productVariants.productId, id));
-      if (variants.length > 0) {
-        await db.insert(productVariants).values(
-          variants.map((v: { size?: string; color?: string; colorMn?: string; stock: number; sku?: string }) => ({
+      // Get existing variants
+      const existingVariants = await db.query.productVariants.findMany({
+        where: eq(productVariants.productId, id),
+      });
+
+      const incomingIds = new Set(
+        variants
+          .filter((v: { id?: string }) => v.id)
+          .map((v: { id?: string }) => v.id)
+      );
+
+      // Delete variants that are no longer present (only if not referenced by orders)
+      for (const ev of existingVariants) {
+        if (!incomingIds.has(ev.id)) {
+          const referencedByOrder = await db.query.orderItems.findFirst({
+            where: eq(orderItems.variantId, ev.id),
+          });
+          if (!referencedByOrder) {
+            await db.delete(productVariants).where(eq(productVariants.id, ev.id));
+          } else {
+            // Set stock to 0 for discontinued variants still referenced by orders
+            await db.update(productVariants).set({ stock: 0 }).where(eq(productVariants.id, ev.id));
+          }
+        }
+      }
+
+      // Upsert incoming variants
+      for (const v of variants as Array<{ id?: string; size?: string; color?: string; colorMn?: string; stock: number; sku?: string }>) {
+        const stock = typeof v.stock === "number" ? Math.max(0, Math.floor(v.stock)) : 0;
+        if (v.id && existingVariants.some((ev) => ev.id === v.id)) {
+          // Update existing variant
+          await db.update(productVariants).set({
+            size: v.size || null,
+            color: v.color || null,
+            colorMn: v.colorMn || null,
+            stock,
+            sku: v.sku || null,
+          }).where(eq(productVariants.id, v.id));
+        } else {
+          // Insert new variant
+          await db.insert(productVariants).values({
             productId: id,
             size: v.size || null,
             color: v.color || null,
             colorMn: v.colorMn || null,
-            stock: v.stock || 0,
+            stock,
             sku: v.sku || null,
-          }))
-        );
+          });
+        }
       }
     }
 

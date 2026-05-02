@@ -57,7 +57,7 @@ export default function EditProductPage() {
     categoryId: "",
   });
 
-  const [variants, setVariants] = useState([
+  const [variants, setVariants] = useState<Array<{ id?: string; size: string; color: string; colorMn: string; stock: number; sku: string }>>([
     { size: "", color: "", colorMn: "", stock: 10, sku: "" },
   ]);
 
@@ -84,8 +84,9 @@ export default function EditProductPage() {
         setImages(product.images || []);
         if (product.variants?.length) {
           setVariants(
-            product.variants.map((v: { size: string; color?: string; colorMn?: string; stock: number; sku?: string }) => ({
-              size: v.size,
+            product.variants.map((v: { id: string; size: string; color?: string; colorMn?: string; stock: number; sku?: string }) => ({
+              id: v.id,
+              size: v.size || "",
               color: v.color || "",
               colorMn: v.colorMn || "",
               stock: v.stock,
