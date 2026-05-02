@@ -18,12 +18,15 @@ export async function GET(req: NextRequest) {
       return NextResponse.json([]);
     }
 
+    // Escape SQL LIKE special characters to prevent wildcard injection
+    const escaped = q.replace(/[%_\\]/g, "\\$&");
+
     const results = await db.query.products.findMany({
       where: and(
         eq(products.active, true),
         or(
-          ilike(products.name, `%${q}%`),
-          ilike(products.nameMn, `%${q}%`)
+          ilike(products.name, `%${escaped}%`),
+          ilike(products.nameMn, `%${escaped}%`)
         )
       ),
       with: { variants: true, category: true },

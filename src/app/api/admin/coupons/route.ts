@@ -95,15 +95,17 @@ export async function PATCH(req: NextRequest) {
         return NextResponse.json({ error: "Энэ код аль хэдийн бүртгэгдсэн байна" }, { status: 409 });
       }
 
-      await db.update(coupons).set({
+      const couponUpdate: Record<string, unknown> = {
         code: code.toUpperCase(),
         type,
         value,
         minOrderAmount: minOrderAmount || null,
         maxUses: maxUses || null,
         expiresAt: expiresAt ? new Date(expiresAt) : null,
-        active: typeof active === "boolean" ? active : undefined,
-      }).where(eq(coupons.id, id));
+      };
+      if (typeof active === "boolean") couponUpdate.active = active;
+
+      await db.update(coupons).set(couponUpdate).where(eq(coupons.id, id));
 
       return NextResponse.json({ success: true });
     }

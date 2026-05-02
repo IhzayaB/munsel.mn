@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
             size: v.size || null,
             color: v.color || null,
             colorMn: v.colorMn || null,
-            stock: v.stock || 0,
+            stock: typeof v.stock === "number" ? Math.max(0, Math.floor(v.stock)) : 0,
             sku: v.sku || null,
           })
         )

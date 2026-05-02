@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { orders } from "@/lib/db/schema";
-import { eq, inArray, isNull } from "drizzle-orm";
+import { eq, inArray, isNull, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
 export async function PATCH(req: NextRequest) {
@@ -19,12 +19,23 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
 
-    // Verify order exists
+    // Verify order exists and is not soft-deleted
     const order = await db.query.orders.findFirst({
-      where: eq(orders.id, orderId),
+      where: and(eq(orders.id, orderId), isNull(orders.deletedAt)),
     });
     if (!order) {
       return NextResponse.json({ error: "Захиалга олдсонгүй" }, { status: 404 });
+    }
+
+    // Prevent changing status of already-delivered orders back to earlier states
+    const statusOrder = ["pending", "paid", "processing", "shipped", "delivered", "cancelled"];
+    const currentIdx = statusOrder.indexOf(order.status);
+    const newIdx = statusOrder.indexOf(status);
+    if (order.status === "delivered" && status !== "cancelled") {
+      return NextResponse.json({ error: "Хүргэгдсэн захиалгын төлөв өөрчлөх боломжгүй" }, { status: 400 });
+    }
+    if (order.status === "cancelled" && status !== "pending") {
+      return NextResponse.json({ error: "Цуцлагдсан захиалгыг зөвхөн хүлээгдэж буй руу буцаах боломжтой" }, { status: 400 });
     }
 
     await db

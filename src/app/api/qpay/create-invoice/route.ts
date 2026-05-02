@@ -48,6 +48,15 @@ export async function POST(req: NextRequest) {
       where: inArray(products.id, productIds as string[]),
     });
 
+    // Reject orders with inactive products
+    const inactiveProduct = dbProducts.find((p) => !p.active);
+    if (inactiveProduct) {
+      return NextResponse.json(
+        { error: `Бүтээгдэхүүн "${inactiveProduct.nameMn || inactiveProduct.name}" идэвхгүй байна` },
+        { status: 400 }
+      );
+    }
+
     const priceMap = new Map(dbProducts.map((p) => [p.id, Number(p.price)]));
 
     // Validate stock for variants
@@ -85,7 +94,8 @@ export async function POST(req: NextRequest) {
       subtotal += realPrice * item.quantity;
     }
 
-    const { shippingCost } = await getShippingSettings();
+    const { shippingCost: baseShippingCost, freeShippingThreshold } = await getShippingSettings();
+    const shippingCost = subtotal >= freeShippingThreshold ? 0 : baseShippingCost;
 
     // Apply coupon if provided
     let discount = 0;
