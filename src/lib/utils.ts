@@ -37,5 +37,4 @@ export function sanitizeSlug(value: string): string {
     .replace(/^-|-$/g, "");
 }
 
-export const FREE_SHIPPING_THRESHOLD = 50000;
 export const SHIPPING_COST = 7000;

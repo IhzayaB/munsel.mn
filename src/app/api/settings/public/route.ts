@@ -2,9 +2,8 @@ import { NextResponse } from "next/server";
 import { getShippingSettings } from "@/lib/settings";
 
 /**
- * Public endpoint – returns only non-sensitive store settings
- * (shipping cost & free-shipping threshold) so the client-side
- * cart can calculate totals dynamically.
+ * Public endpoint – returns only the shipping cost so the
+ * client-side cart can calculate totals dynamically.
  */
 export async function GET() {
   const settings = await getShippingSettings();

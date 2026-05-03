@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from "@/lib/utils";
+import { SHIPPING_COST } from "@/lib/utils";
 
 export interface CartItem {
   productId: string;
@@ -18,7 +18,6 @@ export interface CartItem {
 interface CartState {
   items: CartItem[];
   shippingCost: number;
-  freeShippingThreshold: number;
   _settingsFetched: boolean;
   fetchShippingSettings: () => Promise<void>;
   addItem: (item: CartItem) => void;
@@ -36,7 +35,6 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
       shippingCost: SHIPPING_COST,
-      freeShippingThreshold: FREE_SHIPPING_THRESHOLD,
       _settingsFetched: false,
 
       fetchShippingSettings: async () => {
@@ -47,7 +45,6 @@ export const useCartStore = create<CartState>()(
             const data = await res.json();
             set({
               shippingCost: Number(data.shippingCost) || SHIPPING_COST,
-              freeShippingThreshold: Number(data.freeShippingThreshold) || FREE_SHIPPING_THRESHOLD,
               _settingsFetched: true,
             });
           }
@@ -113,11 +110,7 @@ export const useCartStore = create<CartState>()(
           0
         ),
 
-      getShippingCost: () => {
-        const { shippingCost, freeShippingThreshold } = get();
-        const subtotal = get().getTotalPrice();
-        return subtotal >= freeShippingThreshold ? 0 : shippingCost;
-      },
+      getShippingCost: () => get().shippingCost,
 
       getGrandTotal: () => get().getTotalPrice() + get().getShippingCost(),
     }),

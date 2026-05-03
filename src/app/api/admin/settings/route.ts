@@ -48,7 +48,7 @@ export async function PUT(req: NextRequest) {
 
     // Allowed settings keys whitelist
     const ALLOWED_KEYS = [
-      "SHIPPING_COST", "FREE_SHIPPING_THRESHOLD",
+      "SHIPPING_COST",
       "QPAY_INVOICE_CODE", "QPAY_USERNAME", "QPAY_PASSWORD",
       "STORE_NAME", "STORE_PHONE", "STORE_EMAIL", "STORE_ADDRESS",
     ];
