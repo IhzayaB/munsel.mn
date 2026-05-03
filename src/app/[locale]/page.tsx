@@ -3,7 +3,6 @@ import { products, categories } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { HomeClient } from "./home-client";
 import type { Metadata } from "next";
-import type { Product, ProductVariant, Category } from "@/lib/db/schema";
 
 export const revalidate = 60;
 
@@ -73,11 +72,11 @@ export default async function HomePage() {
 
   // Filter out products with zero total stock
   const allProducts = allProductsRaw
-    .filter((p: Product & { variants: ProductVariant[] }) => {
+    .filter((p) => {
       if (!p.variants || p.variants.length === 0) return true;
-      return p.variants.some((v: ProductVariant) => v.stock > 0);
+      return p.variants.some((v) => v.stock > 0);
     })
-    .sort((a: Product & { category: Category | null }, b: Product & { category: Category | null }) => {
+    .sort((a, b) => {
       // Sort by category priority (high → low), then featured, then newest
       const priA = a.category?.priority ?? 0;
       const priB = b.category?.priority ?? 0;
@@ -103,8 +102,8 @@ export default async function HomePage() {
     slug: p.slug,
     price: p.price,
     compareAtPrice: p.compareAtPrice,
-    images: p.images,
-    featured: p.featured,
+    images: p.images || [],
+    featured: Boolean(p.featured),
     ageRange: p.ageRange,
     categoryId: p.categoryId,
     category: p.category
@@ -115,7 +114,7 @@ export default async function HomePage() {
       : null,
     variants: p.variants?.map((v) => ({
       id: v.id,
-      size: v.size,
+      size: v.size || undefined,
       stock: v.stock,
     })),
   }));
