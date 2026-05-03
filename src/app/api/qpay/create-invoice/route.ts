@@ -60,16 +60,19 @@ export async function POST(req: NextRequest) {
     const priceMap = new Map(dbProducts.map((p) => [p.id, Number(p.price)]));
 
     // Validate stock for variants
-    const variantIds = items
+    const variantIds: string[] = items
       .filter((i: { variantId?: string }) => i.variantId)
       .map((i: { variantId: string }) => i.variantId);
 
-    let stockMap = new Map<string, number>();
+    let variantMap = new Map<string, { stock: number; productId: string }>();
     if (variantIds.length > 0) {
+      const uniqueVariantIds = [...new Set<string>(variantIds)];
       const dbVariants = await db.query.productVariants.findMany({
-        where: inArray(productVariants.id, variantIds),
+        where: inArray(productVariants.id, uniqueVariantIds),
       });
-      stockMap = new Map(dbVariants.map((v) => [v.id, v.stock]));
+      variantMap = new Map(
+        dbVariants.map((v) => [v.id, { stock: v.stock, productId: v.productId }])
+      );
     }
 
     // Calculate server-side totals
@@ -90,9 +93,21 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
-      if (item.variantId && stockMap.has(item.variantId)) {
-        const stock = stockMap.get(item.variantId)!;
-        if (stock < item.quantity) {
+      if (item.variantId) {
+        const variant = variantMap.get(item.variantId);
+        if (!variant) {
+          return NextResponse.json(
+            { error: `Invalid variant: ${item.variantId}` },
+            { status: 400 }
+          );
+        }
+        if (variant.productId !== item.productId) {
+          return NextResponse.json(
+            { error: `Variant does not belong to product: ${item.variantId}` },
+            { status: 400 }
+          );
+        }
+        if (variant.stock < item.quantity) {
           return NextResponse.json(
             { error: `Insufficient stock for ${item.name}` },
             { status: 400 }

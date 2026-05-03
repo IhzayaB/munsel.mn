@@ -10,9 +10,17 @@ import {
   PASSWORD_RESET_TOKEN_TTL_MS,
 } from "@/lib/password-reset";
 import { sendAdminPasswordResetEmail } from "@/lib/email";
+import { rateLimitAsync, getRateLimitKey } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit: 5 password reset requests per minute per IP
+    const rlKey = getRateLimitKey(req, "password-reset-request");
+    const rl = await rateLimitAsync(rlKey, { limit: 5, windowMs: 60_000 });
+    if (!rl.success) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const body = await req.json();
     const email = String(body?.email || "").trim().toLowerCase();
 

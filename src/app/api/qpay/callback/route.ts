@@ -1,54 +1,69 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { orders, orderItems } from "@/lib/db/schema";
+import { orders, productVariants } from "@/lib/db/schema";
 import { checkQPayPayment } from "@/lib/qpay";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, gte, sql } from "drizzle-orm";
 import { sendOrderConfirmation } from "@/lib/email";
 import { sendOrderSms } from "@/lib/sms";
 import { formatPrice } from "@/lib/utils";
 import { rateLimitAsync, getRateLimitKey } from "@/lib/rate-limit";
 
 async function handlePaymentConfirmed(orderNumber: string, paymentId: string) {
-  // Idempotency guard: only process if order is still pending
-  const existingOrder = await db.query.orders.findFirst({
-    where: eq(orders.orderNumber, orderNumber),
-  });
+  const order = await db.transaction(async (tx) => {
+    // Claim pending order exactly once to keep callback idempotent.
+    const [claimedOrder] = await tx
+      .update(orders)
+      .set({
+        status: "processing",
+        qpayPaymentId: paymentId,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(orders.orderNumber, orderNumber), eq(orders.status, "pending")))
+      .returning({ id: orders.id, orderNumber: orders.orderNumber });
 
-  if (!existingOrder || existingOrder.status !== "pending") {
-    return; // Already processed, not found, or in a later state
-  }
+    if (!claimedOrder) {
+      return null;
+    }
 
-  // Update order status
-  await db
-    .update(orders)
-    .set({
-      status: "paid",
-      qpayPaymentId: paymentId,
-      updatedAt: new Date(),
-    })
-    .where(eq(orders.orderNumber, orderNumber));
+    const claimedWithItems = await tx.query.orders.findFirst({
+      where: eq(orders.id, claimedOrder.id),
+      with: { items: true },
+    });
 
-  // Get the order with items
-  const order = await db.query.orders.findFirst({
-    where: eq(orders.orderNumber, orderNumber),
-    with: { items: true },
+    if (!claimedWithItems) {
+      throw new Error("Claimed order not found during payment processing");
+    }
+
+    for (const item of claimedWithItems.items) {
+      if (!item.variantId) continue;
+      const updated = await tx
+        .update(productVariants)
+        .set({ stock: sql`${productVariants.stock} - ${item.quantity}` })
+        .where(
+          and(
+            eq(productVariants.id, item.variantId),
+            gte(productVariants.stock, item.quantity)
+          )
+        )
+        .returning({ id: productVariants.id });
+
+      if (updated.length === 0) {
+        throw new Error(`Insufficient stock while confirming payment for variant ${item.variantId}`);
+      }
+    }
+
+    await tx
+      .update(orders)
+      .set({
+        status: "paid",
+        updatedAt: new Date(),
+      })
+      .where(eq(orders.id, claimedOrder.id));
+
+    return claimedWithItems;
   });
 
   if (!order) return;
-
-  // Decrement stock for each variant (atomic: only decrement if sufficient stock)
-  for (const item of order.items) {
-    if (item.variantId) {
-      await db.execute(
-        sql`UPDATE product_variants SET stock = stock - ${item.quantity} WHERE id = ${item.variantId} AND stock >= ${item.quantity}`
-      );
-      // If stock was already 0, the WHERE clause prevents going negative
-      // (fallback: if stock < quantity, set to 0)
-      await db.execute(
-        sql`UPDATE product_variants SET stock = 0 WHERE id = ${item.variantId} AND stock < 0`
-      );
-    }
-  }
 
   // Send confirmation email (only if customer provided email)
   if (order.customerEmail) {
