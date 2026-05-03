@@ -7,10 +7,19 @@ import { useCartStore } from "@/store/cart";
 function ShippingSettingsLoader() {
   const fetchShippingSettings = useCartStore((s) => s.fetchShippingSettings);
   useEffect(() => {
-    // Defer non-critical fetch so it doesn't block first paint
-    startTransition(() => {
-      fetchShippingSettings();
-    });
+    const run = () => {
+      startTransition(() => {
+        fetchShippingSettings();
+      });
+    };
+
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      const idleId = window.requestIdleCallback(() => run(), { timeout: 1500 });
+      return () => window.cancelIdleCallback(idleId);
+    }
+
+    const timeoutId = window.setTimeout(run, 300);
+    return () => window.clearTimeout(timeoutId);
   }, [fetchShippingSettings]);
   return null;
 }

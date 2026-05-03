@@ -39,7 +39,35 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   const allProductsRaw = await db.query.products.findMany({
     where: eq(products.active, true),
-    with: { category: true, variants: true },
+    columns: {
+      id: true,
+      name: true,
+      nameMn: true,
+      slug: true,
+      price: true,
+      compareAtPrice: true,
+      images: true,
+      featured: true,
+      ageRange: true,
+      categoryId: true,
+      createdAt: true,
+    },
+    with: {
+      category: {
+        columns: {
+          name: true,
+          nameMn: true,
+          priority: true,
+        },
+      },
+      variants: {
+        columns: {
+          id: true,
+          size: true,
+          stock: true,
+        },
+      },
+    },
     orderBy: [desc(products.featured), desc(products.createdAt)],
   });
 
@@ -59,8 +87,38 @@ export default async function HomePage() {
     });
 
   const allCategories = await db.query.categories.findMany({
+    columns: {
+      id: true,
+      name: true,
+      nameMn: true,
+      priority: true,
+    },
     orderBy: [desc(categories.priority)],
   });
+
+  const serializedProducts = allProducts.map((p) => ({
+    id: p.id,
+    name: p.name,
+    nameMn: p.nameMn,
+    slug: p.slug,
+    price: p.price,
+    compareAtPrice: p.compareAtPrice,
+    images: p.images,
+    featured: p.featured,
+    ageRange: p.ageRange,
+    categoryId: p.categoryId,
+    category: p.category
+      ? {
+          name: p.category.name,
+          nameMn: p.category.nameMn,
+        }
+      : null,
+    variants: p.variants?.map((v) => ({
+      id: v.id,
+      size: v.size,
+      stock: v.stock,
+    })),
+  }));
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -85,8 +143,8 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <HomeClient
-        products={JSON.parse(JSON.stringify(allProducts))}
-        categories={JSON.parse(JSON.stringify(allCategories))}
+        products={serializedProducts}
+        categories={allCategories}
       />
     </>
   );

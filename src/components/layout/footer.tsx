@@ -1,14 +1,12 @@
-"use client";
-
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Separator } from "@/components/ui/separator";
 import { Instagram, Facebook, Mail, Phone } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
 
-export function Footer() {
-  const tc = useTranslations("common");
-  const tf = useTranslations("footer");
+export async function Footer() {
+  const tc = await getTranslations("common");
+  const tf = await getTranslations("footer");
 
   return (
     <footer className="bg-[var(--baby-charcoal)] text-gray-300">
