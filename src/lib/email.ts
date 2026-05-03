@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { ADMIN_RECOVERY_EMAIL } from "@/lib/password-reset";
 
 function getResendClient() {
   if (!process.env.RESEND_API_KEY) return null;
@@ -91,6 +92,38 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
     console.error("Failed to send order confirmation email:", error);
     // In production, you should log this to an error tracking service (e.g. Sentry)
     // and potentially flag the order for manual review
+    return { success: false, error };
+  }
+}
+
+export async function sendAdminPasswordResetEmail(data: { resetUrl: string }) {
+  const resend = getResendClient();
+  if (!resend) {
+    console.log("RESEND_API_KEY not set, skipping admin password reset email");
+    return;
+  }
+
+  try {
+    await resend.emails.send({
+      from: "Pajama.mn <orders@pajama.mn>",
+      to: ADMIN_RECOVERY_EMAIL,
+      subject: "Pajama.mn admin password reset",
+      html: `
+        <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f5fafa">
+          <div style="background:#ffffff;border-radius:12px;padding:24px;margin:16px 0">
+            <h2 style="color:#2c3e3f;margin-top:0;font-size:20px">Admin password reset</h2>
+            <p style="color:#666;font-size:15px">A password reset was requested for the admin login <strong>admin@pajama.mn</strong>.</p>
+            <p style="color:#666;font-size:15px">Use the link below to set a new password. This link expires in 30 minutes.</p>
+            <p style="margin:24px 0">
+              <a href="${data.resetUrl}" style="display:inline-block;background:#409ba0;color:#fff;text-decoration:none;padding:12px 18px;border-radius:8px;font-weight:600">Reset admin password</a>
+            </p>
+            <p style="color:#999;font-size:13px;word-break:break-all">${data.resetUrl}</p>
+          </div>
+        </div>
+      `,
+    });
+  } catch (error) {
+    console.error("Failed to send admin password reset email:", error);
     return { success: false, error };
   }
 }

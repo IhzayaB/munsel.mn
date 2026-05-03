@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useRouter } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -186,6 +186,11 @@ export default function LoginPage() {
                 className="h-12 text-base"
                 required
               />
+            </div>
+            <div className="flex justify-end">
+              <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+                {t("forgotPassword")}
+              </Link>
             </div>
 
             <Button type="submit" className="w-full h-12 text-base" disabled={loading}>
