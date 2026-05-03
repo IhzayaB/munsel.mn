@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import type { Category } from "@/lib/db/schema";
 import { Search, PackageOpen } from "lucide-react";
 
 interface ProductsClientProps {
@@ -30,7 +29,10 @@ interface ProductsClientProps {
     categoryId?: string | null;
     category?: { id: string; name: string; nameMn: string } | null;
   }>;
-  categories: Category[];
+  categories: Array<{
+    id: string;
+    nameMn: string;
+  }>;
 }
 
 export function ProductsClient({ products, categories }: ProductsClientProps) {

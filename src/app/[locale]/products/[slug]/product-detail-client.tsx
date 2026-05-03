@@ -24,7 +24,6 @@ import { Link } from "@/i18n/routing";
 import { toast } from "sonner";
 import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
-import type { ProductWithVariants } from "@/types";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 // Size guide data
@@ -39,8 +38,33 @@ const SIZE_GUIDE = [
 ];
 
 interface ProductDetailClientProps {
-  product: ProductWithVariants;
-  relatedProducts: ProductWithVariants[];
+  product: {
+    id: string;
+    name: string;
+    nameMn: string;
+    slug: string;
+    descriptionMn?: string | null;
+    price: string;
+    compareAtPrice?: string | null;
+    images: string[];
+    ageRange?: string | null;
+    materialMn?: string | null;
+    category?: { id: string; nameMn: string } | null;
+    variants: Array<{ id: string; size?: string | null; color?: string | null; stock: number }>;
+  };
+  relatedProducts: Array<{
+    id: string;
+    name: string;
+    nameMn: string;
+    slug: string;
+    price: string;
+    compareAtPrice?: string | null;
+    images: string[];
+    featured?: boolean;
+    ageRange?: string | null;
+    category?: { name: string; nameMn: string } | null;
+    variants?: Array<{ id: string; size?: string | null; stock: number }> | null;
+  }>;
 }
 
 export function ProductDetailClient({

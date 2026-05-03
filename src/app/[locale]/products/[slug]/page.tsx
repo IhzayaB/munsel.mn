@@ -72,8 +72,33 @@ export default async function ProductDetailPage({
       ...(sanitized && sanitized !== slug ? [eq(products.slug, sanitized)] : [])
     ),
     with: {
-      category: true,
-      variants: true,
+      category: {
+        columns: {
+          id: true,
+          nameMn: true,
+        },
+      },
+      variants: {
+        columns: {
+          id: true,
+          size: true,
+          color: true,
+          stock: true,
+        },
+      },
+    },
+    columns: {
+      id: true,
+      name: true,
+      nameMn: true,
+      slug: true,
+      descriptionMn: true,
+      price: true,
+      compareAtPrice: true,
+      images: true,
+      ageRange: true,
+      materialMn: true,
+      categoryId: true,
     },
   });
 
@@ -91,7 +116,33 @@ export default async function ProductDetailPage({
   const relatedRaw = product.categoryId
     ? await db.query.products.findMany({
         where: eq(products.categoryId, product.categoryId),
-        with: { category: true, variants: true },
+        columns: {
+          id: true,
+          name: true,
+          nameMn: true,
+          slug: true,
+          price: true,
+          compareAtPrice: true,
+          images: true,
+          featured: true,
+          ageRange: true,
+          active: true,
+        },
+        with: {
+          category: {
+            columns: {
+              name: true,
+              nameMn: true,
+            },
+          },
+          variants: {
+            columns: {
+              id: true,
+              size: true,
+              stock: true,
+            },
+          },
+        },
         limit: 6,
       })
     : [];
@@ -142,10 +193,54 @@ export default async function ProductDetailPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <ProductDetailClient
-        product={JSON.parse(JSON.stringify(product))}
-        relatedProducts={JSON.parse(
-          JSON.stringify(related.filter((p) => p.id !== product.id))
-        )}
+        product={{
+          id: product.id,
+          name: product.name,
+          nameMn: product.nameMn,
+          slug: product.slug,
+          descriptionMn: product.descriptionMn,
+          price: product.price,
+          compareAtPrice: product.compareAtPrice,
+          images: product.images || [],
+          ageRange: product.ageRange,
+          materialMn: product.materialMn,
+          category: product.category
+            ? {
+                id: product.category.id,
+                nameMn: product.category.nameMn,
+              }
+            : null,
+          variants: (product.variants || []).map((v) => ({
+            id: v.id,
+            size: v.size,
+            color: v.color,
+            stock: v.stock,
+          })),
+        }}
+        relatedProducts={related
+          .filter((p) => p.id !== product.id)
+          .map((p) => ({
+            id: p.id,
+            name: p.name,
+            nameMn: p.nameMn,
+            slug: p.slug,
+            price: p.price,
+            compareAtPrice: p.compareAtPrice,
+            images: p.images || [],
+            featured: Boolean(p.featured),
+            ageRange: p.ageRange,
+            category: p.category
+              ? {
+                  name: p.category.name,
+                  nameMn: p.category.nameMn,
+                }
+              : null,
+            variants: (p.variants || []).map((v) => ({
+              id: v.id,
+              size: v.size,
+              stock: v.stock,
+            })),
+          }))}
       />
     </>
   );

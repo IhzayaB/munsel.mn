@@ -3,7 +3,6 @@ import { products, categories } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { ProductsClient } from "./products-client";
 import type { Metadata } from "next";
-import type { Product, ProductVariant } from "@/lib/db/schema";
 
 export const revalidate = 60;
 
@@ -29,27 +28,74 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ProductsPage() {
   const allProductsRaw = await db.query.products.findMany({
     where: eq(products.active, true),
+    columns: {
+      id: true,
+      name: true,
+      nameMn: true,
+      slug: true,
+      price: true,
+      compareAtPrice: true,
+      images: true,
+      featured: true,
+      ageRange: true,
+      categoryId: true,
+      createdAt: true,
+    },
     with: {
-      category: true,
-      variants: true,
+      category: {
+        columns: {
+          id: true,
+          name: true,
+          nameMn: true,
+        },
+      },
+      variants: {
+        columns: {
+          stock: true,
+        },
+      },
     },
     orderBy: [desc(products.createdAt)],
   });
 
   // Filter out products with zero total stock
-  const allProducts = allProductsRaw.filter((p: Product & { variants: ProductVariant[] }) => {
+  const allProducts = allProductsRaw.filter((p) => {
     if (!p.variants || p.variants.length === 0) return true;
-    return p.variants.some((v: ProductVariant) => v.stock > 0);
+    return p.variants.some((v) => v.stock > 0);
   });
 
   const allCategories = await db.query.categories.findMany({
+    columns: {
+      id: true,
+      nameMn: true,
+    },
     orderBy: [desc(categories.priority)],
   });
 
+  const serializedProducts = allProducts.map((p) => ({
+    id: p.id,
+    name: p.name,
+    nameMn: p.nameMn,
+    slug: p.slug,
+    price: p.price,
+    compareAtPrice: p.compareAtPrice,
+    images: p.images || [],
+    featured: Boolean(p.featured),
+    ageRange: p.ageRange,
+    categoryId: p.categoryId,
+    category: p.category
+      ? {
+          id: p.category.id,
+          name: p.category.name,
+          nameMn: p.category.nameMn,
+        }
+      : null,
+  }));
+
   return (
     <ProductsClient
-      products={JSON.parse(JSON.stringify(allProducts))}
-      categories={JSON.parse(JSON.stringify(allCategories))}
+      products={serializedProducts}
+      categories={allCategories}
     />
   );
 }
