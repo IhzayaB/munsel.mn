@@ -49,6 +49,12 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
 
   useEffect(() => {
     fetch("/api/admin/settings")
@@ -74,6 +80,50 @@ export default function SettingsPage() {
       toast.error("Хадгалахад алдаа гарлаа");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      toast.error("Нууц үгийн бүх талбарыг бөглөнө үү");
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 8) {
+      toast.error("Шинэ нууц үг хамгийн багадаа 8 тэмдэгт байна");
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error("Шинэ нууц үг таарахгүй байна");
+      return;
+    }
+
+    setPasswordSaving(true);
+    try {
+      const res = await fetch("/api/admin/password", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(passwordForm),
+      });
+
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(data?.error || "Нууц үг солиход алдаа гарлаа");
+      }
+
+      setPasswordForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      toast.success("Нууц үг амжилттай солигдлоо");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Нууц үг солиход алдаа гарлаа"
+      );
+    } finally {
+      setPasswordSaving(false);
     }
   };
 
@@ -113,6 +163,64 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       ))}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Админ нууц үг</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-1 sm:col-span-2">
+            <Label htmlFor="currentPassword">Одоогийн нууц үг</Label>
+            <Input
+              id="currentPassword"
+              type="password"
+              value={passwordForm.currentPassword}
+              onChange={(e) =>
+                setPasswordForm((prev) => ({
+                  ...prev,
+                  currentPassword: e.target.value,
+                }))
+              }
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="newPassword">Шинэ нууц үг</Label>
+            <Input
+              id="newPassword"
+              type="password"
+              value={passwordForm.newPassword}
+              onChange={(e) =>
+                setPasswordForm((prev) => ({
+                  ...prev,
+                  newPassword: e.target.value,
+                }))
+              }
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="confirmPassword">Шинэ нууц үг давтах</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              value={passwordForm.confirmPassword}
+              onChange={(e) =>
+                setPasswordForm((prev) => ({
+                  ...prev,
+                  confirmPassword: e.target.value,
+                }))
+              }
+            />
+          </div>
+          <div className="sm:col-span-2 flex items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
+              Одоогийн нууц үгээ баталгаажуулаад шинэ нууц үгээ хадгална.
+            </p>
+            <Button onClick={handlePasswordChange} disabled={passwordSaving}>
+              {passwordSaving ? "Сольж байна..." : "Нууц үг солих"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={saving}>
