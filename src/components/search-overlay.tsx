@@ -24,18 +24,57 @@ interface SearchOverlayProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const RECENT_SEARCHES_KEY = "pajama-recent-searches";
+const QUICK_SUGGESTIONS = ["Комбинезон", "Малгай", "Пижама", "Оймс", "0-3M"];
+
 export function SearchOverlay({ open, onOpenChange }: SearchOverlayProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const router = useRouter();
 
+  const saveRecentSearch = (value: string) => {
+    const clean = value.trim();
+    if (!clean) return;
+    try {
+      const next = [clean, ...recentSearches.filter((s) => s !== clean)].slice(0, 6);
+      setRecentSearches(next);
+      localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(next));
+    } catch {
+      // ignore storage errors
+    }
+  };
+
+  const loadRecentSearches = () => {
+    try {
+      const raw = localStorage.getItem(RECENT_SEARCHES_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        setRecentSearches(parsed.filter((v) => typeof v === "string").slice(0, 6));
+      }
+    } catch {
+      // ignore storage errors
+    }
+  };
+
+  const clearRecentSearches = () => {
+    setRecentSearches([]);
+    try {
+      localStorage.removeItem(RECENT_SEARCHES_KEY);
+    } catch {
+      // ignore storage errors
+    }
+  };
+
   // Focus input when opened
   useEffect(() => {
     if (open) {
+      loadRecentSearches();
       setTimeout(() => inputRef.current?.focus(), 100);
     } else {
       setQuery("");
@@ -83,13 +122,21 @@ export function SearchOverlay({ open, onOpenChange }: SearchOverlayProps) {
   }, [query, search]);
 
   const handleSelect = (slug: string) => {
+    saveRecentSearch(query);
     onOpenChange(false);
     router.push(`/products/${slug}`);
   };
 
   const handleSeeAll = () => {
+    saveRecentSearch(query);
     onOpenChange(false);
     router.push("/products");
+  };
+
+  const handleQuickSearch = (value: string) => {
+    setQuery(value);
+    saveRecentSearch(value);
+    inputRef.current?.focus();
   };
 
   return (
@@ -181,10 +228,52 @@ export function SearchOverlay({ open, onOpenChange }: SearchOverlayProps) {
           )}
 
           {!loading && !searched && (
-            <div className="text-center py-8 px-4">
-              <p className="text-muted-foreground text-sm">
-                Бүтээгдэхүүний нэр оруулна уу
-              </p>
+            <div className="py-4 px-4 space-y-4">
+              <div className="text-center">
+                <p className="text-muted-foreground text-sm">
+                  Бүтээгдэхүүний нэр оруулна уу
+                </p>
+              </div>
+
+              {recentSearches.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-semibold text-muted-foreground">Сүүлд хайсан</p>
+                    <button
+                      onClick={clearRecentSearches}
+                      className="text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      Арилгах
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {recentSearches.map((item) => (
+                      <button
+                        key={item}
+                        onClick={() => handleQuickSearch(item)}
+                        className="px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground text-xs font-medium"
+                      >
+                        {item}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground mb-2">Санал болгох хайлт</p>
+                <div className="flex flex-wrap gap-2">
+                  {QUICK_SUGGESTIONS.map((item) => (
+                    <button
+                      key={item}
+                      onClick={() => handleQuickSearch(item)}
+                      className="px-3 py-1.5 rounded-full border border-border text-xs font-medium hover:bg-muted"
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </div>

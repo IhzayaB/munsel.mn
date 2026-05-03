@@ -1,9 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useDeferredValue } from "react";
 import { ProductCard } from "@/components/products/product-card";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -40,26 +39,22 @@ export function ProductsClient({ products, categories }: ProductsClientProps) {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
+  const deferredSearch = useDeferredValue(search);
 
   const filteredProducts = useMemo(() => {
     let filtered = [...products];
 
-    // Search
-    if (search) {
-      const q = search.toLowerCase();
+    if (deferredSearch) {
+      const q = deferredSearch.toLowerCase();
       filtered = filtered.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.nameMn.toLowerCase().includes(q)
+        (p) => p.name.toLowerCase().includes(q) || p.nameMn.toLowerCase().includes(q)
       );
     }
 
-    // Category filter
     if (categoryFilter !== "all") {
       filtered = filtered.filter((p) => p.categoryId === categoryFilter);
     }
 
-    // Sort
     switch (sortBy) {
       case "priceAsc":
         filtered.sort((a, b) => Number(a.price) - Number(b.price));
@@ -68,15 +63,14 @@ export function ProductsClient({ products, categories }: ProductsClientProps) {
         filtered.sort((a, b) => Number(b.price) - Number(a.price));
         break;
       case "name":
-        filtered.sort((a, b) =>
-          a.nameMn.localeCompare(b.nameMn)
-        );
+        filtered.sort((a, b) => a.nameMn.localeCompare(b.nameMn));
         break;
-      // newest is default (already sorted by createdAt desc)
+      default:
+        break;
     }
 
     return filtered;
-  }, [products, search, categoryFilter, sortBy]);
+  }, [products, deferredSearch, categoryFilter, sortBy]);
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
@@ -84,13 +78,9 @@ export function ProductsClient({ products, categories }: ProductsClientProps) {
 
       <div className="mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">{t("title")}</h1>
-        <p className="text-muted-foreground">
-          {filteredProducts.length}{" "}
-          {"бүтээгдэхүүн"}
-        </p>
+        <p className="text-muted-foreground">{filteredProducts.length} бүтээгдэхүүн</p>
       </div>
 
-      {/* Filters bar */}
       <div className="flex flex-col gap-3 sm:gap-4 mb-6 sm:mb-8">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -131,21 +121,16 @@ export function ProductsClient({ products, categories }: ProductsClientProps) {
         </div>
       </div>
 
-      {/* Product grid */}
       {filteredProducts.length === 0 ? (
         <div className="text-center py-20">
           <PackageOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-          <p className="text-lg font-medium text-foreground mb-1">
-            {t("noProducts")}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Өөр ангилал эсвэл хайлтын үг оруулж үзнэ үү
-          </p>
+          <p className="text-lg font-medium text-foreground mb-1">{t("noProducts")}</p>
+          <p className="text-sm text-muted-foreground">Өөр ангилал эсвэл хайлтын үг оруулж үзнэ үү</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 animate-fade-in-up">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+          {filteredProducts.map((product, index) => (
+            <ProductCard key={product.id} product={product} imagePriority={index < 4} />
           ))}
         </div>
       )}

@@ -89,6 +89,19 @@ export default function CheckoutPage() {
   });
 
   const [phoneError, setPhoneError] = useState("");
+  const nameRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const khorooRef = useRef<HTMLInputElement>(null);
+  const districtInputRef = useRef<HTMLInputElement>(null);
+
+  const focusNext = (next: "phone" | "email" | "district" | "khoroo" | "address") => {
+    if (next === "phone") phoneRef.current?.focus();
+    if (next === "email") emailRef.current?.focus();
+    if (next === "district") districtInputRef.current?.focus();
+    if (next === "khoroo") khorooRef.current?.focus();
+    if (next === "address") document.getElementById("address")?.focus();
+  };
 
   // Persist form to sessionStorage
   useEffect(() => {
@@ -341,11 +354,19 @@ export default function CheckoutPage() {
                   <div>
                     <Label htmlFor="name">{t("name")} *</Label>
                     <Input
+                      ref={nameRef}
                       id="name"
+                      autoComplete="name"
                       value={form.name}
                       onChange={(e) =>
                         setForm({ ...form, name: e.target.value })
                       }
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          focusNext("phone");
+                        }
+                      }}
                       placeholder={t("namePlaceholder")}
                       className="h-12 text-base"
                       required
@@ -354,13 +375,21 @@ export default function CheckoutPage() {
                   <div>
                     <Label htmlFor="phone">{t("phone")} *</Label>
                     <Input
+                      ref={phoneRef}
                       id="phone"
                       type="tel"
                       inputMode="tel"
+                      autoComplete="tel"
                       value={form.phone}
                       onChange={(e) => {
                         setForm({ ...form, phone: e.target.value });
                         setPhoneError("");
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          focusNext("email");
+                        }
                       }}
                       placeholder={t("phonePlaceholder")}
                       className={`h-12 text-base ${phoneError ? "border-destructive" : ""}`}
@@ -373,13 +402,21 @@ export default function CheckoutPage() {
                   <div>
                     <Label htmlFor="email">{t("emailOptional")}</Label>
                     <Input
+                      ref={emailRef}
                       id="email"
                       type="email"
                       inputMode="email"
+                      autoComplete="email"
                       value={form.email}
                       onChange={(e) =>
                         setForm({ ...form, email: e.target.value })
                       }
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          focusNext(form.city === "Улаанбаатар" ? "khoroo" : "district");
+                        }
+                      }}
                       placeholder="tani@email.com"
                       className="h-12 text-base"
                     />
@@ -412,48 +449,81 @@ export default function CheckoutPage() {
                   </div>
 
                   {form.city === "Улаанбаатар" ? (
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label>{t("district")} *</Label>
-                        <Select
-                          value={form.district}
-                          onValueChange={(v) => v && setForm({ ...form, district: v })}
-                        >
-                          <SelectTrigger className="h-12 text-base">
-                            <SelectValue placeholder={t("selectPlaceholder")} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {UB_DISTRICTS.map((d) => (
-                              <SelectItem key={d} value={d}>
-                                {d}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                    <>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label>{t("district")} *</Label>
+                          <Select
+                            value={form.district}
+                            onValueChange={(v) => v && setForm({ ...form, district: v })}
+                          >
+                            <SelectTrigger className="h-12 text-base">
+                              <SelectValue placeholder={t("selectPlaceholder")} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {UB_DISTRICTS.map((d) => (
+                                <SelectItem key={d} value={d}>
+                                  {d}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="khoroo">{t("khoroo")}</Label>
+                          <Input
+                            ref={khorooRef}
+                            id="khoroo"
+                            inputMode="numeric"
+                            value={form.khoroo}
+                            onChange={(e) =>
+                              setForm({ ...form, khoroo: e.target.value })
+                            }
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                focusNext("address");
+                              }
+                            }}
+                            placeholder={t("khorooPlaceholder")}
+                            className="h-12 text-base"
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <Label htmlFor="khoroo">{t("khoroo")}</Label>
-                        <Input
-                          id="khoroo"
-                          inputMode="numeric"
-                          value={form.khoroo}
-                          onChange={(e) =>
-                            setForm({ ...form, khoroo: e.target.value })
-                          }
-                          placeholder={t("khorooPlaceholder")}
-                          className="h-12 text-base"
-                        />
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {["Баянзүрх", "Хан-Уул", "Сүхбаатар", "Баянгол"].map((district) => (
+                          <button
+                            key={district}
+                            type="button"
+                            onClick={() => setForm({ ...form, district })}
+                            className={`px-3 py-1.5 rounded-full text-xs font-medium border ${
+                              form.district === district
+                                ? "bg-primary text-primary-foreground border-primary"
+                                : "border-border text-muted-foreground"
+                            }`}
+                          >
+                            {district}
+                          </button>
+                        ))}
                       </div>
-                    </div>
+                    </>
                   ) : (
                     <div>
                       <Label htmlFor="district">{t("districtLabel")} *</Label>
                       <Input
+                        ref={districtInputRef}
                         id="district"
+                        autoComplete="address-level2"
                         value={form.district}
                         onChange={(e) =>
                           setForm({ ...form, district: e.target.value })
                         }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            focusNext("address");
+                          }
+                        }}
                         className="h-12 text-base"
                         required
                       />
@@ -464,6 +534,7 @@ export default function CheckoutPage() {
                     <Label htmlFor="address">{t("address")} *</Label>
                     <Textarea
                       id="address"
+                      autoComplete="street-address"
                       value={form.address}
                       onChange={(e) =>
                         setForm({ ...form, address: e.target.value })

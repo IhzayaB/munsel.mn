@@ -27,9 +27,10 @@ interface ProductCardProps {
     category?: { name: string; nameMn: string } | null;
     variants?: Array<{ id: string; size?: string | null; stock: number }> | null;
   };
+  imagePriority?: boolean;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, imagePriority = false }: ProductCardProps) {
   const tc = useTranslations("common");
   const displayName = product.nameMn;
   const categoryName = product.category?.nameMn;
@@ -93,6 +94,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 src={product.images[0]}
                 alt={displayName}
                 fill
+                priority={imagePriority}
                 className={`object-cover transition-all duration-500 ${
                   hoverReady && product.images.length > 1
                     ? "group-hover:opacity-0 group-hover:scale-105"
