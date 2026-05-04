@@ -35,7 +35,8 @@ interface HomeClientProps {
 export function HomeClient({ products, categories }: HomeClientProps) {
   const t = useTranslations("home");
   const tc = useTranslations("common");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const defaultCategoryId = categories.find((c) => c.nameMn === "Бүтэн боди")?.id || "all";
+  const [selectedCategory, setSelectedCategory] = useState<string>(defaultCategoryId);
 
   const filteredProducts = useMemo(() => {
     if (selectedCategory === "all") return products;
