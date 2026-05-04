@@ -11,7 +11,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, ChevronLeft, ChevronRight, Download, Trash2, Calendar } from "lucide-react";
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Trash2,
+  Calendar,
+  Phone,
+  Mail,
+  MapPin,
+  Package,
+  CreditCard,
+  Clock,
+  Copy,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  StickyNote,
+  Tag,
+} from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -39,21 +58,69 @@ interface Order {
   shippingCost: string;
   discount?: string | null;
   couponCode?: string | null;
+  qpayInvoiceId?: string | null;
+  qpayPaymentId?: string | null;
   notes?: string | null;
   createdAt: string;
+  updatedAt: string;
   items: OrderItem[];
 }
 
 const STATUSES = [
-  { value: "pending", label: "Хүлээгдэж буй", color: "bg-yellow-100 text-yellow-700" },
-  { value: "paid", label: "Төлөгдсөн", color: "bg-green-100 text-green-700" },
-  { value: "processing", label: "Бэлтгэж буй", color: "bg-blue-100 text-blue-700" },
-  { value: "shipped", label: "Илгээсэн", color: "bg-indigo-100 text-indigo-700" },
-  { value: "delivered", label: "Хүргэсэн", color: "bg-purple-100 text-purple-700" },
-  { value: "cancelled", label: "Цуцлагдсан", color: "bg-red-100 text-red-700" },
+  { value: "pending", label: "Хүлээгдэж буй", color: "bg-yellow-100 text-yellow-700 border-yellow-200" },
+  { value: "paid", label: "Төлөгдсөн", color: "bg-green-100 text-green-700 border-green-200" },
+  { value: "processing", label: "Бэлтгэж буй", color: "bg-blue-100 text-blue-700 border-blue-200" },
+  { value: "shipped", label: "Илгээсэн", color: "bg-indigo-100 text-indigo-700 border-indigo-200" },
+  { value: "delivered", label: "Хүргэсэн", color: "bg-purple-100 text-purple-700 border-purple-200" },
+  { value: "cancelled", label: "Цуцлагдсан", color: "bg-red-100 text-red-700 border-red-200" },
 ];
 
 const PAGE_SIZE = 15;
+
+function CopyButton({ text, label }: { text: string; label?: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+  return (
+    <button
+      onClick={handleCopy}
+      className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+      title={`${label || text} хуулах`}
+    >
+      {copied ? <CheckCircle2 className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+    </button>
+  );
+}
+
+function formatDateTime(iso: string) {
+  const d = new Date(iso);
+  return d.toLocaleString("mn-MN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatRelativeTime(iso: string) {
+  const d = new Date(iso);
+  const now = new Date();
+  const diffMs = now.getTime() - d.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return "Дөнгөж сая";
+  if (diffMins < 60) return `${diffMins} мин өмнө`;
+  if (diffHours < 24) return `${diffHours} цагийн өмнө`;
+  if (diffDays < 7) return `${diffDays} өдрийн өмнө`;
+  return formatDateTime(iso);
+}
 
 export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
   const [orders, setOrders] = useState(initialOrders);
@@ -69,6 +136,24 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
 
   const statusColor = (status: string) =>
     STATUSES.find((s) => s.value === status)?.color || "bg-gray-100 text-gray-700";
+
+  const statusLabel = (status: string) =>
+    STATUSES.find((s) => s.value === status)?.label || status;
+
+  // Stats
+  const stats = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayOrders = orders.filter((o) => new Date(o.createdAt) >= today);
+    const totalRevenue = orders
+      .filter((o) => o.status !== "cancelled")
+      .reduce((sum, o) => sum + Number(o.total), 0);
+    const pendingCount = orders.filter((o) => o.status === "pending").length;
+    const paidCount = orders.filter((o) => o.status === "paid").length;
+    const processingCount = orders.filter((o) => o.status === "processing").length;
+
+    return { todayOrders: todayOrders.length, totalRevenue, pendingCount, paidCount, processingCount };
+  }, [orders]);
 
   const filtered = useMemo(() => {
     let result = orders;
@@ -92,7 +177,9 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
           o.orderNumber.toLowerCase().includes(q) ||
           o.customerName.toLowerCase().includes(q) ||
           o.customerPhone.includes(q) ||
-          o.customerEmail.toLowerCase().includes(q)
+          o.customerEmail.toLowerCase().includes(q) ||
+          o.items.some((item) => item.name.toLowerCase().includes(q)) ||
+          (o.notes && o.notes.toLowerCase().includes(q))
       );
     }
     // Sort
@@ -110,6 +197,11 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const paginated = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const filteredTotal = useMemo(
+    () => filtered.reduce((sum, o) => sum + Number(o.total), 0),
+    [filtered]
+  );
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
@@ -145,7 +237,6 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
 
   const handleBulkStatus = async (newStatus: string) => {
     if (selectedIds.size === 0) return;
-    // Prevent accidentally cancelling many orders at once
     if (newStatus === "cancelled" && selectedIds.size > 5) {
       toast.error(`${selectedIds.size} захиалгыг нэг дор цуцлах боломжгүй. 5-аас бага сонгоно уу`);
       return;
@@ -236,8 +327,9 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
   };
 
   const exportCSV = () => {
-    const rows = [["Дугаар", "Нэр", "Утас", "И-мэйл", "Хаяг", "Хот", "Төлөв", "Нийт", "Огноо"]];
+    const rows = [["Дугаар", "Нэр", "Утас", "И-мэйл", "Хаяг", "Хот", "Дүүрэг", "Төлөв", "Дүн", "Хүргэлт", "Хөнгөлөлт", "Купон", "Нийт", "Бараа", "QPay Invoice", "Тэмдэглэл", "Огноо"]];
     filtered.forEach((o) => {
+      const itemsSummary = o.items.map((i) => `${i.name}${i.size ? `(${i.size})` : ""}×${i.quantity}`).join("; ");
       rows.push([
         o.orderNumber,
         o.customerName,
@@ -245,12 +337,19 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
         o.customerEmail,
         o.shippingAddress || "",
         o.city || "",
-        STATUSES.find((s) => s.value === o.status)?.label || o.status,
+        o.district || "",
+        statusLabel(o.status),
+        o.subtotal,
+        o.shippingCost,
+        o.discount || "0",
+        o.couponCode || "",
         o.total,
+        itemsSummary,
+        o.qpayInvoiceId || "",
+        o.notes || "",
         new Date(o.createdAt).toLocaleDateString("mn-MN"),
       ]);
     });
-    // Escape CSV: double-quote internal quotes, prefix formula chars with tab
     const escapeCSV = (val: string) => {
       let escaped = val.replace(/"/g, '""');
       if (/^[=+\-@\t\r]/.test(escaped)) escaped = "\t" + escaped;
@@ -268,14 +367,45 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
 
   return (
     <div>
+      {/* Summary Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-4">
+        <div className="bg-background border rounded-lg p-3 text-center">
+          <p className="text-xs text-muted-foreground">Өнөөдөр</p>
+          <p className="text-lg font-bold">{stats.todayOrders}</p>
+        </div>
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
+          <p className="text-xs text-yellow-700">Хүлээгдэж буй</p>
+          <p className="text-lg font-bold text-yellow-700">{stats.pendingCount}</p>
+        </div>
+        <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+          <p className="text-xs text-green-700">Төлөгдсөн</p>
+          <p className="text-lg font-bold text-green-700">{stats.paidCount}</p>
+        </div>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+          <p className="text-xs text-blue-700">Бэлтгэж буй</p>
+          <p className="text-lg font-bold text-blue-700">{stats.processingCount}</p>
+        </div>
+        <div className="bg-background border rounded-lg p-3 text-center col-span-2 sm:col-span-1">
+          <p className="text-xs text-muted-foreground">Нийт орлого</p>
+          <p className="text-sm font-bold">{formatPrice(String(stats.totalRevenue))}</p>
+        </div>
+      </div>
+
       <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
-        <h1 className="text-lg sm:text-2xl font-bold">Захиалга ({filtered.length})</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg sm:text-2xl font-bold">Захиалга ({filtered.length})</h1>
+          {filtered.length > 0 && (
+            <span className="text-sm text-muted-foreground">
+              Нийт: <span className="font-semibold text-foreground">{formatPrice(String(filteredTotal))}</span>
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="relative flex-1 min-w-[140px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               className="pl-9 h-10 w-full"
-              placeholder="Хайх..."
+              placeholder="Дугаар, нэр, утас, бараа..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             />
@@ -366,100 +496,270 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
             Бүгдийг сонгох
           </label>
 
-          {paginated.map((order) => (
-            <Card key={order.id}>
-              <CardContent className="p-3 sm:p-4 md:p-6">
-                <div className="flex items-start gap-3">
-                  <input
-                    type="checkbox"
-                    className="mt-1.5 shrink-0"
-                    checked={selectedIds.has(order.id)}
-                    onChange={() => toggleSelect(order.id)}
-                  />
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 flex-1 min-w-0">
-                    <div
-                      className="cursor-pointer flex-1 min-w-0"
-                      onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
-                    >
-                      <p className="font-mono text-sm font-bold">#{order.orderNumber}</p>
-                      <p className="text-sm text-muted-foreground">{order.customerName} • {order.customerPhone}</p>
-                      <p className="text-xs text-muted-foreground">{order.customerEmail}</p>
-                      <p className="text-xs text-muted-foreground mt-1 truncate">
-                        {order.shippingAddress}, {order.city}{order.district ? `, ${order.district}` : ""}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-                      <div className="text-right">
-                        <p className="font-bold text-base sm:text-lg">{formatPrice(order.total)}</p>
-                        <p className="text-xs text-muted-foreground">{order.items?.length || 0} бараа</p>
-                      </div>
-                      <Select value={order.status} onValueChange={(v) => v && handleStatusChange(order.id, v)}>
-                        <SelectTrigger className="w-[110px] sm:w-[140px] h-9">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusColor(order.status)}`}>
-                            {STATUSES.find((s) => s.value === order.status)?.label || order.status}
-                          </span>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {STATUSES.map((s) => (
-                            <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
+          {paginated.map((order) => {
+            const isExpanded = expandedOrder === order.id;
+            const totalItems = order.items.reduce((s, i) => s + i.quantity, 0);
 
-                {expandedOrder === order.id && (
-                  <div className="mt-4 pt-4 border-t ml-7">
-                    <p className="text-xs text-muted-foreground mb-2">
-                      {new Date(order.createdAt).toLocaleString("mn-MN")}
-                    </p>
-                    {order.notes && (
-                      <p className="text-sm bg-secondary/50 p-2 rounded mb-3">
-                        <span className="font-medium">Тэмдэглэл:</span> {order.notes}
-                      </p>
-                    )}
-                    <div className="space-y-2">
-                      {order.items?.map((item) => (
-                        <div key={item.id} className="flex justify-between text-sm">
-                          <span>
-                            {item.name}{item.size ? ` (${item.size})` : ""}{item.color ? ` - ${item.color}` : ""} × {item.quantity}
+            return (
+              <Card key={order.id} className={`transition-shadow ${isExpanded ? "ring-1 ring-primary/20 shadow-md" : ""}`}>
+                <CardContent className="p-3 sm:p-4">
+                  {/* Row 1: Header - Order#, Status, Total, Time */}
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      className="mt-1.5 shrink-0"
+                      checked={selectedIds.has(order.id)}
+                      onChange={() => toggleSelect(order.id)}
+                    />
+                    <div className="flex-1 min-w-0">
+                      {/* Top line: order number + date + status + total */}
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-sm font-bold">#{order.orderNumber}</span>
+                          <CopyButton text={order.orderNumber} label="Дугаар" />
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${statusColor(order.status)}`}>
+                            {statusLabel(order.status)}
                           </span>
-                          <span className="font-medium">{formatPrice(item.price)}</span>
                         </div>
-                      ))}
-                      <div className="flex justify-between text-sm pt-2 border-t">
-                        <span>Хүргэлт</span>
-                        <span>{formatPrice(order.shippingCost)}</span>
-                      </div>
-                      {order.discount && Number(order.discount) > 0 && (
-                        <div className="flex justify-between text-sm text-green-600">
-                          <span>Хөнгөлөлт{order.couponCode ? ` (${order.couponCode})` : ""}</span>
-                          <span>-{formatPrice(order.discount)}</span>
+                        <div className="flex items-center gap-3">
+                          <span className="font-bold text-base sm:text-lg">{formatPrice(order.total)}</span>
+                          <Select value={order.status} onValueChange={(v) => v && handleStatusChange(order.id, v)}>
+                            <SelectTrigger className="w-[110px] sm:w-[130px] h-8 text-xs">
+                              <SelectValue placeholder="Төлөв..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {STATUSES.map((s) => (
+                                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
-                      )}
-                      <div className="flex justify-between font-bold">
-                        <span>Нийт</span>
-                        <span>{formatPrice(order.total)}</span>
                       </div>
-                      {order.status === "cancelled" && (
-                        <div className="pt-3 border-t mt-2">
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            className="w-full sm:w-auto text-xs"
-                            onClick={(e) => { e.stopPropagation(); handleDeleteOrder(order.id); }}
-                          >
-                            <Trash2 className="mr-1 h-3 w-3" /> Захиалга устгах
-                          </Button>
+
+                      {/* Row 2: Customer info */}
+                      <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-1 text-sm">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-medium text-foreground">{order.customerName}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                          <Phone className="h-3.5 w-3.5 shrink-0" />
+                          <a href={`tel:${order.customerPhone}`} className="hover:text-foreground hover:underline">
+                            {order.customerPhone}
+                          </a>
+                          <CopyButton text={order.customerPhone} label="Утас" />
+                        </div>
+                        {order.customerEmail && (
+                          <div className="flex items-center gap-1.5 text-muted-foreground">
+                            <Mail className="h-3.5 w-3.5 shrink-0" />
+                            <span className="truncate text-xs">{order.customerEmail}</span>
+                            <CopyButton text={order.customerEmail} label="И-мэйл" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Row 3: Address */}
+                      <div className="mt-1.5 flex items-start gap-1.5 text-sm text-muted-foreground">
+                        <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                        <span>
+                          {order.city}{order.district ? `, ${order.district}` : ""}{order.shippingAddress ? ` — ${order.shippingAddress}` : ""}
+                        </span>
+                        {order.shippingAddress && (
+                          <CopyButton text={`${order.city}${order.district ? `, ${order.district}` : ""}, ${order.shippingAddress}`} label="Хаяг" />
+                        )}
+                      </div>
+
+                      {/* Row 4: Items summary + time */}
+                      <div className="mt-2 flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Package className="h-3.5 w-3.5" />
+                          <span className="font-medium">{totalItems} ш, {order.items.length} төрөл:</span>
+                          <span className="truncate max-w-[280px] sm:max-w-[400px]">
+                            {order.items.map((i) => `${i.name}${i.size ? `(${i.size})` : ""}×${i.quantity}`).join(", ")}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground shrink-0">
+                          <Clock className="h-3.5 w-3.5" />
+                          <span title={formatDateTime(order.createdAt)}>{formatRelativeTime(order.createdAt)}</span>
+                        </div>
+                      </div>
+
+                      {/* Row 5: Notes indicator + coupon + QPay */}
+                      <div className="mt-1.5 flex items-center gap-3 flex-wrap text-xs">
+                        {order.notes && (
+                          <span className="inline-flex items-center gap-1 text-amber-600 bg-amber-50 px-2 py-0.5 rounded">
+                            <StickyNote className="h-3 w-3" />
+                            Тэмдэглэлтэй
+                          </span>
+                        )}
+                        {order.couponCode && (
+                          <span className="inline-flex items-center gap-1 text-green-600 bg-green-50 px-2 py-0.5 rounded">
+                            <Tag className="h-3 w-3" />
+                            {order.couponCode} ({"\u2212"}{formatPrice(order.discount || "0")})
+                          </span>
+                        )}
+                        {order.qpayPaymentId && (
+                          <span className="inline-flex items-center gap-1 text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+                            <CreditCard className="h-3 w-3" />
+                            QPay төлөгдсөн
+                          </span>
+                        )}
+                        {!order.qpayPaymentId && order.qpayInvoiceId && (
+                          <span className="inline-flex items-center gap-1 text-orange-600 bg-orange-50 px-2 py-0.5 rounded">
+                            <CreditCard className="h-3 w-3" />
+                            QPay нэхэмжлэл
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Expand/Collapse toggle */}
+                      <button
+                        onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
+                        className="mt-2 flex items-center gap-1 text-xs text-primary hover:underline"
+                      >
+                        {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                        {isExpanded ? "Хураах" : "Дэлгэрэнгүй"}
+                      </button>
+
+                      {/* Expanded details panel */}
+                      {isExpanded && (
+                        <div className="mt-3 pt-3 border-t space-y-4">
+                          {/* Full datetime info */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                            <div>
+                              <span className="text-muted-foreground">Захиалсан:</span>{" "}
+                              <span className="font-medium">{formatDateTime(order.createdAt)}</span>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Шинэчилсэн:</span>{" "}
+                              <span className="font-medium">{formatDateTime(order.updatedAt)}</span>
+                            </div>
+                          </div>
+
+                          {/* Notes */}
+                          {order.notes && (
+                            <div className="bg-amber-50 border border-amber-200 rounded-md p-3">
+                              <p className="text-xs font-medium text-amber-800 mb-1 flex items-center gap-1">
+                                <StickyNote className="h-3.5 w-3.5" /> Тэмдэглэл:
+                              </p>
+                              <p className="text-sm text-amber-900">{order.notes}</p>
+                            </div>
+                          )}
+
+                          {/* Items table */}
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground mb-2">Барааны мэдээлэл:</p>
+                            <div className="border rounded-md overflow-hidden">
+                              <table className="w-full text-sm">
+                                <thead className="bg-muted/50">
+                                  <tr>
+                                    <th className="text-left px-3 py-2 text-xs font-medium">Бараа</th>
+                                    <th className="text-center px-2 py-2 text-xs font-medium">Хэмжээ</th>
+                                    <th className="text-center px-2 py-2 text-xs font-medium">Өнгө</th>
+                                    <th className="text-center px-2 py-2 text-xs font-medium">Тоо</th>
+                                    <th className="text-right px-3 py-2 text-xs font-medium">Нэг үнэ</th>
+                                    <th className="text-right px-3 py-2 text-xs font-medium">Нийт</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y">
+                                  {order.items.map((item) => (
+                                    <tr key={item.id} className="hover:bg-muted/30">
+                                      <td className="px-3 py-2 font-medium">{item.name}</td>
+                                      <td className="text-center px-2 py-2 text-muted-foreground">{item.size || "\u2014"}</td>
+                                      <td className="text-center px-2 py-2 text-muted-foreground">{item.color || "\u2014"}</td>
+                                      <td className="text-center px-2 py-2">{item.quantity}</td>
+                                      <td className="text-right px-3 py-2">{formatPrice(item.price)}</td>
+                                      <td className="text-right px-3 py-2 font-medium">
+                                        {formatPrice(String(Number(item.price) * item.quantity))}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+
+                          {/* Financial breakdown */}
+                          <div className="bg-muted/30 rounded-md p-3">
+                            <p className="text-xs font-medium text-muted-foreground mb-2">Төлбөрийн мэдээлэл:</p>
+                            <div className="space-y-1.5 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Дүн (subtotal)</span>
+                                <span>{formatPrice(order.subtotal)}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Хүргэлтийн төлбөр</span>
+                                <span>{formatPrice(order.shippingCost)}</span>
+                              </div>
+                              {order.discount && Number(order.discount) > 0 && (
+                                <div className="flex justify-between text-green-600">
+                                  <span>Хөнгөлөлт{order.couponCode ? ` (${order.couponCode})` : ""}</span>
+                                  <span>{"\u2212"}{formatPrice(order.discount)}</span>
+                                </div>
+                              )}
+                              <div className="flex justify-between font-bold text-base pt-1.5 border-t">
+                                <span>Нийт төлбөр</span>
+                                <span>{formatPrice(order.total)}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* QPay details */}
+                          {(order.qpayInvoiceId || order.qpayPaymentId) && (
+                            <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                              <p className="text-xs font-medium text-blue-800 mb-2 flex items-center gap-1">
+                                <CreditCard className="h-3.5 w-3.5" /> QPay мэдээлэл:
+                              </p>
+                              <div className="space-y-1 text-xs">
+                                {order.qpayInvoiceId && (
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-blue-700">Invoice ID:</span>
+                                    <code className="bg-blue-100 px-1.5 py-0.5 rounded text-blue-900 font-mono text-xs">
+                                      {order.qpayInvoiceId}
+                                    </code>
+                                    <CopyButton text={order.qpayInvoiceId} label="Invoice ID" />
+                                  </div>
+                                )}
+                                {order.qpayPaymentId && (
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-blue-700">Payment ID:</span>
+                                    <code className="bg-blue-100 px-1.5 py-0.5 rounded text-blue-900 font-mono text-xs">
+                                      {order.qpayPaymentId}
+                                    </code>
+                                    <CopyButton text={order.qpayPaymentId} label="Payment ID" />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Order ID */}
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span>ID:</span>
+                            <code className="bg-muted px-1.5 py-0.5 rounded font-mono">{order.id}</code>
+                            <CopyButton text={order.id} label="Order ID" />
+                          </div>
+
+                          {/* Delete for cancelled */}
+                          {order.status === "cancelled" && (
+                            <div className="pt-3 border-t">
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="text-xs"
+                                onClick={(e) => { e.stopPropagation(); handleDeleteOrder(order.id); }}
+                              >
+                                <Trash2 className="mr-1 h-3 w-3" /> Захиалга устгах
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 

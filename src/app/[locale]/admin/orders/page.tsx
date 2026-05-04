@@ -22,8 +22,11 @@ export default async function AdminOrdersPage() {
       shippingCost: true,
       discount: true,
       couponCode: true,
+      qpayInvoiceId: true,
+      qpayPaymentId: true,
       notes: true,
       createdAt: true,
+      updatedAt: true,
     },
     with: {
       items: {
@@ -56,8 +59,11 @@ export default async function AdminOrdersPage() {
     shippingCost: o.shippingCost || "0",
     discount: o.discount,
     couponCode: o.couponCode,
+    qpayInvoiceId: o.qpayInvoiceId,
+    qpayPaymentId: o.qpayPaymentId,
     notes: o.notes,
     createdAt: o.createdAt.toISOString(),
+    updatedAt: o.updatedAt.toISOString(),
     items: o.items.map((item) => ({
       id: item.id,
       name: item.name,
