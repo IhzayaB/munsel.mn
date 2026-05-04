@@ -166,10 +166,7 @@
     "hasAccount": "Бүртгэлтэй юу?",
     "signIn": "Нэвтрэх",
     "signUp": "Бүртгүүлэх",
-    "orContinueWith": "Эсвэл",
-    "continueGoogle": "Google-ээр нэвтрэх",
-    "continueFacebook": "Facebook-ээр нэвтрэх",
-    "continueX": "X-ээр нэвтрэх",
+
     "invalidCredentials": "И-мэйл эсвэл нууц үг буруу байна",
     "welcome": "Тавтай морил!",
     "loginError": "Алдаа гарлаа. Дахин оролдоно уу",
