@@ -31,25 +31,6 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    const allowedTransitions: Record<string, string[]> = {
-      pending: ["paid", "cancelled"],
-      paid: ["processing", "cancelled"],
-      processing: ["shipped", "cancelled"],
-      shipped: ["delivered", "cancelled"],
-      delivered: [],
-      cancelled: ["pending"],
-    };
-
-    const allowedNext = allowedTransitions[order.status] || [];
-    if (!allowedNext.includes(status)) {
-      return NextResponse.json(
-        {
-          error: `Төлөв солих боломжгүй: ${order.status} -> ${status}`,
-        },
-        { status: 400 }
-      );
-    }
-
     await db
       .update(orders)
       .set({ status, updatedAt: new Date() })
