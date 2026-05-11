@@ -127,3 +127,32 @@ export async function sendAdminPasswordResetEmail(data: { resetUrl: string }) {
     return { success: false, error };
   }
 }
+
+interface InfoEmailData {
+  to: string;
+  subject: string;
+  html: string;
+  replyTo?: string;
+}
+
+export async function sendInfoEmail(data: InfoEmailData) {
+  const resend = getResendClient();
+  if (!resend) {
+    console.log("RESEND_API_KEY not set, skipping info email");
+    return { success: false, error: "RESEND_API_KEY not configured" };
+  }
+
+  try {
+    await resend.emails.send({
+      from: "Pajama.mn Info <info@pajama.mn>",
+      to: data.to,
+      subject: data.subject,
+      html: data.html,
+      replyTo: data.replyTo,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to send info email:", error);
+    return { success: false, error };
+  }
+}

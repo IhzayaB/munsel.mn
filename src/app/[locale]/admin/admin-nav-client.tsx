@@ -11,6 +11,7 @@ import {
   Warehouse,
   Users,
   Settings,
+  Mail,
 } from "lucide-react";
 
 const iconMap = {
@@ -22,6 +23,7 @@ const iconMap = {
   Warehouse,
   Users,
   Settings,
+  Mail,
 } as const;
 
 interface NavItem {

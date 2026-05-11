@@ -205,10 +205,10 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
-      const res = await fetch("/api/admin/orders", {
-        method: "PATCH",
+      const res = await fetch("/api/admin/orders/update-status-with-email", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId, status: newStatus }),
+        body: JSON.stringify({ orderId, status: newStatus, sendNotification: true }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -244,10 +244,10 @@ export function OrdersClient({ orders: initialOrders }: { orders: Order[] }) {
     try {
       const results = await Promise.allSettled(
         Array.from(selectedIds).map(async (id) => {
-          const res = await fetch("/api/admin/orders", {
-            method: "PATCH",
+          const res = await fetch("/api/admin/orders/update-status-with-email", {
+            method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ orderId: id, status: newStatus }),
+            body: JSON.stringify({ orderId: id, status: newStatus, sendNotification: true }),
           });
           if (!res.ok) throw new Error(id);
           return id;

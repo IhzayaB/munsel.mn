@@ -23,6 +23,7 @@ export default async function AdminLayout({
     { href: "/admin/coupons", label: "Купон", icon: "Ticket" as const },
     { href: "/admin/stock", label: "Нөөц", icon: "Warehouse" as const },
     { href: "/admin/customers", label: "Хэрэглэгч", icon: "Users" as const },
+    { href: "/admin/email", label: "Имэйл", icon: "Mail" as const },
     { href: "/admin/settings", label: "Тохиргоо", icon: "Settings" as const },
   ];
 

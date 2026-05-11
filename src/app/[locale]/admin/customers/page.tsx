@@ -13,7 +13,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatPrice } from "@/lib/utils";
-import { Search, Users, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Loader2, ArrowUpDown } from "lucide-react";
+import { Search, Users, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Loader2, ArrowUpDown, Mail } from "lucide-react";
+import { EmailComposer } from "@/components/admin/email-composer";
+import { toast } from "sonner";
 
 interface CustomerOrder {
   id: string;
@@ -54,6 +56,9 @@ export default function CustomersPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [customerOrders, setCustomerOrders] = useState<Record<string, CustomerOrder[]>>({});
   const [loadingOrders, setLoadingOrders] = useState<string | null>(null);
+  const [emailComposerOpen, setEmailComposerOpen] = useState(false);
+  const [selectedCustomerEmail, setSelectedCustomerEmail] = useState<string | null>(null);
+  const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetch("/api/admin/customers")
@@ -120,7 +125,7 @@ export default function CustomersPage() {
           <Users className="h-5 w-5 sm:h-6 sm:w-6" /> Хэрэглэгчид
           <Badge variant="secondary" className="text-xs">{customers.length}</Badge>
         </h1>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="relative flex-1 sm:flex-none">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -140,6 +145,16 @@ export default function CustomersPage() {
               <SelectItem value="spent">Зарцуулсанаар</SelectItem>
             </SelectContent>
           </Select>
+          {selectedEmails.size > 0 && (
+            <Button
+              size="sm"
+              onClick={() => setEmailComposerOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Mail className="h-4 w-4 mr-2" />
+              Илгээх ({selectedEmails.size})
+            </Button>
+          )}
         </div>
       </div>
 
@@ -154,11 +169,25 @@ export default function CustomersPage() {
           {paginated.map((c) => (
             <Card key={c.id}>
               <CardContent className="p-3 sm:p-4">
-                <div
-                  className="flex items-center justify-between gap-3 cursor-pointer"
-                  onClick={() => toggleExpand(c.id)}
-                >
-                  <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedEmails.has(c.email)}
+                    onChange={(e) => {
+                      const newSet = new Set(selectedEmails);
+                      if (e.target.checked) {
+                        newSet.add(c.email);
+                      } else {
+                        newSet.delete(c.email);
+                      }
+                      setSelectedEmails(newSet);
+                    }}
+                    className="w-4 h-4"
+                  />
+                  <div
+                    className="flex-1 cursor-pointer"
+                    onClick={() => toggleExpand(c.id)}
+                  >
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-medium text-sm">{c.name || "—"}</p>
                       <Badge variant={c.role === "admin" ? "default" : "secondary"} className="text-[10px] px-1.5 py-0">
@@ -167,7 +196,7 @@ export default function CustomersPage() {
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">{c.email} {c.phone ? `• ${c.phone}` : ""}</p>
                   </div>
-                  <div className="flex items-center gap-3 sm:gap-6 shrink-0 text-right">
+                  <div className="flex items-center gap-2 sm:gap-6 shrink-0 text-right">
                     <div className="hidden sm:block">
                       <p className="text-sm font-bold">{c.orderCount}</p>
                       <p className="text-[10px] text-muted-foreground">захиалга</p>
@@ -176,6 +205,18 @@ export default function CustomersPage() {
                       <p className="text-sm font-bold">{formatPrice(c.totalSpent)}</p>
                       <p className="text-[10px] text-muted-foreground">зарцуулсан</p>
                     </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setSelectedCustomerEmail(c.email);
+                        setEmailComposerOpen(true);
+                      }}
+                      className="h-8 w-8 p-0"
+                      title="Имэйл илгээх"
+                    >
+                      <Mail className="h-4 w-4" />
+                    </Button>
                     {expandedId === c.id ? (
                       <ChevronUp className="h-4 w-4 text-muted-foreground" />
                     ) : (
@@ -241,6 +282,21 @@ export default function CustomersPage() {
           </div>
         </div>
       )}
+
+      <EmailComposer
+        isOpen={emailComposerOpen}
+        onClose={() => {
+          setEmailComposerOpen(false);
+          setSelectedCustomerEmail(null);
+          setSelectedEmails(new Set());
+        }}
+        recipients={selectedCustomerEmail ? selectedCustomerEmail : Array.from(selectedEmails)}
+        recipientLabel={
+          selectedCustomerEmail 
+            ? "Хүлээн авагч"
+            : `${selectedEmails.size} хэрэглэгч сонгосон`
+        }
+      />
     </div>
   );
 }
