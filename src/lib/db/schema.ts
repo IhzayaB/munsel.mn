@@ -36,6 +36,29 @@ export const productSizeEnum = pgEnum("product_size", [
   "4T",
 ]);
 
+export const productColorEnum = pgEnum("product_color", [
+  "red",
+  "blue",
+  "green",
+  "yellow",
+  "black",
+  "white",
+]);
+
+export const productMaterialEnum = pgEnum("product_material", [
+  "cotton",
+  "wool",
+  "silk",
+  "polyester",
+]);
+
+export const productStyleEnum = pgEnum("product_style", [
+  "casual",
+  "formal",
+  "sport",
+  "sleepwear",
+]);
+
 // ── Users ──────────────────────────────────────────
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -112,6 +135,12 @@ export const products = pgTable("products", {
   ageRange: varchar("age_range", { length: 50 }),
   material: varchar("material", { length: 255 }),
   materialMn: varchar("material_mn", { length: 255 }),
+  hasColorCategory: boolean("has_color_category").default(false),
+  colorOptions: jsonb("color_options"),
+  hasMaterialCategory: boolean("has_material_category").default(false),
+  materialOptions: jsonb("material_options"),
+  hasStyleCategory: boolean("has_style_category").default(false),
+  styleOptions: jsonb("style_options"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ([

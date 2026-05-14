@@ -20,6 +20,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 import { DeleteProductButton } from "./delete-product-button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Product {
   id: string;
@@ -31,6 +32,8 @@ interface Product {
   createdAt?: string;
   category?: { nameMn: string } | null;
   variants?: { id: string; stock?: number }[] | null;
+  hasColorCategory?: boolean;
+  colorOptions?: string[];
 }
 
 interface Category {
