@@ -6,109 +6,8 @@ import { redirect } from "next/navigation";
 import { ProductDetailClient } from "./product-detail-client";
 import type { Metadata } from "next";
 import { sanitizeSlug } from "@/lib/utils";
-import { unstable_cache } from "next/cache";
 
 export const revalidate = 60;
-
-async function getProductBySlug(slug: string) {
-  const sanitized = sanitizeSlug(slug);
-
-  return unstable_cache(
-    async () => {
-      return db.query.products.findFirst({
-        where: or(
-          eq(products.slug, slug),
-          eq(sql`trim(${products.slug})`, slug),
-          ...(sanitized && sanitized !== slug ? [eq(products.slug, sanitized)] : [])
-        ),
-        with: {
-          category: {
-            columns: {
-              id: true,
-              nameMn: true,
-            },
-          },
-          variants: {
-            columns: {
-              id: true,
-              size: true,
-              color: true,
-              stock: true,
-            },
-          },
-        },
-        columns: {
-          id: true,
-          name: true,
-          nameMn: true,
-          slug: true,
-          descriptionMn: true,
-          price: true,
-          compareAtPrice: true,
-          images: true,
-          ageRange: true,
-          materialMn: true,
-          categoryId: true,
-          active: true,
-        },
-      });
-    },
-    [`product-detail:${slug}:${sanitized ?? ""}`],
-    { revalidate: 60, tags: ["products"] }
-  )();
-}
-
-async function getRelatedProductsByCategory(categoryId: string) {
-  return unstable_cache(
-    async () => {
-      return db.query.products.findMany({
-        where: eq(products.categoryId, categoryId),
-        columns: {
-          id: true,
-          name: true,
-          nameMn: true,
-          slug: true,
-          price: true,
-          compareAtPrice: true,
-          images: true,
-          featured: true,
-          ageRange: true,
-          active: true,
-        },
-        with: {
-          category: {
-            columns: {
-              name: true,
-              nameMn: true,
-            },
-          },
-          variants: {
-            columns: {
-              id: true,
-              size: true,
-              stock: true,
-            },
-          },
-        },
-        limit: 6,
-      });
-    },
-    [`related-products:${categoryId}`],
-    { revalidate: 60, tags: ["products", "categories"] }
-  )();
-}
-
-export async function generateStaticParams() {
-  const slugs = await db.query.products.findMany({
-    where: eq(products.active, true),
-    columns: { slug: true },
-  });
-
-  return slugs
-    .map(({ slug }) => sanitizeSlug(slug))
-    .filter((slug): slug is string => Boolean(slug))
-    .map((slug) => ({ slug }));
-}
 
 export async function generateMetadata({
   params,
@@ -116,7 +15,14 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  const sanitized = sanitizeSlug(slug);
+  const product = await db.query.products.findFirst({
+    where: or(
+      eq(products.slug, slug),
+      eq(sql`trim(${products.slug})`, slug),
+      ...(sanitized && sanitized !== slug ? [eq(products.slug, sanitized)] : [])
+    ),
+  });
 
   if (!product) return { title: "Олдсонгүй" };
 
@@ -157,7 +63,45 @@ export default async function ProductDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  const sanitized = sanitizeSlug(slug);
+
+  const product = await db.query.products.findFirst({
+    where: or(
+      eq(products.slug, slug),
+      eq(sql`trim(${products.slug})`, slug),
+      ...(sanitized && sanitized !== slug ? [eq(products.slug, sanitized)] : [])
+    ),
+    with: {
+      category: {
+        columns: {
+          id: true,
+          nameMn: true,
+        },
+      },
+      variants: {
+        columns: {
+          id: true,
+          size: true,
+          color: true,
+          stock: true,
+        },
+      },
+    },
+    columns: {
+      id: true,
+      name: true,
+      nameMn: true,
+      slug: true,
+      descriptionMn: true,
+      price: true,
+      compareAtPrice: true,
+      images: true,
+      ageRange: true,
+      materialMn: true,
+      categoryId: true,
+      active: true,
+    },
+  });
 
   if (!product || !product.active) {
     notFound();
@@ -171,7 +115,37 @@ export default async function ProductDetailPage({
 
   // Get related products from same category (in stock only)
   const relatedRaw = product.categoryId
-    ? await getRelatedProductsByCategory(product.categoryId)
+    ? await db.query.products.findMany({
+        where: eq(products.categoryId, product.categoryId),
+        columns: {
+          id: true,
+          name: true,
+          nameMn: true,
+          slug: true,
+          price: true,
+          compareAtPrice: true,
+          images: true,
+          featured: true,
+          ageRange: true,
+          active: true,
+        },
+        with: {
+          category: {
+            columns: {
+              name: true,
+              nameMn: true,
+            },
+          },
+          variants: {
+            columns: {
+              id: true,
+              size: true,
+              stock: true,
+            },
+          },
+        },
+        limit: 6,
+      })
     : [];
   const related = relatedRaw.filter((p) => {
     if (p.id === product.id) return false;
