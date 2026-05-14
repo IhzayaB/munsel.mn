@@ -12,8 +12,6 @@ export default async function AdminProductsPage() {
         nameMn: true,
         price: true,
         active: true,
-        hasColorCategory: true,
-        colorOptions: true,
         images: true,
         createdAt: true,
       },
@@ -26,6 +24,8 @@ export default async function AdminProductsPage() {
         variants: {
           columns: {
             id: true,
+            color: true,
+            colorMn: true,
             stock: true,
           },
         },
@@ -35,22 +35,32 @@ export default async function AdminProductsPage() {
     db.select({ id: categories.id, nameMn: categories.nameMn }).from(categories).orderBy(categories.nameMn),
   ]);
 
-  const serializedProducts = allProducts.map((p) => ({
+  const serializedProducts = allProducts.map((p) => {
+    const colorOptions = Array.from(
+      new Set(
+        (p.variants || [])
+          .map((v) => v.colorMn || v.color)
+          .filter((c): c is string => Boolean(c && c.trim()))
+      )
+    );
+
+    return {
     id: p.id,
     name: p.name,
     nameMn: p.nameMn,
     price: p.price,
     active: Boolean(p.active),
-    hasColorCategory: Boolean(p.hasColorCategory),
-    colorOptions: (p.colorOptions as string[] | null) ?? [],
+    hasColorCategory: colorOptions.length > 0,
+    colorOptions,
     images: p.images,
-    createdAt: p.createdAt.toISOString(),
+    createdAt: p.createdAt ? p.createdAt.toISOString() : new Date(0).toISOString(),
     category: p.category ? { nameMn: p.category.nameMn } : null,
     variants: (p.variants || []).map((v) => ({
       id: v.id,
       stock: v.stock ?? undefined,
     })),
-  }));
+  };
+  });
 
   return (
     <ProductsClient
