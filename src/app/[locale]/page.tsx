@@ -3,8 +3,98 @@ import { products, categories } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { HomeClient } from "./home-client";
 import type { Metadata } from "next";
+import { unstable_cache } from "next/cache";
 
 export const revalidate = 60;
+
+const getHomePageData = unstable_cache(
+  async () => {
+    const allProductsRaw = await db.query.products.findMany({
+      where: eq(products.active, true),
+      columns: {
+        id: true,
+        name: true,
+        nameMn: true,
+        slug: true,
+        price: true,
+        compareAtPrice: true,
+        images: true,
+        featured: true,
+        ageRange: true,
+        categoryId: true,
+        createdAt: true,
+      },
+      with: {
+        category: {
+          columns: {
+            name: true,
+            nameMn: true,
+            priority: true,
+          },
+        },
+        variants: {
+          columns: {
+            id: true,
+            size: true,
+            stock: true,
+          },
+        },
+      },
+      orderBy: [desc(products.featured), desc(products.createdAt)],
+    });
+
+    const allProducts = allProductsRaw
+      .filter((p) => {
+        if (!p.variants || p.variants.length === 0) return true;
+        return p.variants.some((v) => v.stock > 0);
+      })
+      .sort((a, b) => {
+        const priA = a.category?.priority ?? 0;
+        const priB = b.category?.priority ?? 0;
+        if (priB !== priA) return priB - priA;
+        if (a.featured !== b.featured) return a.featured ? -1 : 1;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+
+    const allCategories = await db.query.categories.findMany({
+      columns: {
+        id: true,
+        name: true,
+        nameMn: true,
+        priority: true,
+      },
+      orderBy: [desc(categories.priority)],
+    });
+
+    const serializedProducts = allProducts.map((p) => ({
+      id: p.id,
+      name: p.name,
+      nameMn: p.nameMn,
+      slug: p.slug,
+      price: p.price,
+      compareAtPrice: p.compareAtPrice,
+      images: p.images || [],
+      featured: Boolean(p.featured),
+      ageRange: p.ageRange,
+      categoryId: p.categoryId,
+      category: p.category
+        ? {
+            name: p.category.name,
+            nameMn: p.category.nameMn,
+          }
+        : null,
+      variants: p.variants?.map((v) => ({
+        id: v.id,
+        size: v.size || undefined,
+        stock: v.stock,
+      })),
+    }));
+
+    return { serializedProducts, allCategories };
+  },
+  ["home-page-data"],
+  { revalidate: 60, tags: ["products", "categories"] }
+);
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -36,88 +126,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const allProductsRaw = await db.query.products.findMany({
-    where: eq(products.active, true),
-    columns: {
-      id: true,
-      name: true,
-      nameMn: true,
-      slug: true,
-      price: true,
-      compareAtPrice: true,
-      images: true,
-      featured: true,
-      ageRange: true,
-      categoryId: true,
-      createdAt: true,
-    },
-    with: {
-      category: {
-        columns: {
-          name: true,
-          nameMn: true,
-          priority: true,
-        },
-      },
-      variants: {
-        columns: {
-          id: true,
-          size: true,
-          stock: true,
-        },
-      },
-    },
-    orderBy: [desc(products.featured), desc(products.createdAt)],
-  });
-
-  // Filter out products with zero total stock
-  const allProducts = allProductsRaw
-    .filter((p) => {
-      if (!p.variants || p.variants.length === 0) return true;
-      return p.variants.some((v) => v.stock > 0);
-    })
-    .sort((a, b) => {
-      // Sort by category priority (high → low), then featured, then newest
-      const priA = a.category?.priority ?? 0;
-      const priB = b.category?.priority ?? 0;
-      if (priB !== priA) return priB - priA;
-      if (a.featured !== b.featured) return a.featured ? -1 : 1;
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
-
-  const allCategories = await db.query.categories.findMany({
-    columns: {
-      id: true,
-      name: true,
-      nameMn: true,
-      priority: true,
-    },
-    orderBy: [desc(categories.priority)],
-  });
-
-  const serializedProducts = allProducts.map((p) => ({
-    id: p.id,
-    name: p.name,
-    nameMn: p.nameMn,
-    slug: p.slug,
-    price: p.price,
-    compareAtPrice: p.compareAtPrice,
-    images: p.images || [],
-    featured: Boolean(p.featured),
-    ageRange: p.ageRange,
-    categoryId: p.categoryId,
-    category: p.category
-      ? {
-          name: p.category.name,
-          nameMn: p.category.nameMn,
-        }
-      : null,
-    variants: p.variants?.map((v) => ({
-      id: v.id,
-      size: v.size || undefined,
-      stock: v.stock,
-    })),
-  }));
+  const { serializedProducts, allCategories } = await getHomePageData();
 
   const jsonLd = {
     "@context": "https://schema.org",

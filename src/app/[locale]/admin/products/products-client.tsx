@@ -16,11 +16,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, Pencil, Search, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 import { DeleteProductButton } from "./delete-product-button";
-import { Checkbox } from "@/components/ui/checkbox";
 
 interface Product {
   id: string;
@@ -181,6 +180,7 @@ export function ProductsClient({ products, categories }: { products: Product[]; 
                       <TableCell>
                         <p className="font-medium">{product.nameMn}</p>
                         <p className="text-xs text-muted-foreground">{product.name}</p>
+                        {product.hasColorCategory && <p className="text-xs text-muted-foreground">Өнгө: {product.colorOptions?.join(", ") || "—"}</p>}
                       </TableCell>
                       <TableCell>{product.category?.nameMn || "—"}</TableCell>
                       <TableCell>{formatPrice(product.price)}</TableCell>
@@ -236,6 +236,9 @@ export function ProductsClient({ products, categories }: { products: Product[]; 
                     <div className="min-w-0 flex-1">
                       <p className="font-medium text-sm truncate">{product.nameMn}</p>
                       <p className="text-xs text-muted-foreground">{product.category?.nameMn || "—"} • Нөөц: {stock}</p>
+                      {product.hasColorCategory && (
+                        <p className="text-xs text-muted-foreground truncate">Өнгө: {product.colorOptions?.join(", ") || "—"}</p>
+                      )}
                       <div className="flex items-center gap-2 mt-1">
                         <span className="font-bold text-sm">{formatPrice(product.price)}</span>
                         <Badge variant={product.active ? "default" : "secondary"} className="text-[10px] px-1.5 py-0">

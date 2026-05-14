@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2, Plus, Trash2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import Image from "next/image";
 
 const SIZES = [
@@ -57,7 +57,18 @@ export default function NewProductPage() {
   ]);
 
   useEffect(() => {
-    fetch("/api/admin/categories").then(r => r.json()).then(setCategories).catch(() => {});
+    const loadCategories = async () => {
+      try {
+        const res = await fetch("/api/admin/categories");
+        if (!res.ok) throw new Error("Ангиллын мэдээлэл татаж чадсангүй");
+        const data = await res.json();
+        setCategories(data);
+      } catch {
+        toast.error("Ангиллын мэдээлэл ачаалахад алдаа гарлаа");
+      }
+    };
+
+    void loadCategories();
   }, []);
 
   const addVariant = () => {

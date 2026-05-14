@@ -21,7 +21,8 @@ import {
 } from "@/components/ui/select";
 import { Loader2, Plus, Trash2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import Image from "next/image";
 
 const SIZES = [
@@ -62,10 +63,27 @@ export default function EditProductPage() {
   ]);
 
   useEffect(() => {
-    fetch("/api/admin/categories").then(r => r.json()).then(setCategories).catch(() => {});
-    fetch(`/api/admin/products/${productId}`)
-      .then((r) => r.json())
-      .then((product) => {
+    const load = async () => {
+      try {
+        const [categoriesRes, productRes] = await Promise.all([
+          fetch("/api/admin/categories"),
+          fetch(`/api/admin/products/${productId}`),
+        ]);
+
+        if (!categoriesRes.ok) {
+          throw new Error("Ангиллын мэдээлэл татаж чадсангүй");
+        }
+        if (!productRes.ok) {
+          const errorData = await productRes.json().catch(() => ({}));
+          throw new Error(errorData.error || "Бүтээгдэхүүн олдсонгүй");
+        }
+
+        const [categoriesData, product] = await Promise.all([
+          categoriesRes.json(),
+          productRes.json(),
+        ]);
+
+        setCategories(categoriesData);
         setForm({
           name: product.name,
           nameMn: product.nameMn,
@@ -94,12 +112,14 @@ export default function EditProductPage() {
             }))
           );
         }
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Бүтээгдэхүүний мэдээллийг ачаалахад алдаа гарлаа. Та дахин оролдоно уу.");
+      } finally {
         setFetching(false);
-      })
-      .catch(() => {
-        toast.error("Бүтээгдэхүүн ачаалахад алдаа гарлаа");
-        setFetching(false);
-      });
+      }
+    };
+
+    void load();
   }, [productId]);
 
   const addVariant = () => {

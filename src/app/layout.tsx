@@ -6,14 +6,14 @@ const montserrat = Montserrat({
   variable: "--font-sans",
   subsets: ["latin", "cyrillic"],
   display: "swap",
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "600", "700"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
   display: "swap",
-  weight: ["400", "500"],
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {

@@ -4,7 +4,12 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
+  compress: true,
+  poweredByHeader: false,
   serverExternalPackages: ["cloudinary", "postgres"],
+  experimental: {
+    optimizePackageImports: ["lucide-react", "sonner"],
+  },
   images: {
     // Custom loader: serves Cloudinary images directly from Cloudinary CDN
     // with f_auto/q_auto/w_{size} transforms, bypassing Vercel Image Optimization.
