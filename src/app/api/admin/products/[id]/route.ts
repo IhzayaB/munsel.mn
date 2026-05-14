@@ -44,7 +44,19 @@ export async function PUT(
       name, nameMn, slug, description, descriptionMn,
       price, compareAtPrice, material, materialMn,
       ageRange, featured, active, images, categoryId, variants,
+      hasColorCategory, colorOptions,
     } = body;
+
+    const normalizedColorOptions = Array.from(
+      new Set(
+        (Array.isArray(colorOptions) ? colorOptions : [])
+          .map((c) => (typeof c === "string" ? c.trim() : ""))
+          .filter((c) => c.length > 0)
+      )
+    );
+
+    const resolvedHasColorCategory =
+      hasColorCategory === true || normalizedColorOptions.length > 0;
 
     // Sanitize and check slug uniqueness (exclude current product)
     const cleanSlug = slug ? sanitizeSlug(slug) : undefined;
@@ -89,6 +101,10 @@ export async function PUT(
     if (active !== undefined) updateData.active = !!active;
     if (images !== undefined) updateData.images = images || [];
     if (categoryId !== undefined) updateData.categoryId = categoryId || null;
+    if (hasColorCategory !== undefined || colorOptions !== undefined) {
+      updateData.hasColorCategory = resolvedHasColorCategory;
+      updateData.colorOptions = resolvedHasColorCategory ? normalizedColorOptions : [];
+    }
 
     await db
       .update(products)

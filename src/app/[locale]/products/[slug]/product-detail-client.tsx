@@ -78,6 +78,22 @@ export function ProductDetailClient({
   const isWished = useWishlistStore((s) => s.has(product.id));
   const [wishMounted, setWishMounted] = useState(false);
 
+  const colorOptions = Array.from(
+    new Set(
+      (product.variants || [])
+        .map((v) => (v.color || "").trim())
+        .filter((c): c is string => c.length > 0)
+    )
+  );
+  const [selectedColor, setSelectedColor] = useState<string | null>(
+    colorOptions[0] || null
+  );
+
+  const filteredVariants = (product.variants || []).filter((v) => {
+    if (!selectedColor) return true;
+    return (v.color || "").trim() === selectedColor;
+  });
+
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants?.[0] || null
   );
@@ -141,6 +157,24 @@ export function ProductDetailClient({
   useEffect(() => {
     setWishMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!selectedColor) return;
+    const variantsByColor = (product.variants || []).filter(
+      (v) => (v.color || "").trim() === selectedColor
+    );
+    if (variantsByColor.length === 0) return;
+
+    if (
+      !selectedVariant ||
+      (selectedVariant.color || "").trim() !== selectedColor
+    ) {
+      setSelectedVariant(
+        variantsByColor.find((v) => v.stock > 0) || variantsByColor[0]
+      );
+      setQuantity(1);
+    }
+  }, [selectedColor, product.variants, selectedVariant]);
 
   const handleVariantChange = (variant: typeof selectedVariant) => {
     setSelectedVariant(variant);
@@ -302,7 +336,38 @@ export function ProductDetailClient({
           </div>
 
           {/* Size selection */}
-          {product.variants && product.variants.length > 0 && product.variants.some(v => v.size) && (
+          {colorOptions.length > 0 && (
+            <div className="mb-4 sm:mb-6">
+              <p className="font-medium mb-2">Өнгө сонгох</p>
+              <div className="flex flex-wrap gap-2">
+                {colorOptions.map((color) => {
+                  const anyInStock = (product.variants || []).some(
+                    (v) => (v.color || "").trim() === color && v.stock > 0
+                  );
+                  return (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setSelectedColor(color)}
+                      disabled={!anyInStock}
+                      className={`px-3.5 py-2.5 sm:px-4 sm:py-2.5 rounded-lg border text-sm font-medium transition-colors min-w-[44px] min-h-[44px] ${
+                        selectedColor === color
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : !anyInStock
+                          ? "border-muted text-muted-foreground cursor-not-allowed line-through"
+                          : "border-border hover:border-primary active:bg-accent"
+                      }`}
+                    >
+                      {color}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Size selection */}
+          {filteredVariants.length > 0 && filteredVariants.some(v => v.size) && (
             <div className="mb-4 sm:mb-6">
               <div className="flex items-center justify-between mb-2">
                 <p className="font-medium">{t("selectSize")}</p>
@@ -316,7 +381,7 @@ export function ProductDetailClient({
                 </button>
               </div>
               <div className="flex flex-wrap gap-2">
-                {product.variants.map((variant) => (
+                {filteredVariants.map((variant) => (
                   <button
                     key={variant.id}
                     onClick={() => handleVariantChange(variant)}

@@ -30,6 +30,19 @@ const SIZES = [
   "12-18M", "18-24M", "2T", "3T", "4T",
 ];
 
+const PRESET_COLORS = [
+  "Цагаан",
+  "Улбар шар",
+  "Хар",
+  "Саарал",
+  "Ягаан",
+  "Цэнхэр",
+  "Ногоон",
+  "Шар",
+  "Улаан",
+  "Хөх",
+];
+
 interface Category { id: string; name: string; nameMn: string; }
 
 export default function EditProductPage() {
@@ -56,11 +69,15 @@ export default function EditProductPage() {
     featured: false,
     active: true,
     categoryId: "",
+    hasColorCategory: false,
+    colorOptions: [] as string[],
   });
 
   const [variants, setVariants] = useState<Array<{ id?: string; size: string; color: string; colorMn: string; stock: number; sku: string }>>([
     { size: "", color: "", colorMn: "", stock: 10, sku: "" },
   ]);
+
+  const [newColor, setNewColor] = useState("");
 
   useEffect(() => {
     const load = async () => {
@@ -98,19 +115,37 @@ export default function EditProductPage() {
           featured: product.featured || false,
           active: product.active !== false,
           categoryId: product.categoryId || "",
+          hasColorCategory: Boolean(product.hasColorCategory),
+          colorOptions: Array.isArray(product.colorOptions)
+            ? product.colorOptions.filter((c: unknown): c is string => typeof c === "string" && c.trim().length > 0)
+            : [],
         });
         setImages(product.images || []);
         if (product.variants?.length) {
-          setVariants(
-            product.variants.map((v: { id: string; size: string; color?: string; colorMn?: string; stock: number; sku?: string }) => ({
+          const mappedVariants = product.variants.map((v: { id: string; size: string; color?: string; colorMn?: string; stock: number; sku?: string }) => ({
               id: v.id,
               size: v.size || "",
               color: v.color || "",
               colorMn: v.colorMn || "",
               stock: v.stock,
               sku: v.sku || "",
-            }))
+            }));
+          setVariants(mappedVariants);
+
+          const variantColors: string[] = Array.from(
+            new Set(
+              mappedVariants
+                .map((v: { color?: string; colorMn?: string }) => v.colorMn || v.color)
+                .filter((c: string | undefined): c is string => Boolean(c && c.trim()))
+            )
           );
+          if (variantColors.length > 0) {
+            setForm((prev) => ({
+              ...prev,
+              hasColorCategory: true,
+              colorOptions: Array.from(new Set<string>([...(prev.colorOptions || []), ...variantColors])),
+            }));
+          }
         }
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Бүтээгдэхүүний мэдээллийг ачаалахад алдаа гарлаа. Та дахин оролдоно уу.");
@@ -136,6 +171,29 @@ export default function EditProductPage() {
   const updateVariant = (index: number, field: string, value: string | number) => {
     setVariants(
       variants.map((v, i) => (i === index ? { ...v, [field]: value } : v))
+    );
+  };
+
+  const addColorOption = (input?: string) => {
+    const value = (input ?? newColor).trim();
+    if (!value) return;
+    if (form.colorOptions.includes(value)) {
+      setNewColor("");
+      return;
+    }
+    setForm({ ...form, hasColorCategory: true, colorOptions: [...form.colorOptions, value] });
+    setNewColor("");
+  };
+
+  const removeColorOption = (color: string) => {
+    const nextOptions = form.colorOptions.filter((c) => c !== color);
+    setForm({ ...form, colorOptions: nextOptions, hasColorCategory: nextOptions.length > 0 ? form.hasColorCategory : false });
+    if (nextOptions.length === 0) {
+      setVariants((prev) => prev.map((v) => ({ ...v, color: "", colorMn: "" })));
+      return;
+    }
+    setVariants((prev) =>
+      prev.map((v) => (nextOptions.includes(v.colorMn || v.color) ? v : { ...v, color: "", colorMn: "" }))
     );
   };
 
@@ -169,6 +227,12 @@ export default function EditProductPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    if (form.hasColorCategory && form.colorOptions.length === 0) {
+      toast.error("Өнгөний ангилал сонгосон бол дор хаяж 1 өнгө нэмнэ үү");
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch(`/api/admin/products/${productId}`, {
@@ -319,6 +383,69 @@ export default function EditProductPage() {
                 <Label htmlFor="active">Идэвхтэй</Label>
               </div>
             </div>
+
+            <div className="space-y-3 border rounded-lg p-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="hasColorCategory"
+                  checked={form.hasColorCategory}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setForm({ ...form, hasColorCategory: checked, colorOptions: checked ? form.colorOptions : [] });
+                    if (!checked) {
+                      setVariants((prev) => prev.map((v) => ({ ...v, color: "", colorMn: "" })));
+                    }
+                  }}
+                />
+                <Label htmlFor="hasColorCategory">Өнгөний ангилалтай</Label>
+              </div>
+
+              {form.hasColorCategory && (
+                <>
+                  <div className="flex gap-2">
+                    <Input
+                      value={newColor}
+                      onChange={(e) => setNewColor(e.target.value)}
+                      placeholder="Жишээ: Цагаан, Улбар шар"
+                    />
+                    <Button type="button" variant="outline" onClick={() => addColorOption()}>Нэмэх</Button>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {PRESET_COLORS.map((c) => (
+                      <Button
+                        key={c}
+                        type="button"
+                        variant={form.colorOptions.includes(c) ? "default" : "outline"}
+                        size="sm"
+                        className="h-7 px-2 text-xs"
+                        onClick={() => addColorOption(c)}
+                        disabled={form.colorOptions.includes(c)}
+                      >
+                        {c}
+                      </Button>
+                    ))}
+                  </div>
+
+                  {form.colorOptions.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {form.colorOptions.map((c) => (
+                        <button
+                          key={c}
+                          type="button"
+                          className="px-2 py-1 text-xs rounded bg-secondary hover:bg-secondary/80"
+                          onClick={() => removeColorOption(c)}
+                          title="Устгах"
+                        >
+                          {c} ×
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -344,7 +471,28 @@ export default function EditProductPage() {
                 </div>
                 <div>
                   <Label className="text-xs">Өнгө</Label>
-                  <Input value={variant.colorMn} onChange={(e) => { updateVariant(i, "colorMn", e.target.value); updateVariant(i, "color", e.target.value); }} />
+                  {form.hasColorCategory ? (
+                    <Select
+                      value={(variant.colorMn || variant.color) || "__none__"}
+                      onValueChange={(v) => {
+                        const value = v && v !== "__none__" ? v : "";
+                        updateVariant(i, "colorMn", value);
+                        updateVariant(i, "color", value);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Өнгө сонгох" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">Өнгөгүй</SelectItem>
+                        {form.colorOptions.map((c) => (
+                          <SelectItem key={c} value={c}>{c}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input value={variant.colorMn} onChange={(e) => { updateVariant(i, "colorMn", e.target.value); updateVariant(i, "color", e.target.value); }} />
+                  )}
                 </div>
                 <div>
                   <Label className="text-xs">Нөөц</Label>

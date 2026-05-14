@@ -26,9 +26,22 @@ export async function POST(req: NextRequest) {
       ageRange,
       featured,
       categoryId,
+      hasColorCategory,
+      colorOptions,
       images: productImages,
       variants,
     } = body;
+
+    const normalizedColorOptions = Array.from(
+      new Set(
+        (Array.isArray(colorOptions) ? colorOptions : [])
+          .map((c) => (typeof c === "string" ? c.trim() : ""))
+          .filter((c) => c.length > 0)
+      )
+    );
+
+    const resolvedHasColorCategory =
+      hasColorCategory === true || normalizedColorOptions.length > 0;
 
     if (!name || !nameMn || !slug || !price) {
       return NextResponse.json(
@@ -81,6 +94,8 @@ export async function POST(req: NextRequest) {
         featured: featured || false,
         active: true,
         categoryId: categoryId || null,
+        hasColorCategory: resolvedHasColorCategory,
+        colorOptions: resolvedHasColorCategory ? normalizedColorOptions : [],
         images: productImages || [],
       })
       .returning();
