@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useCartStore } from "@/store/cart";
@@ -13,9 +14,6 @@ import {
   Check,
   Minus,
   Plus,
-  ChevronLeft,
-  ChevronRight,
-  X,
   Ruler,
   ZoomIn,
   Heart,
@@ -25,17 +23,14 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-
-// Size guide data
-const SIZE_GUIDE = [
-  { size: "NB", age: "0 сар", weight: "2.5-3.5 кг", height: "45-55 см" },
-  { size: "0-3M", age: "0-3 сар", weight: "3-6 кг", height: "55-62 см" },
-  { size: "3-6M", age: "3-6 сар", weight: "6-8 кг", height: "62-68 см" },
-  { size: "6-9M", age: "6-9 сар", weight: "8-9.5 кг", height: "68-74 см" },
-  { size: "9-12M", age: "9-12 сар", weight: "9.5-11 кг", height: "74-80 см" },
-  { size: "12-18M", age: "12-18 сар", weight: "11-12.5 кг", height: "80-86 см" },
-  { size: "18-24M", age: "18-24 сар", weight: "12.5-14 кг", height: "86-92 см" },
-];
+const ImageLightbox = dynamic(
+  () => import("./image-lightbox").then((m) => m.ImageLightbox),
+  { ssr: false }
+);
+const SizeGuideModal = dynamic(
+  () => import("./size-guide-modal").then((m) => m.SizeGuideModal),
+  { ssr: false }
+);
 
 interface ProductDetailClientProps {
   product: {
@@ -537,117 +532,20 @@ export function ProductDetailClient({
         </div>
       </div>
 
-      {/* Image Lightbox */}
-      {lightboxOpen && product.images && product.images.length > 0 && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
-          onClick={() => setLightboxOpen(false)}
-        >
-          <button
-            onClick={() => setLightboxOpen(false)}
-            className="absolute top-4 right-4 text-white/80 hover:text-white z-10 p-2"
-            aria-label="Хаах"
-          >
-            <X className="h-6 w-6" />
-          </button>
-          {selectedImage > 0 && (
-            <button
-              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-2 z-10"
-              onClick={(e) => { e.stopPropagation(); setSelectedImage(selectedImage - 1); }}
-              aria-label="Өмнөх зураг"
-            >
-              <ChevronLeft className="h-8 w-8" />
-            </button>
-          )}
-          {selectedImage < imageCount - 1 && (
-            <button
-              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-2 z-10"
-              onClick={(e) => { e.stopPropagation(); setSelectedImage(selectedImage + 1); }}
-              aria-label="Дараагийн зураг"
-            >
-              <ChevronRight className="h-8 w-8" />
-            </button>
-          )}
-          <div className="relative w-full h-full max-w-4xl max-h-[80vh] m-4" onClick={(e) => e.stopPropagation()}>
-            <Image
-              src={product.images[selectedImage]}
-              alt={displayName}
-              fill
-              className="object-contain"
-              sizes="100vw"
-              priority
-            />
-          </div>
-          {imageCount > 1 && (
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-              {product.images.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={(e) => { e.stopPropagation(); setSelectedImage(i); }}
-                  className={`h-2 rounded-full transition-all ${
-                    selectedImage === i ? "w-6 bg-white" : "w-2 bg-white/40"
-                  }`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      <ImageLightbox
+        open={lightboxOpen}
+        images={product.images}
+        selectedImage={selectedImage}
+        setSelectedImage={setSelectedImage}
+        onClose={() => setLightboxOpen(false)}
+        displayName={displayName}
+      />
 
-      {/* Size Guide Modal */}
-      {sizeGuideOpen && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/50 flex items-end sm:items-center justify-center"
-          onClick={() => setSizeGuideOpen(false)}
-        >
-          <div
-            className="bg-background rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[80vh] overflow-y-auto p-5 sm:p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold flex items-center gap-2">
-                <Ruler className="h-5 w-5" />
-                Хэмжээний заавар
-              </h3>
-              <button onClick={() => setSizeGuideOpen(false)} className="p-1 hover:bg-accent rounded-lg">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2 pr-4 font-semibold">Хэмжээ</th>
-                    <th className="text-left py-2 pr-4 font-semibold">Нас</th>
-                    <th className="text-left py-2 pr-4 font-semibold">Жин</th>
-                    <th className="text-left py-2 font-semibold">Өндөр</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {SIZE_GUIDE.map((row) => (
-                    <tr
-                      key={row.size}
-                      className={`border-b last:border-0 ${
-                        selectedVariant?.size === row.size
-                          ? "bg-primary/10 font-medium"
-                          : ""
-                      }`}
-                    >
-                      <td className="py-2.5 pr-4">{row.size}</td>
-                      <td className="py-2.5 pr-4 text-muted-foreground">{row.age}</td>
-                      <td className="py-2.5 pr-4 text-muted-foreground">{row.weight}</td>
-                      <td className="py-2.5 text-muted-foreground">{row.height}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <p className="text-xs text-muted-foreground mt-4">
-              * Хэмжээ нь ойролцоо утга бөгөөд хүүхэд бүрийн биеийн хэмжээнээс хамаарч өөрчлөгдөж болно.
-            </p>
-          </div>
-        </div>
-      )}
+      <SizeGuideModal
+        open={sizeGuideOpen}
+        onClose={() => setSizeGuideOpen(false)}
+        selectedSize={selectedVariant?.size}
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Providers } from "@/components/providers";
 import { BackToTop, Toaster } from "@/components/lazy-client";
+import { auth } from "@/lib/auth";
 
 export default async function LocaleLayout({
   children,
@@ -14,6 +15,7 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const session = await auth();
 
   if (!hasLocale(routing.locales, locale)) {
     notFound();
@@ -23,7 +25,7 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <Providers>
+      <Providers session={session}>
         <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm">
           Үндсэн хэсэг рүү шилжих
         </a>

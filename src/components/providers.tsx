@@ -3,6 +3,7 @@
 import { SessionProvider } from "next-auth/react";
 import { useEffect, startTransition } from "react";
 import { useCartStore } from "@/store/cart";
+import type { Session } from "next-auth";
 
 function ShippingSettingsLoader() {
   const fetchShippingSettings = useCartStore((s) => s.fetchShippingSettings);
@@ -36,9 +37,15 @@ function ShippingSettingsLoader() {
   return null;
 }
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({
+  children,
+  session,
+}: {
+  children: React.ReactNode;
+  session?: Session | null;
+}) {
   return (
-    <SessionProvider>
+    <SessionProvider session={session ?? undefined}>
       <ShippingSettingsLoader />
       {children}
     </SessionProvider>
