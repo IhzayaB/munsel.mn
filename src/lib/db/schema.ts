@@ -24,39 +24,51 @@ export const orderStatusEnum = pgEnum("order_status", [
 ]);
 
 export const productSizeEnum = pgEnum("product_size", [
-  "NB",      // Newborn
-  "0-3M",
-  "3-6M",
-  "6-9M",
-  "9-12M",
-  "12-18M",
-  "18-24M",
-  "2T",
-  "3T",
-  "4T",
+  "XS",
+  "S",
+  "M",
+  "L",
+  "XL",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+  "13",
+  "one-size",
 ]);
 
 export const productColorEnum = pgEnum("product_color", [
-  "red",
-  "blue",
-  "green",
-  "yellow",
+  "gold",
+  "rose-gold",
+  "white-gold",
+  "silver",
+  "platinum",
   "black",
-  "white",
+  "mixed",
 ]);
 
 export const productMaterialEnum = pgEnum("product_material", [
-  "cotton",
-  "wool",
-  "silk",
-  "polyester",
+  "gold-14k",
+  "gold-18k",
+  "gold-24k",
+  "silver-sterling",
+  "silver-925",
+  "platinum",
+  "stainless-steel",
 ]);
 
 export const productStyleEnum = pgEnum("product_style", [
-  "casual",
-  "formal",
-  "sport",
-  "sleepwear",
+  "ring",
+  "earring",
+  "necklace",
+  "bracelet",
+  "pendant",
+  "set",
 ]);
 
 // ── Users ──────────────────────────────────────────

@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
       const dataUri = `data:${file.type};base64,${base64}`;
 
       const result = await cloudinary.uploader.upload(dataUri, {
-        folder: "pajama-mn",
+        folder: "munsel-mn",
         transformation: [
           { width: 1200, height: 1200, crop: "limit", quality: "auto", format: "webp" },
         ],

@@ -17,16 +17,16 @@ export async function Footer() {
             <div className="flex items-center gap-2">
               <Image
                 src="/logo.png"
-                alt="Pajama.mn"
+                alt="Munsel.mn"
                 width={32}
                 height={32}
                 className="rounded-full"
               />
-              <span className="text-xl font-bold text-white">Pajama.mn</span>
+              <span className="text-xl font-bold text-white">Munsel.mn</span>
             </div>
             <div className="flex gap-3">
               <a
-                href="https://www.instagram.com/pajama.mn/"
+                href="https://www.instagram.com/munsel.mn/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="h-9 w-9 rounded-full bg-gray-700 flex items-center justify-center hover:bg-[var(--baby-peach)] hover:text-white transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary"
@@ -35,7 +35,7 @@ export async function Footer() {
                 <Instagram className="h-4 w-4" />
               </a>
               <a
-                href="https://www.facebook.com/Pajama.mn"
+                href="https://www.facebook.com/munsel.mn"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="h-9 w-9 rounded-full bg-gray-700 flex items-center justify-center hover:bg-[var(--baby-teal)] hover:text-white transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary"
@@ -70,9 +70,9 @@ export async function Footer() {
                 </a>
               </li>
               <li>
-                <a href="mailto:info@pajama.mn" className="flex items-center gap-2 hover:text-white transition-colors duration-200">
+                <a href="mailto:info@munsel.mn" className="flex items-center gap-2 hover:text-white transition-colors duration-200">
                   <Mail className="h-4 w-4 shrink-0" />
-                  <span>info@pajama.mn</span>
+                  <span>info@munsel.mn</span>
                 </a>
               </li>
             </ul>
@@ -82,7 +82,7 @@ export async function Footer() {
         <Separator className="my-6 bg-gray-700" />
 
         <p className="text-center text-xs text-gray-500">
-          © {new Date().getFullYear()} Pajama.mn. {tc("allRightsReserved")}.
+          © {new Date().getFullYear()} Munsel.mn. {tc("allRightsReserved")}. 
         </p>
       </div>
     </footer>

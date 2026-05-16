@@ -49,7 +49,7 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: "/pajama-text.png",
+        source: "/munsel-text.png",
         headers: [
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
         ],

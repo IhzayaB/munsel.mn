@@ -1,4 +1,4 @@
-// QPay V2 API Integration for pajama.mn
+// QPay V2 API Integration for munsel.mn
 // Documentation: https://developer.qpay.mn
 
 interface QPayAuthResponse {

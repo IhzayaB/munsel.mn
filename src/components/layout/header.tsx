@@ -58,8 +58,8 @@ export function Header() {
             priority
           />
           <Image
-            src="/pajama-text.png"
-            alt="Pajama.mn"
+            src="/logo.png"
+            alt="Munsel.mn"
             width={120}
             height={28}
             className="hidden sm:block h-7 w-auto"

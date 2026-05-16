@@ -48,7 +48,7 @@ const initialTemplates: EmailTemplates = {
   EMAIL_TEMPLATE_PROMO_HTML: "",
 };
 
-const INBOX_DOMAIN = "pajama.mn";
+const INBOX_DOMAIN = "munsel.mn";
 
 export default function AdminEmailPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -224,7 +224,7 @@ export default function AdminEmailPage() {
         <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2">
           <Mail className="h-5 w-5 sm:h-6 sm:w-6" /> Имэйл
         </h1>
-        <Badge variant="secondary">Илгээгч: info@pajama.mn</Badge>
+        <Badge variant="secondary">Илгээгч: info@munsel.mn</Badge>
       </div>
 
       <Tabs defaultValue="compose">
@@ -363,7 +363,7 @@ export default function AdminEmailPage() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <Mail className="h-4 w-4" /> info@pajama.mn inbox status
+                <Mail className="h-4 w-4" /> info@munsel.mn inbox status
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
@@ -435,7 +435,7 @@ export default function AdminEmailPage() {
                 </div>
                 <ol className="list-decimal pl-5 space-y-1">
                   <li>Choose an inbox host: Google Workspace, Zoho Mail, or Cloudflare Email Routing.</li>
-                  <li>Set `info@pajama.mn` as a mailbox or forwarding target inside that provider.</li>
+                  <li>Set `info@munsel.mn` as a mailbox or forwarding target inside that provider.</li>
                   <li>Point your domain MX records to that provider in DNS.</li>
                   <li>Open the provider inbox or forwarding destination to read received mail.</li>
                 </ol>

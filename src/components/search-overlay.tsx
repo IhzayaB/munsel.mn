@@ -24,7 +24,7 @@ interface SearchOverlayProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const RECENT_SEARCHES_KEY = "pajama-recent-searches";
+const RECENT_SEARCHES_KEY = "munsel-recent-searches";
 const QUICK_SUGGESTIONS = ["Комбинезон", "Малгай", "Пижама", "Оймс", "0-3M"];
 
 export function SearchOverlay({ open, onOpenChange }: SearchOverlayProps) {

@@ -134,7 +134,7 @@ export function ProductDetailClient({
   // Save to recently viewed
   useEffect(() => {
     try {
-      const key = "pajama-recently-viewed";
+      const key = "munsel-recently-viewed";
       const stored = JSON.parse(localStorage.getItem(key) || "[]");
       const item = {
         id: product.id,
@@ -562,7 +562,7 @@ function RecentlyViewed({ currentProductId }: { currentProductId: string }) {
 
   useEffect(() => {
     try {
-      const stored = JSON.parse(localStorage.getItem("pajama-recently-viewed") || "[]");
+      const stored = JSON.parse(localStorage.getItem("munsel-recently-viewed") || "[]");
       setItems(stored.filter((s: { id: string }) => s.id !== currentProductId).slice(0, 6));
     } catch {}
   }, [currentProductId]);

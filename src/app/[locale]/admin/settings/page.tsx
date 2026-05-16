@@ -22,17 +22,17 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
   {
     title: "Дэлгүүрийн мэдээлэл",
     keys: [
-      { key: "STORE_NAME", label: "Дэлгүүрийн нэр", placeholder: "Pajama.mn" },
+      { key: "STORE_NAME", label: "Дэлгүүрийн нэр", placeholder: "Munsel.mn" },
       { key: "STORE_PHONE", label: "Утас", placeholder: "88029180" },
-      { key: "STORE_EMAIL", label: "И-мэйл", placeholder: "info@pajama.mn" },
+      { key: "STORE_EMAIL", label: "И-мэйл", placeholder: "info@munsel.mn" },
       { key: "STORE_ADDRESS", label: "Хаяг", placeholder: "Улаанбаатар" },
     ],
   },
   {
     title: "Сошиал хаягууд",
     keys: [
-      { key: "FACEBOOK_URL", label: "Facebook", placeholder: "https://facebook.com/Pajama.mn" },
-      { key: "INSTAGRAM_URL", label: "Instagram", placeholder: "https://instagram.com/pajama.mn/" },
+      { key: "FACEBOOK_URL", label: "Facebook", placeholder: "https://facebook.com/Munsel.mn" },
+      { key: "INSTAGRAM_URL", label: "Instagram", placeholder: "https://instagram.com/munsel.mn/" },
     ],
   },
   {

@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", marginBottom: 24 }}>
-            <img src={`${process.env.NEXT_PUBLIC_SITE_URL || "https://pajama.mn"}/pajama-text.png`} alt="Pajama.mn" style={{ height: 40 }} />
+            <img src={`${process.env.NEXT_PUBLIC_SITE_URL || "https://munsel.mn"}/logo.png`} alt="Munsel.mn" style={{ height: 40 }} />
           </div>
 
           {category && (
@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
 
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: "auto" }}>
             <div style={{ background: "linear-gradient(135deg, #409ba0, #357e82)", color: "white", padding: "10px 24px", borderRadius: 50, fontSize: 14, fontWeight: 700, display: "flex" }}>
-              pajama.mn дээр үзэх
+              munsel.mn дээр үзэх
             </div>
           </div>
         </div>

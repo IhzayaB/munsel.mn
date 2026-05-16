@@ -106,14 +106,14 @@ export default function CheckoutPage() {
   // Persist form to sessionStorage
   useEffect(() => {
     try {
-      const saved = sessionStorage.getItem("pajama-checkout-form");
+      const saved = sessionStorage.getItem("munsel-checkout-form");
       if (saved) setForm(JSON.parse(saved));
     } catch {}
   }, []);
 
   useEffect(() => {
     try {
-      sessionStorage.setItem("pajama-checkout-form", JSON.stringify(form));
+      sessionStorage.setItem("munsel-checkout-form", JSON.stringify(form));
     } catch {}
   }, [form]);
 
@@ -184,7 +184,7 @@ export default function CheckoutPage() {
         if (pollRef.current) clearInterval(pollRef.current);
         setStep("success");
         clearCart();
-        try { sessionStorage.removeItem("pajama-checkout-form"); } catch {}
+        try { sessionStorage.removeItem("munsel-checkout-form"); } catch {}
         toast.success(t("paymentSuccess"));
       } else if (manual) {
         toast.info(t("paymentPending"));

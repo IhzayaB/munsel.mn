@@ -1,4 +1,4 @@
-export const ADMIN_LOGIN_EMAIL = "admin@pajama.mn";
+export const ADMIN_LOGIN_EMAIL = "admin@munsel.mn";
 export const ADMIN_RECOVERY_EMAIL =
   process.env.ADMIN_RECOVERY_EMAIL || "ihzaya@gmail.com";
 export const PASSWORD_RESET_TOKEN_TTL_MS = 30 * 60 * 1000;

@@ -54,23 +54,23 @@ export async function GET(_req: NextRequest) {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", marginBottom: 32 }}>
-            <img src={`${process.env.NEXT_PUBLIC_SITE_URL || "https://pajama.mn"}/pajama-text.png`} alt="Pajama.mn" style={{ height: 48 }} />
+            <img src={`${process.env.NEXT_PUBLIC_SITE_URL || "https://munsel.mn"}/logo.png`} alt="Munsel.mn" style={{ height: 48 }} />
           </div>
 
           <div style={{ fontSize: 52, fontWeight: 800, color: "#1a2f30", lineHeight: 1.15, letterSpacing: "-1.5px", marginBottom: 16 }}>
-            Нярайн хувцасны
+            Алт, гоёл чимэглэлийн
           </div>
           <div style={{ fontSize: 52, fontWeight: 800, color: "#409ba0", lineHeight: 1.15, letterSpacing: "-1.5px", marginBottom: 28 }}>
             онлайн дэлгүүр
           </div>
 
           <div style={{ fontSize: 20, color: "#5a7a7c", fontWeight: 500, lineHeight: 1.5, marginBottom: 32 }}>
-            Комбинезон • Малгай • Хүүхдийн хувцас
+            Бөгж • Ээмэг • Зүүлт
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ background: "linear-gradient(135deg, #409ba0, #357e82)", color: "white", padding: "12px 28px", borderRadius: 50, fontSize: 16, fontWeight: 700, display: "flex" }}>
-              pajama.mn
+              munsel.mn
             </div>
           </div>
         </div>

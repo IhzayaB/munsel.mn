@@ -98,28 +98,28 @@ const getHomePageData = unstable_cache(
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "pajama.mn — Нярайн хувцас",
-    description: "Монголын шилдэг нярай, бяцхан хүүхдийн хувцасны онлайн дэлгүүр",
+    title: "Munsel.mn — Алт, гоёл чимэглэл",
+    description: "Монголын чанартай алт, гоёл чимэглэлийн онлайн дэлгүүр",
     openGraph: {
-      title: "pajama.mn — Нярайн хувцас",
-      description: "Монголын шилдэг нярай, бяцхан хүүхдийн хувцасны онлайн дэлгүүр",
-      siteName: "Pajama.mn",
+      title: "Munsel.mn — Алт, гоёл чимэглэл",
+      description: "Монголын чанартай алт, гоёл чимэглэлийн онлайн дэлгүүр",
+      siteName: "Munsel.mn",
       locale: "mn_MN",
       type: "website",
-      url: process.env.NEXT_PUBLIC_SITE_URL || "https://pajama.mn",
+      url: process.env.NEXT_PUBLIC_SITE_URL || "https://munsel.mn",
       images: [
         {
           url: "/api/og",
           width: 1200,
           height: 630,
-          alt: "Pajama.mn — Нярайн хувцасны онлайн дэлгүүр",
+          alt: "Munsel.mn — Алт, гоёл чимэглэлийн онлайн дэлгүүр",
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: "pajama.mn — Нярайн хувцас",
-      description: "Монголын шилдэг нярай, бяцхан хүүхдийн хувцасны онлайн дэлгүүр",
+      title: "Munsel.mn — Алт, гоёл чимэглэл",
+      description: "Монголын чанартай алт, гоёл чимэглэлийн онлайн дэлгүүр",
       images: ["/api/og"],
     },
   };
@@ -131,15 +131,15 @@ export default async function HomePage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Pajama.mn",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "https://pajama.mn",
-    description: "Монголын шилдэг нярай, бяцхан хүүхдийн хувцасны онлайн дэлгүүр",
+    name: "Munsel.mn",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://munsel.mn",
+    description: "Монголын чанартай алт, гоёл чимэглэлийн онлайн дэлгүүр",
     publisher: {
       "@type": "Organization",
-      name: "Pajama.mn",
+      name: "Munsel.mn",
       logo: {
         "@type": "ImageObject",
-        url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://pajama.mn"}/logo.png`,
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://munsel.mn"}/logo.png`,
       },
     },
   };

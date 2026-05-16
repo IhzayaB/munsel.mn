@@ -23,6 +23,6 @@ export const useWishlistStore = create<WishlistState>()(
       has: (productId: string) => get().items.includes(productId),
       clear: () => set({ items: [] }),
     }),
-    { name: "pajama-wishlist" }
+    { name: "munsel-wishlist" }
   )
 );

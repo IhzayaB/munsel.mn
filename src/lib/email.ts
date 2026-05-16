@@ -41,14 +41,14 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
 
   try {
     await resend.emails.send({
-      from: "Pajama.mn <orders@pajama.mn>",
+      from: "Munsel.mn <orders@munsel.mn>",
       to: data.customerEmail,
       subject: `Захиалга баталгаажлаа #${data.orderNumber}`,
       html: `
         <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f5fafa">
           <div style="text-align:center;padding:20px 0">
-            <img src="${process.env.NEXT_PUBLIC_SITE_URL || 'https://pajama.mn'}/logo.png" alt="Pajama.mn" width="60" height="60" style="border-radius:50%" />
-            <h1 style="color:#409ba0;margin:10px 0 0;font-size:24px">Pajama.mn</h1>
+            <img src="${process.env.NEXT_PUBLIC_SITE_URL || 'https://munsel.mn'}/logo.png" alt="Munsel.mn" width="60" height="60" style="border-radius:50%" />
+            <h1 style="color:#409ba0;margin:10px 0 0;font-size:24px">Munsel.mn</h1>
           </div>
           
           <div style="background:#ffffff;border-radius:12px;padding:24px;margin:16px 0">
@@ -83,7 +83,7 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
 
           <p style="text-align:center;color:#9a9a9a;font-size:12px;margin-top:24px">
             Асуух зүйл байвал +976 8802-9180 дугаарт холбогдоно уу.<br/>
-            © ${new Date().getFullYear()} Pajama.mn
+            © ${new Date().getFullYear()} Munsel.mn
           </p>
         </div>
       `,
@@ -105,14 +105,14 @@ export async function sendAdminPasswordResetEmail(data: { resetUrl: string }) {
 
   try {
     await resend.emails.send({
-      from: "Pajama.mn <orders@pajama.mn>",
+      from: "Munsel.mn <orders@munsel.mn>",
       to: ADMIN_RECOVERY_EMAIL,
-      subject: "Pajama.mn admin password reset",
+      subject: "Munsel.mn admin password reset",
       html: `
         <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f5fafa">
           <div style="background:#ffffff;border-radius:12px;padding:24px;margin:16px 0">
             <h2 style="color:#2c3e3f;margin-top:0;font-size:20px">Admin password reset</h2>
-            <p style="color:#666;font-size:15px">A password reset was requested for the admin login <strong>admin@pajama.mn</strong>.</p>
+            <p style="color:#666;font-size:15px">A password reset was requested for the admin login <strong>admin@munsel.mn</strong>.</p>
             <p style="color:#666;font-size:15px">Use the link below to set a new password. This link expires in 30 minutes.</p>
             <p style="margin:24px 0">
               <a href="${data.resetUrl}" style="display:inline-block;background:#409ba0;color:#fff;text-decoration:none;padding:12px 18px;border-radius:8px;font-weight:600">Reset admin password</a>
@@ -144,7 +144,7 @@ export async function sendInfoEmail(data: InfoEmailData) {
 
   try {
     await resend.emails.send({
-      from: "Pajama.mn Info <info@pajama.mn>",
+      from: "Munsel.mn Info <info@munsel.mn>",
       to: data.to,
       subject: data.subject,
       html: data.html,

@@ -28,16 +28,16 @@ export async function generateMetadata({
 
   const name = product.nameMn;
   const desc = product.descriptionMn;
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://pajama.mn";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://munsel.mn";
 
   return {
-    title: `${name} — pajama.mn`,
-    description: desc || `${name} - нярайн хувцас`,
+    title: `${name} — Munsel.mn`,
+    description: desc || `${name} - алт, гоёл чимэглэл`,
     openGraph: {
       title: name,
-      description: desc || `${name} - нярайн хувцас`,
+      description: desc || `${name} - алт, гоёл чимэглэл`,
       type: "website",
-      siteName: "Pajama.mn",
+      siteName: "Munsel.mn",
       locale: "mn_MN",
       images: [
         {
@@ -157,7 +157,7 @@ export default async function ProductDetailPage({
   // Check if in stock
   const totalStock = product.variants.reduce((sum: number, v: { stock: number }) => sum + v.stock, 0);
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://pajama.mn";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://munsel.mn";
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -168,7 +168,7 @@ export default async function ProductDetailPage({
     sku: product.slug,
     brand: {
       "@type": "Brand",
-      name: "Pajama.mn",
+      name: "Munsel.mn",
     },
     offers: {
       "@type": "Offer",
@@ -182,7 +182,7 @@ export default async function ProductDetailPage({
         : "https://schema.org/OutOfStock",
       seller: {
         "@type": "Organization",
-        name: "Pajama.mn",
+        name: "Munsel.mn",
       },
     },
   };

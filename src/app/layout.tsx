@@ -17,30 +17,30 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pajama.mn — Нярайн хувцас",
+  title: "Munsel.mn — Алт, гоёл чимэглэл",
   description:
-    "Монголын шилдэг нярайн хувцасны онлайн дэлгүүр",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://pajama.mn"),
+    "Монголын чанартай алт, гоёл чимэглэлийн онлайн дэлгүүр",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://munsel.mn"),
   openGraph: {
-    title: "Pajama.mn — Нярайн хувцас",
-    description: "Монголын шилдэг нярайн хувцасны онлайн дэлгүүр",
-    siteName: "Pajama.mn",
+    title: "Munsel.mn — Алт, гоёл чимэглэл",
+    description: "Монголын чанартай алт, гоёл чимэглэлийн онлайн дэлгүүр",
+    siteName: "Munsel.mn",
     locale: "mn_MN",
     type: "website",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "https://pajama.mn",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://munsel.mn",
     images: [
       {
         url: "/api/og",
         width: 1200,
         height: 630,
-        alt: "Pajama.mn — Нярайн хувцасны онлайн дэлгүүр",
+        alt: "Munsel.mn — Алт, гоёл чимэглэлийн онлайн дэлгүүр",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pajama.mn — Нярайн хувцас",
-    description: "Монголын шилдэг нярайн хувцасны онлайн дэлгүүр",
+    title: "Munsel.mn — Алт, гоёл чимэглэл",
+    description: "Монголын чанартай алт, гоёл чимэглэлийн онлайн дэлгүүр",
     images: ["/api/og"],
   },
   icons: {

@@ -115,7 +115,7 @@ export const useCartStore = create<CartState>()(
       getGrandTotal: () => get().getTotalPrice() + get().getShippingCost(),
     }),
     {
-      name: "pajama-cart",
+      name: "munsel-cart",
       partialize: (state) => ({ items: state.items }),
     }
   )

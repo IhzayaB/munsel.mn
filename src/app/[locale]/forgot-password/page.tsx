@@ -18,7 +18,7 @@ import {
 
 export default function ForgotPasswordPage() {
   const t = useTranslations("auth");
-  const [email, setEmail] = useState("admin@pajama.mn");
+  const [email, setEmail] = useState("admin@munsel.mn");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -55,7 +55,7 @@ export default function ForgotPasswordPage() {
         <CardHeader className="text-center">
           <Image
             src="/logo.png"
-            alt="Pajama.mn"
+            alt="Munsel.mn"
             width={56}
             height={56}
             className="rounded-full mx-auto mb-2"

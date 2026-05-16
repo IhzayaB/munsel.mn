@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 const querySchema = z.object({
-  domain: z.string().min(1).default("pajama.mn"),
+  domain: z.string().min(1).default("munsel.mn"),
 });
 
 type ProviderKey = "google" | "zoho" | "cloudflare" | "microsoft" | "custom" | "none";
@@ -127,7 +127,7 @@ export async function GET(req: NextRequest) {
     }
 
     const domain = querySchema.parse({
-      domain: req.nextUrl.searchParams.get("domain") || "pajama.mn",
+      domain: req.nextUrl.searchParams.get("domain") || "munsel.mn",
     }).domain;
 
     const mxRecords = await fetchMxRecords(domain);

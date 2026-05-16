@@ -27,7 +27,7 @@ export default async function AdminLayout({
     { href: "/admin/settings", label: "Тохиргоо", icon: "Settings" as const },
   ];
 
-  const isProduction = process.env.NEXT_PUBLIC_SITE_URL?.includes("pajama.mn");
+  const isProduction = process.env.NEXT_PUBLIC_SITE_URL?.includes("munsel.mn");
 
   return (
     <div className="min-h-[60vh]">
