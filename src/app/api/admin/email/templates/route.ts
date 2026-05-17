@@ -12,12 +12,12 @@ const TEMPLATE_KEYS = [
 ] as const;
 
 const defaults: Record<(typeof TEMPLATE_KEYS)[number], string> = {
-  EMAIL_TEMPLATE_GENERAL_SUBJECT: "Pajama.mn мэдэгдэл",
+  EMAIL_TEMPLATE_GENERAL_SUBJECT: "Munsel.mn мэдэгдэл",
   EMAIL_TEMPLATE_GENERAL_HTML:
-    "<p>Сайн байна уу,</p><p>Танд энэ өдрийн мэнд хүргэе.</p><p>Хүндэтгэсэн,<br/>Pajama.mn</p>",
-  EMAIL_TEMPLATE_PROMO_SUBJECT: "Pajama.mn урамшуулал",
+    "<p>Сайн байна уу,</p><p>Танд энэ өдрийн мэнд хүргэе.</p><p>Хүндэтгэсэн,<br/>Munsel.mn</p>",
+  EMAIL_TEMPLATE_PROMO_SUBJECT: "Munsel.mn урамшуулал",
   EMAIL_TEMPLATE_PROMO_HTML:
-    "<h3>Онцгой санал</h3><p>Манай шинэ урамшууллыг ашиглаарай.</p><p>Хүндэтгэсэн,<br/>Pajama.mn</p>",
+    "<h3>Онцгой санал</h3><p>Манай шинэ урамшууллыг ашиглаарай.</p><p>Хүндэтгэсэн,<br/>Munsel.mn</p>",
 };
 
 const updateSchema = z.object({

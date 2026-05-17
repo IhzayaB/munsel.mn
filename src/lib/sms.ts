@@ -47,7 +47,7 @@ export async function sendOrderSms(data: OrderSmsData): Promise<void> {
   }
 
   const body = [
-    `Pajama.mn`,
+    `Munsel.mn`,
     `#${data.orderNumber} дугаартай захиалга амжилттай баталгаажлаа.`,
     `Биднийг сонгосон танд баярлалаа.`,
   ].join("\n");

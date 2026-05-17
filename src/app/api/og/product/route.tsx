@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
           overflow: "hidden",
         }}
       >
-        <div style={{ position: "absolute", top: -100, right: -100, width: 400, height: 400, borderRadius: "50%", background: "rgba(64,155,160,0.06)", display: "flex" }} />
+        <div style={{ position: "absolute", top: -100, right: -100, width: 400, height: 400, borderRadius: "50%", background: "rgba(198,151,63,0.06)", display: "flex" }} />
 
         {/* Product image */}
         {image && (
@@ -62,11 +62,11 @@ export async function GET(req: NextRequest) {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", marginBottom: 24 }}>
-            <img src={`${process.env.NEXT_PUBLIC_SITE_URL || "https://munsel.mn"}/logo.png`} alt="Munsel.mn" style={{ height: 40 }} />
+            <img src={`${process.env.NEXT_PUBLIC_SITE_URL || "https://munsel.mn"}/logo.jpg`} alt="Munsel.mn" style={{ height: 40 }} />
           </div>
 
           {category && (
-            <div style={{ fontSize: 18, color: "#409ba0", fontWeight: 600, marginBottom: 8, display: "flex" }}>{category}</div>
+            <div style={{ fontSize: 18, color: "#C6973F", fontWeight: 600, marginBottom: 8, display: "flex" }}>{category}</div>
           )}
 
           <div style={{ fontSize: 44, fontWeight: 800, color: "#1a2f30", lineHeight: 1.2, letterSpacing: "-1px", marginBottom: 20, display: "flex" }}>
@@ -74,11 +74,11 @@ export async function GET(req: NextRequest) {
           </div>
 
           {price && (
-            <div style={{ fontSize: 36, fontWeight: 700, color: "#409ba0", marginBottom: 24, display: "flex" }}>{price}</div>
+            <div style={{ fontSize: 36, fontWeight: 700, color: "#C6973F", marginBottom: 24, display: "flex" }}>{price}</div>
           )}
 
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: "auto" }}>
-            <div style={{ background: "linear-gradient(135deg, #409ba0, #357e82)", color: "white", padding: "10px 24px", borderRadius: 50, fontSize: 14, fontWeight: 700, display: "flex" }}>
+            <div style={{ background: "linear-gradient(135deg, #C6973F, #A67C2A)", color: "white", padding: "10px 24px", borderRadius: 50, fontSize: 14, fontWeight: 700, display: "flex" }}>
               munsel.mn дээр үзэх
             </div>
           </div>

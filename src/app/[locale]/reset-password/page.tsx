@@ -83,8 +83,8 @@ export default function ResetPasswordPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <Image
-            src="/logo.png"
-            alt="Pajama.mn"
+            src="/logo.jpg"
+            alt="Munsel.mn"
             width={56}
             height={56}
             className="rounded-full mx-auto mb-2"

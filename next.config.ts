@@ -38,12 +38,12 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' https://res.cloudinary.com https://qpay.mn https://*.qpay.mn data: blob:; font-src 'self' data:; connect-src 'self' https://merchant.qpay.mn https://api.cloudinary.com https://*.upstash.io; frame-ancestors 'none';",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' https://res.cloudinary.com https://images.unsplash.com https://plus.unsplash.com https://qpay.mn https://*.qpay.mn data: blob:; font-src 'self' data:; connect-src 'self' https://merchant.qpay.mn https://api.cloudinary.com https://*.upstash.io; frame-ancestors 'none';",
           },
         ],
       },
       {
-        source: "/logo.png",
+        source: "/logo.jpg",
         headers: [
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
         ],

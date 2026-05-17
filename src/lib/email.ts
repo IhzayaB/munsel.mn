@@ -47,8 +47,8 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
       html: `
         <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f5fafa">
           <div style="text-align:center;padding:20px 0">
-            <img src="${process.env.NEXT_PUBLIC_SITE_URL || 'https://munsel.mn'}/logo.png" alt="Munsel.mn" width="60" height="60" style="border-radius:50%" />
-            <h1 style="color:#409ba0;margin:10px 0 0;font-size:24px">Munsel.mn</h1>
+            <img src="${process.env.NEXT_PUBLIC_SITE_URL || 'https://munsel.mn'}/logo.jpg" alt="Munsel.mn" width="60" height="60" style="border-radius:50%" />
+            <h1 style="color:#C6973F;margin:10px 0 0;font-size:24px">Munsel.mn</h1>
           </div>
           
           <div style="background:#ffffff;border-radius:12px;padding:24px;margin:16px 0">
@@ -68,7 +68,7 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
               <tfoot>
                 <tr>
                   <td colspan="2" style="padding:12px 10px;font-weight:bold;font-size:16px;border-top:2px solid #cde0e1">Нийт</td>
-                  <td style="padding:12px 10px;text-align:right;font-weight:bold;font-size:16px;color:#409ba0;border-top:2px solid #cde0e1">${data.total}</td>
+                  <td style="padding:12px 10px;text-align:right;font-weight:bold;font-size:16px;color:#C6973F;border-top:2px solid #E8D5A3">${data.total}</td>
                 </tr>
               </tfoot>
             </table>
@@ -115,7 +115,7 @@ export async function sendAdminPasswordResetEmail(data: { resetUrl: string }) {
             <p style="color:#666;font-size:15px">A password reset was requested for the admin login <strong>admin@munsel.mn</strong>.</p>
             <p style="color:#666;font-size:15px">Use the link below to set a new password. This link expires in 30 minutes.</p>
             <p style="margin:24px 0">
-              <a href="${data.resetUrl}" style="display:inline-block;background:#409ba0;color:#fff;text-decoration:none;padding:12px 18px;border-radius:8px;font-weight:600">Reset admin password</a>
+              <a href="${data.resetUrl}" style="display:inline-block;background:#C6973F;color:#fff;text-decoration:none;padding:12px 18px;border-radius:8px;font-weight:600">Reset admin password</a>
             </p>
             <p style="color:#999;font-size:13px;word-break:break-all">${data.resetUrl}</p>
           </div>

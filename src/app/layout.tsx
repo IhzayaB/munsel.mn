@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Montserrat, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
+import { Montserrat, JetBrains_Mono, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -7,6 +8,20 @@ const montserrat = Montserrat({
   subsets: ["latin", "cyrillic"],
   display: "swap",
   weight: ["400", "600", "700"],
+});
+
+const cormorantGaramond = Cormorant_Garamond({
+  variable: "--font-serif",
+  subsets: ["latin", "cyrillic"],
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+  style: ["normal"],
+});
+
+const kzRomul = localFont({
+  src: "../../logos/KZ_Romul.ttf",
+  variable: "--font-brand",
+  display: "swap",
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -44,11 +59,9 @@ export const metadata: Metadata = {
     images: ["/api/og"],
   },
   icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "48x48" },
-      { url: "/logo.png", type: "image/png", sizes: "512x512" },
-    ],
-    apple: "/logo.png",
+    icon: [{ url: "/icon", type: "image/png" }],
+    shortcut: [{ url: "/icon", type: "image/png" }],
+    apple: [{ url: "/apple-icon", type: "image/png" }],
   },
   manifest: "/manifest.json",
 };
@@ -60,14 +73,17 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      className={`${montserrat.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${montserrat.variable} ${cormorantGaramond.variable} ${kzRomul.variable} ${jetbrainsMono.variable} h-full antialiased`}
       lang="mn"
       suppressHydrationWarning
     >
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
-        <meta name="theme-color" content="#f5fafa" />
+        <meta name="theme-color" content="#FAFAF8" />
         <meta name="format-detection" content="telephone=no" />
+        <link rel="icon" href="/icon" type="image/png" />
+        <link rel="shortcut icon" href="/icon" type="image/png" />
+        <link rel="apple-touch-icon" href="/apple-icon" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />

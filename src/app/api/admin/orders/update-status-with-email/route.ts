@@ -64,7 +64,7 @@ export async function POST(req: Request) {
         html: `
           <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f5fafa">
             <div style="text-align:center;padding:20px 0">
-              <h1 style="color:#409ba0;margin:0;font-size:24px">Pajama.mn</h1>
+              <h1 style="color:#C6973F;margin:0;font-size:24px">Munsel.mn</h1>
             </div>
             
             <div style="background:#ffffff;border-radius:12px;padding:24px;margin:16px 0">
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
               <div style="background:#e4f1f2;border-radius:8px;padding:14px;margin:16px 0">
                 <p style="margin:0;font-size:13px">
                   <strong style="color:#2c3e3f">Захиалга:</strong> #${order.orderNumber}<br/>
-                  <strong style="color:#2c3e3f">Шинэ статус:</strong> <span style="color:#409ba0;font-weight:bold">${statusLabel}</span>
+                  <strong style="color:#2c3e3f">Шинэ статус:</strong> <span style="color:#C6973F;font-weight:bold">${statusLabel}</span>
                 </p>
               </div>
 
@@ -99,7 +99,7 @@ export async function POST(req: Request) {
 
             <p style="text-align:center;color:#9a9a9a;font-size:12px;margin-top:24px">
               Асуух зүйл байвал +976 8802-9180 дугаарт холбогдоно уу.<br/>
-              © ${new Date().getFullYear()} Pajama.mn
+              © ${new Date().getFullYear()} Munsel.mn
             </p>
           </div>
         `,

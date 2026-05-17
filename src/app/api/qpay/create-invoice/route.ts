@@ -211,7 +211,7 @@ export async function POST(req: NextRequest) {
     const qpayInvoice = await createQPayInvoice(
       orderNumber,
       total,
-      `Pajama.mn захиалга #${orderNumber}`
+      `Munsel.mn захиалга #${orderNumber}`
     );
 
     // Update order with QPay invoice ID

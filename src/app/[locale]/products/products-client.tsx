@@ -24,7 +24,7 @@ interface ProductsClientProps {
     compareAtPrice?: string | null;
     images: string[];
     featured?: boolean;
-    ageRange?: string | null;
+    materialMn?: string | null;
     categoryId?: string | null;
     category?: { id: string; name: string; nameMn: string } | null;
   }>;

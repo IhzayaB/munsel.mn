@@ -31,6 +31,14 @@ export default function imageLoader({
     return src.replace("/upload/", `/upload/${params.join(",")}/`);
   }
 
+  // Unsplash placeholder images — pass w and q as URL params
+  if (src.includes("images.unsplash.com") || src.includes("plus.unsplash.com")) {
+    const url = new URL(src);
+    url.searchParams.set("w", String(width));
+    url.searchParams.set("q", String(quality || 80));
+    return url.toString();
+  }
+
   // Local /public images (logos, favicons): serve as-is from origin.
   // These are small static assets that don't benefit from resizing.
   return src;

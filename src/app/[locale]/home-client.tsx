@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { ProductCard } from "@/components/products/product-card";
 import { ShoppingBag } from "lucide-react";
+import Image from "next/image";
 
 interface Category {
   id: string;
@@ -21,7 +22,7 @@ interface Product {
   compareAtPrice?: string | null;
   images: string[];
   featured?: boolean;
-  ageRange?: string | null;
+  materialMn?: string | null;
   categoryId?: string | null;
   category?: { name: string; nameMn: string } | null;
   variants?: Array<{ id: string; size?: string; stock: number }> | null;
@@ -33,10 +34,8 @@ interface HomeClientProps {
 }
 
 export function HomeClient({ products, categories }: HomeClientProps) {
-  const t = useTranslations("home");
   const tc = useTranslations("common");
-  const defaultCategoryId = categories.find((c) => c.nameMn === "Бүтэн боди")?.id || "all";
-  const [selectedCategory, setSelectedCategory] = useState<string>(defaultCategoryId);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   const filteredProducts = useMemo(() => {
     if (selectedCategory === "all") return products;
@@ -44,16 +43,37 @@ export function HomeClient({ products, categories }: HomeClientProps) {
   }, [products, selectedCategory]);
 
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-12">
-      {/* Category pills */}
+    <div className="container mx-auto px-3 sm:px-4 premium-shell">
+      {/* Hero */}
+      <section className="text-center pt-12 sm:pt-18 pb-10 sm:pb-14">
+        <div className="flex justify-center mb-4 sm:mb-5">
+          <Image
+            src="/logo-black.png"
+            alt="Munsel Fine Jewelry"
+            width={680}
+            height={260}
+            priority
+            className="w-full max-w-[320px] sm:max-w-[460px] lg:max-w-[560px] h-auto"
+          />
+        </div>
+        <div className="flex items-center gap-5 justify-center">
+          <div className="h-px flex-1 max-w-20 bg-[var(--sand)]" />
+          <p className="font-brand text-[11px] sm:text-xs text-muted-foreground tracking-[0.32em] uppercase">
+            Алт · Мөнгө · Үнэт Чулуу
+          </p>
+          <div className="h-px flex-1 max-w-20 bg-[var(--sand)]" />
+        </div>
+      </section>
+
+      {/* Category tabs */}
       {categories.length > 0 && (
-        <div className="flex gap-2 mb-6 sm:mb-8 overflow-x-auto pb-2 -mx-3 px-3 sm:-mx-4 sm:px-4 scrollbar-hide">
+        <div className="flex border-y border-[var(--border)]/80 mb-8 sm:mb-12 overflow-x-auto scrollbar-hide -mx-3 px-3 sm:-mx-4 sm:px-4 bg-white/55 backdrop-blur-[2px]">
           <button
             onClick={() => setSelectedCategory("all")}
-            className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap shrink-0 ${
+            className={`px-3.5 sm:px-6 py-4 text-[11px] sm:text-xs whitespace-nowrap relative shrink-0 transition-colors duration-200 tracking-[0.22em] uppercase ${
               selectedCategory === "all"
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                ? "text-foreground font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1.5px] after:bg-[var(--gold)]"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             {tc("all")}
@@ -62,10 +82,10 @@ export function HomeClient({ products, categories }: HomeClientProps) {
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap shrink-0 ${
+              className={`px-3.5 sm:px-6 py-4 text-[11px] sm:text-xs whitespace-nowrap relative shrink-0 transition-colors duration-200 tracking-[0.22em] uppercase ${
                 selectedCategory === cat.id
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                  ? "text-foreground font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1.5px] after:bg-[var(--gold)]"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {cat.nameMn}
@@ -77,15 +97,15 @@ export function HomeClient({ products, categories }: HomeClientProps) {
       {/* Products grid */}
       {filteredProducts.length === 0 ? (
         <div className="text-center py-16 sm:py-20">
-          <ShoppingBag className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground/40 mx-auto mb-4" />
-          <p className="text-base sm:text-lg text-muted-foreground">
+          <ShoppingBag className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground/30 mx-auto mb-4" />
+          <p className="text-base sm:text-lg text-muted-foreground font-heading italic">
             {tc("noCategoryProducts")}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 animate-fade-in-up">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-7 pb-14 animate-fade-in-up">
+          {filteredProducts.map((product, i) => (
+            <ProductCard key={product.id} product={product} imagePriority={i < 4} />
           ))}
         </div>
       )}

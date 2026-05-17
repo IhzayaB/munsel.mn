@@ -9,27 +9,29 @@ export async function Footer() {
   const tf = await getTranslations("footer");
 
   return (
-    <footer className="bg-[var(--baby-charcoal)] text-gray-300">
+    <footer className="bg-[var(--charcoal)] text-gray-300">
       <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
           {/* Brand + socials */}
           <div className="col-span-2 md:col-span-2 flex flex-col items-center md:items-start gap-3 sm:gap-4">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col items-center md:items-start gap-3">
               <Image
-                src="/logo.png"
+                src="/logo-white.png"
                 alt="Munsel.mn"
-                width={32}
-                height={32}
-                className="rounded-full"
+                width={220}
+                height={84}
+                className="h-11 w-auto"
               />
-              <span className="text-xl font-bold text-white">Munsel.mn</span>
+              <p className="font-brand text-[11px] uppercase tracking-[0.34em] text-white/70">
+                Fine Jewelry
+              </p>
             </div>
             <div className="flex gap-3">
               <a
                 href="https://www.instagram.com/munsel.mn/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="h-9 w-9 rounded-full bg-gray-700 flex items-center justify-center hover:bg-[var(--baby-peach)] hover:text-white transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary"
+                className="h-9 w-9 rounded-full bg-gray-700 flex items-center justify-center hover:bg-[var(--gold)] hover:text-white transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary"
                 aria-label="Instagram"
               >
                 <Instagram className="h-4 w-4" />
@@ -38,7 +40,7 @@ export async function Footer() {
                 href="https://www.facebook.com/munsel.mn"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="h-9 w-9 rounded-full bg-gray-700 flex items-center justify-center hover:bg-[var(--baby-teal)] hover:text-white transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary"
+                className="h-9 w-9 rounded-full bg-gray-700 flex items-center justify-center hover:bg-[var(--gold)] hover:text-white transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary"
                 aria-label="Facebook"
               >
                 <Facebook className="h-4 w-4" />

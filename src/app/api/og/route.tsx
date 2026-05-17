@@ -31,15 +31,15 @@ export async function GET(_req: NextRequest) {
           width: "100%",
           height: "100%",
           display: "flex",
-          background: "linear-gradient(145deg, #f5fafa 0%, #e8f4f5 40%, #d4ecee 100%)",
+          background: "linear-gradient(145deg, #FAF8F5 0%, #F5EFE6 40%, #EDE8DF 100%)",
           fontFamily: "sans-serif",
           position: "relative",
           overflow: "hidden",
         }}
       >
         {/* Decorative circles */}
-        <div style={{ position: "absolute", top: -60, right: -60, width: 300, height: 300, borderRadius: "50%", background: "rgba(64,155,160,0.08)", display: "flex" }} />
-        <div style={{ position: "absolute", bottom: -80, left: -80, width: 400, height: 400, borderRadius: "50%", background: "rgba(64,155,160,0.06)", display: "flex" }} />
+        <div style={{ position: "absolute", top: -60, right: -60, width: 300, height: 300, borderRadius: "50%", background: "rgba(198,151,63,0.08)", display: "flex" }} />
+        <div style={{ position: "absolute", bottom: -80, left: -80, width: 400, height: 400, borderRadius: "50%", background: "rgba(198,151,63,0.06)", display: "flex" }} />
 
         {/* Left content */}
         <div
@@ -54,13 +54,13 @@ export async function GET(_req: NextRequest) {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", marginBottom: 32 }}>
-            <img src={`${process.env.NEXT_PUBLIC_SITE_URL || "https://munsel.mn"}/logo.png`} alt="Munsel.mn" style={{ height: 48 }} />
+            <img src={`${process.env.NEXT_PUBLIC_SITE_URL || "https://munsel.mn"}/logo.jpg`} alt="Munsel.mn" style={{ height: 48 }} />
           </div>
 
           <div style={{ fontSize: 52, fontWeight: 800, color: "#1a2f30", lineHeight: 1.15, letterSpacing: "-1.5px", marginBottom: 16 }}>
             Алт, гоёл чимэглэлийн
           </div>
-          <div style={{ fontSize: 52, fontWeight: 800, color: "#409ba0", lineHeight: 1.15, letterSpacing: "-1.5px", marginBottom: 28 }}>
+          <div style={{ fontSize: 52, fontWeight: 800, color: "#C6973F", lineHeight: 1.15, letterSpacing: "-1.5px", marginBottom: 28 }}>
             онлайн дэлгүүр
           </div>
 
@@ -69,7 +69,7 @@ export async function GET(_req: NextRequest) {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ background: "linear-gradient(135deg, #409ba0, #357e82)", color: "white", padding: "12px 28px", borderRadius: 50, fontSize: 16, fontWeight: 700, display: "flex" }}>
+            <div style={{ background: "linear-gradient(135deg, #C6973F, #A67C2A)", color: "white", padding: "12px 28px", borderRadius: 50, fontSize: 16, fontWeight: 700, display: "flex" }}>
               munsel.mn
             </div>
           </div>

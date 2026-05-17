@@ -15,6 +15,7 @@ cloudinary.config({
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_FILES = 10;
+const CLOUDINARY_FOLDER = process.env.CLOUDINARY_FOLDER || "munsel-mn";
 
 export async function POST(req: NextRequest) {
   try {
@@ -66,7 +67,7 @@ export async function POST(req: NextRequest) {
       const dataUri = `data:${file.type};base64,${base64}`;
 
       const result = await cloudinary.uploader.upload(dataUri, {
-        folder: "munsel-mn",
+        folder: CLOUDINARY_FOLDER,
         transformation: [
           { width: 1200, height: 1200, crop: "limit", quality: "auto", format: "webp" },
         ],

@@ -20,7 +20,6 @@ const SearchOverlay = lazy(() => import("@/components/search-overlay").then(m =>
 
 export function Header() {
   const t = useTranslations("common");
-  const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [badgeBounce, setBadgeBounce] = useState(false);
@@ -45,24 +44,24 @@ export function Header() {
   const isAdmin = session?.user?.role === "admin";
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--baby-cream)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--baby-cream)]/60 safe-top">
+    <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--ivory)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--ivory)]/60 safe-top">
       <div className="container mx-auto flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <Image
-            src="/logo.png"
-            alt="Pajama.mn"
-            width={36}
-            height={36}
-            className="rounded-full"
+            src="/logo-black.png"
+            alt="Munsel.mn"
+            width={124}
+            height={48}
+            className="h-8 w-auto sm:hidden"
             priority
           />
           <Image
-            src="/logo.png"
+            src="/logo-black.png"
             alt="Munsel.mn"
-            width={120}
-            height={28}
-            className="hidden sm:block h-7 w-auto"
+            width={220}
+            height={84}
+            className="hidden sm:block h-10 w-auto"
             priority
           />
         </Link>

@@ -21,8 +21,8 @@ export default function Error({
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
       <Image
-        src="/logo.png"
-        alt="Pajama.mn"
+        src="/logo.jpg"
+        alt="Munsel.mn"
         width={80}
         height={80}
         className="rounded-full opacity-40 mb-6"

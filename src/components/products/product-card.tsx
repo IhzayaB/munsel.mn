@@ -23,7 +23,7 @@ interface ProductCardProps {
     compareAtPrice?: string | null;
     images: string[] | null;
     featured?: boolean | null;
-    ageRange?: string | null;
+    materialMn?: string | null;
     category?: { name: string; nameMn: string } | null;
     variants?: Array<{ id: string; size?: string | null; stock: number }> | null;
   };
@@ -86,8 +86,8 @@ export function ProductCard({ product, imagePriority = false }: ProductCardProps
 
   return (
     <Link href={`/products/${product.slug}`}>
-      <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden h-full border-transparent hover:border-primary/10" onMouseEnter={enableHover}>
-        <div className="relative bg-secondary aspect-[3/4] flex items-center justify-center overflow-hidden">
+      <Card className="group cursor-pointer transition-all duration-300 overflow-hidden h-full border border-[var(--sand)]/55 hover:border-[var(--gold-light)] hover:shadow-[0_10px_30px_rgba(198,151,63,0.10)] bg-white/92 backdrop-blur-[2px] rounded-none sm:rounded-sm" onMouseEnter={enableHover}>
+        <div className="relative bg-[var(--champagne)] aspect-[3/4] flex items-center justify-center overflow-hidden">
           {product.images && product.images.length > 0 ? (
             <>
               <Image
@@ -95,10 +95,10 @@ export function ProductCard({ product, imagePriority = false }: ProductCardProps
                 alt={displayName}
                 fill
                 priority={imagePriority}
-                className={`object-cover transition-all duration-500 ${
+                className={`object-cover transition-all duration-700 ${
                   hoverReady && product.images.length > 1
-                    ? "group-hover:opacity-0 group-hover:scale-105"
-                    : "group-hover:scale-105"
+                    ? "group-hover:opacity-0 group-hover:scale-[1.04]"
+                    : "group-hover:scale-[1.04]"
                 }`}
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               />
@@ -107,60 +107,53 @@ export function ProductCard({ product, imagePriority = false }: ProductCardProps
                   src={product.images[1]}
                   alt={displayName}
                   fill
-                  className="object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  className="object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700"
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 />
               )}
             </>
           ) : (
-            <ShoppingBag className="h-16 w-16 text-muted-foreground/30 group-hover:scale-110 transition-transform" />
-          )}
-
-          {/* Image count indicator */}
-          {product.images && product.images.length > 1 && (
-            <div className="absolute bottom-2 left-2 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded-full backdrop-blur-sm">
-              1/{product.images.length}
-            </div>
+            <ShoppingBag className="h-12 w-12 text-muted-foreground/20 group-hover:scale-110 transition-transform" />
           )}
 
           {/* Wishlist heart */}
           {mounted && (
             <button
               onClick={handleWishlist}
-              className="absolute top-2 right-2 z-10 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors shadow-sm"
+              className="absolute top-2.5 right-2.5 z-10 h-8 w-8 rounded-full bg-white/85 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors shadow-sm"
               aria-label="Хадгалах"
             >
               <Heart
-                className={`h-4 w-4 transition-colors ${
-                  isWished ? "fill-red-500 text-red-500" : "text-gray-600"
+                className={`h-3.5 w-3.5 transition-colors ${
+                  isWished ? "fill-red-500 text-red-500" : "text-[var(--charcoal)]/70"
                 }`}
               />
             </button>
           )}
 
           {/* Badges */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
+          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1">
             {product.featured && (
-              <Badge className="bg-[var(--baby-peach)] hover:bg-[var(--baby-peach-dark)] text-white">⭐ Онцлох</Badge>
+              <Badge variant="outline" className="border-[var(--gold)]/60 text-[var(--gold)] bg-white/90 backdrop-blur-sm text-[9px] sm:text-[10px] px-2 py-0.5 font-medium tracking-wider rounded-sm">
+                ОНЦЛОХ
+              </Badge>
             )}
             {hasDiscount && (
-              <Badge variant="destructive">
-                -
-                {Math.round(
+              <Badge variant="destructive" className="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-sm">
+                −{Math.round(
                   ((Number(product.compareAtPrice) - Number(product.price)) /
                     Number(product.compareAtPrice)) *
                     100
-                )}
-                %
+                )}%
               </Badge>
             )}
           </div>
 
-          {/* Quick add button - always visible on mobile, hover on desktop */}
+          {/* Quick add button */}
           {inStock && (
             <Button
               size="icon"
-              className="absolute bottom-2 right-2 opacity-100 sm:opacity-0 sm:translate-y-2 sm:group-hover:opacity-100 sm:group-hover:translate-y-0 transition-all duration-300 h-10 w-10 sm:h-9 sm:w-9 rounded-full shadow-md"
+              className="absolute bottom-2.5 right-2.5 opacity-100 sm:opacity-0 sm:translate-y-2 sm:group-hover:opacity-100 sm:group-hover:translate-y-0 transition-all duration-300 h-9 w-9 rounded-full shadow-md bg-[var(--charcoal)] hover:bg-black text-white border-0"
               onClick={handleQuickAdd}
               aria-label="Сагсанд нэмэх"
             >
@@ -169,32 +162,34 @@ export function ProductCard({ product, imagePriority = false }: ProductCardProps
           )}
         </div>
 
-        <CardContent className="p-2.5 sm:p-4">
+        <CardContent className="p-3 sm:p-4">
+          <div className="w-8 h-px bg-[var(--gold)]/70 mb-3" />
           {categoryName && (
-            <p className="text-[11px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1 truncate">
+            <p className="text-[9px] sm:text-[10px] tracking-[0.24em] uppercase text-muted-foreground/80 mb-1.5 truncate">
               {categoryName}
             </p>
           )}
-          <h3 className="font-semibold text-foreground mb-0.5 sm:mb-1 line-clamp-2 text-[13px] leading-tight sm:text-sm sm:leading-snug">
+          <h3 className="font-heading font-semibold text-foreground mb-2 line-clamp-2 text-[15px] leading-[1.08] sm:text-[1.08rem] uppercase tracking-[0.02em]">
             {displayName}
           </h3>
-          {product.ageRange && (
-            <p className="text-[11px] sm:text-xs text-muted-foreground mb-1 sm:mb-2">
-              {product.ageRange}
-            </p>
-          )}
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <p className="text-sm sm:text-lg font-bold text-primary">
+          <div className="flex items-baseline gap-2">
+            <p className="text-sm sm:text-[15px] font-semibold text-primary tracking-[0.03em]">
               {formatPrice(product.price)}
             </p>
             {hasDiscount && (
-              <p className="text-[11px] sm:text-sm text-muted-foreground line-through">
+              <p className="text-[11px] sm:text-xs text-muted-foreground line-through">
                 {formatPrice(product.compareAtPrice!)}
               </p>
             )}
           </div>
+          {product.materialMn && (
+            <p className="text-[9px] sm:text-[10px] text-muted-foreground/60 mt-2 uppercase tracking-[0.28em]">
+              {product.materialMn}
+            </p>
+          )}
         </CardContent>
       </Card>
     </Link>
   );
 }
+

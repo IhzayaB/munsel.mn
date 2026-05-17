@@ -21,6 +21,7 @@ const getHomePageData = unstable_cache(
         images: true,
         featured: true,
         ageRange: true,
+        materialMn: true,
         categoryId: true,
         createdAt: true,
       },
@@ -76,6 +77,7 @@ const getHomePageData = unstable_cache(
       images: p.images || [],
       featured: Boolean(p.featured),
       ageRange: p.ageRange,
+      materialMn: p.materialMn,
       categoryId: p.categoryId,
       category: p.category
         ? {
@@ -139,7 +141,7 @@ export default async function HomePage() {
       name: "Munsel.mn",
       logo: {
         "@type": "ImageObject",
-        url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://munsel.mn"}/logo.png`,
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://munsel.mn"}/logo.jpg`,
       },
     },
   };

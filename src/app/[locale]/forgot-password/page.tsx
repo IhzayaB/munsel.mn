@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <Image
-            src="/logo.png"
+            src="/logo.jpg"
             alt="Munsel.mn"
             width={56}
             height={56}

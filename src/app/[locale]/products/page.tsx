@@ -21,6 +21,7 @@ const getProductsPageData = unstable_cache(
         images: true,
         featured: true,
         ageRange: true,
+        materialMn: true,
         categoryId: true,
         createdAt: true,
       },
@@ -64,6 +65,7 @@ const getProductsPageData = unstable_cache(
       images: p.images || [],
       featured: Boolean(p.featured),
       ageRange: p.ageRange,
+      materialMn: p.materialMn,
       categoryId: p.categoryId,
       category: p.category
         ? {

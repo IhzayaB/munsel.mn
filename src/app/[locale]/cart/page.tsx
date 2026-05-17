@@ -20,8 +20,8 @@ export default function CartPage() {
     return (
       <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-16 text-center">
         <Image
-          src="/logo.png"
-          alt="Pajama.mn"
+          src="/logo.jpg"
+          alt="Munsel.mn"
           width={80}
           height={80}
           className="mx-auto mb-6 rounded-full opacity-40"
