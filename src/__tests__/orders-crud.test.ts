@@ -6,7 +6,7 @@
  *   - GET /api/orders (user order listing)
  * Focus: state machine enforcement, auth, edge cases, soft-delete logic
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 
 // --- Mocks ---
@@ -18,6 +18,7 @@ const mockOrdersFindMany = vi.fn();
 const mockUpdateWhere = vi.fn();
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockUpdateSet = vi.fn(() => ({ where: mockUpdateWhere })) as any;
+let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
 vi.mock("@/lib/auth", () => ({ auth: () => mockAuth() }));
 
@@ -68,6 +69,11 @@ describe("PATCH /api/admin/orders - Update Order Status", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockAuth.mockResolvedValue({ user: { role: "admin" } });
+    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleErrorSpy?.mockRestore();
   });
 
   // --- Auth ---
@@ -211,6 +217,11 @@ describe("DELETE /api/admin/orders - Soft-Delete Orders", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockAuth.mockResolvedValue({ user: { role: "admin" } });
+    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleErrorSpy?.mockRestore();
   });
 
   // --- Auth ---
@@ -336,6 +347,11 @@ describe("DELETE /api/admin/orders - Soft-Delete Orders", () => {
 describe("GET /api/orders - User Order Listing", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleErrorSpy?.mockRestore();
   });
 
   it("returns 401 if not authenticated", async () => {

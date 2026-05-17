@@ -5,13 +5,15 @@
 
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
+const TWILIO_API_KEY_SID = process.env.TWILIO_API_KEY_SID;
+const TWILIO_API_KEY_SECRET = process.env.TWILIO_API_KEY_SECRET;
 const TWILIO_FROM = process.env.TWILIO_FROM_NUMBER;
 
 /**
  * Format a Mongolian phone number to E.164 (+976XXXXXXXX).
  * Handles: 88029180, 80029180, +97688029180, 976-8802-9180, etc.
  */
-function formatMongolianPhone(phone: string): string | null {
+export function formatMongolianPhone(phone: string): string | null {
   // Strip everything except digits and leading +
   const cleaned = phone.replace(/[^\d+]/g, "");
 
@@ -27,6 +29,24 @@ function formatMongolianPhone(phone: string): string | null {
   return null; // Unrecognizable format
 }
 
+function getTwilioAuthHeader(): string | null {
+  if (TWILIO_API_KEY_SID && TWILIO_API_KEY_SECRET) {
+    const credentials = Buffer.from(
+      `${TWILIO_API_KEY_SID}:${TWILIO_API_KEY_SECRET}`
+    ).toString("base64");
+    return `Basic ${credentials}`;
+  }
+
+  if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN) {
+    const credentials = Buffer.from(
+      `${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`
+    ).toString("base64");
+    return `Basic ${credentials}`;
+  }
+
+  return null;
+}
+
 interface OrderSmsData {
   orderNumber: string;
   customerName: string;
@@ -35,7 +55,8 @@ interface OrderSmsData {
 }
 
 export async function sendOrderSms(data: OrderSmsData): Promise<void> {
-  if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_FROM) {
+  const authHeader = getTwilioAuthHeader();
+  if (!TWILIO_ACCOUNT_SID || !authHeader || !TWILIO_FROM) {
     console.log("Twilio not configured, skipping SMS for order", data.orderNumber);
     return;
   }
@@ -48,18 +69,18 @@ export async function sendOrderSms(data: OrderSmsData): Promise<void> {
 
   const body = [
     `Munsel.mn`,
-    `#${data.orderNumber} дугаартай захиалга амжилттай баталгаажлаа.`,
-    `Биднийг сонгосон танд баярлалаа.`,
+    `#${data.orderNumber} захиалгын төлбөр баталгаажлаа.`,
+    `Нийт төлбөр: ${data.total}`,
+    `Таны захиалга боловсруулалтад шилжлээ.`,
   ].join("\n");
 
   const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
-  const credentials = Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString("base64");
 
   try {
     const res = await fetch(url, {
       method: "POST",
       headers: {
-        Authorization: `Basic ${credentials}`,
+        Authorization: authHeader,
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({
