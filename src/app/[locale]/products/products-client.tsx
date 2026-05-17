@@ -76,25 +76,26 @@ export function ProductsClient({ products, categories }: ProductsClientProps) {
     <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
       <Breadcrumbs items={[{ label: t("title") }]} />
 
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">{t("title")}</h1>
-        <p className="text-muted-foreground">{filteredProducts.length} бүтээгдэхүүн</p>
+      <div className="mb-5 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-1.5 sm:mb-2">{t("title")}</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">{filteredProducts.length} бүтээгдэхүүн</p>
       </div>
 
-      <div className="flex flex-col gap-3 sm:gap-4 mb-6 sm:mb-8">
+      <div className="sticky top-16 sm:top-[4.25rem] z-20 -mx-3 px-3 sm:mx-0 sm:px-0 py-3 sm:py-0 mb-5 sm:mb-8 bg-[linear-gradient(180deg,rgba(250,250,248,0.96),rgba(250,250,248,0.84))] sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none border-b border-border/50 sm:border-0">
+        <div className="flex flex-col gap-3 sm:gap-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Бүтээгдэхүүн хайх..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 h-12 text-base"
+            className="pl-10 h-12 text-base bg-white/90"
           />
         </div>
 
         <div className="flex gap-2">
           <Select value={categoryFilter} onValueChange={(v) => v && setCategoryFilter(v)}>
-            <SelectTrigger className="flex-1 h-11 sm:h-10 sm:w-48 sm:flex-none">
+            <SelectTrigger className="flex-1 h-11 sm:h-10 sm:w-48 sm:flex-none bg-white/90">
               <SelectValue placeholder={t("category")} />
             </SelectTrigger>
             <SelectContent>
@@ -108,7 +109,7 @@ export function ProductsClient({ products, categories }: ProductsClientProps) {
           </Select>
 
           <Select value={sortBy} onValueChange={(v) => v && setSortBy(v)}>
-            <SelectTrigger className="flex-1 h-11 sm:h-10 sm:w-48 sm:flex-none">
+            <SelectTrigger className="flex-1 h-11 sm:h-10 sm:w-48 sm:flex-none bg-white/90">
               <SelectValue placeholder={t("sort")} />
             </SelectTrigger>
             <SelectContent>
@@ -120,15 +121,16 @@ export function ProductsClient({ products, categories }: ProductsClientProps) {
           </Select>
         </div>
       </div>
+      </div>
 
       {filteredProducts.length === 0 ? (
-        <div className="text-center py-20">
+        <div className="text-center py-16 sm:py-20">
           <PackageOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
           <p className="text-lg font-medium text-foreground mb-1">{t("noProducts")}</p>
           <p className="text-sm text-muted-foreground">Өөр ангилал эсвэл хайлтын үг оруулж үзнэ үү</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 animate-fade-in-up">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6 animate-fade-in-up">
           {filteredProducts.map((product, index) => (
             <ProductCard key={product.id} product={product} imagePriority={index < 4} />
           ))}

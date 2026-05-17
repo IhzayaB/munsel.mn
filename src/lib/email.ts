@@ -6,6 +6,38 @@ function getResendClient() {
   return new Resend(process.env.RESEND_API_KEY);
 }
 
+type EmailSendResult =
+  | { success: true; id?: string }
+  | { success: false; error: unknown };
+
+interface BaseEmailPayload {
+  from: string;
+  to: string;
+  subject: string;
+  html: string;
+  replyTo?: string;
+}
+
+async function sendWithResend(
+  payload: BaseEmailPayload,
+  logContext: string
+): Promise<EmailSendResult> {
+  const resend = getResendClient();
+  if (!resend) {
+    const error = "RESEND_API_KEY not configured";
+    console.log(`${error}, skipping ${logContext}`);
+    return { success: false, error };
+  }
+
+  try {
+    const result = await resend.emails.send(payload);
+    return { success: true, id: result.data?.id };
+  } catch (error) {
+    console.error(`Failed to send ${logContext}:`, error);
+    return { success: false, error };
+  }
+}
+
 interface OrderEmailData {
   orderNumber: string;
   customerName: string;
@@ -22,12 +54,6 @@ interface OrderEmailData {
 }
 
 export async function sendOrderConfirmation(data: OrderEmailData) {
-  const resend = getResendClient();
-  if (!resend) {
-    console.log("RESEND_API_KEY not set, skipping email for order", data.orderNumber);
-    return;
-  }
-
   const itemsHtml = data.items
     .map(
       (item) =>
@@ -39,8 +65,8 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
     )
     .join("");
 
-  try {
-    await resend.emails.send({
+  return sendWithResend(
+    {
       from: "Munsel.mn <orders@munsel.mn>",
       to: data.customerEmail,
       subject: `Захиалга баталгаажлаа #${data.orderNumber}`,
@@ -87,24 +113,14 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
           </p>
         </div>
       `,
-    });
-  } catch (error) {
-    console.error("Failed to send order confirmation email:", error);
-    // In production, you should log this to an error tracking service (e.g. Sentry)
-    // and potentially flag the order for manual review
-    return { success: false, error };
-  }
+    },
+    `order confirmation email for order ${data.orderNumber}`
+  );
 }
 
 export async function sendAdminPasswordResetEmail(data: { resetUrl: string }) {
-  const resend = getResendClient();
-  if (!resend) {
-    console.log("RESEND_API_KEY not set, skipping admin password reset email");
-    return;
-  }
-
-  try {
-    await resend.emails.send({
+  return sendWithResend(
+    {
       from: "Munsel.mn <orders@munsel.mn>",
       to: ADMIN_RECOVERY_EMAIL,
       subject: "Munsel.mn admin password reset",
@@ -121,11 +137,9 @@ export async function sendAdminPasswordResetEmail(data: { resetUrl: string }) {
           </div>
         </div>
       `,
-    });
-  } catch (error) {
-    console.error("Failed to send admin password reset email:", error);
-    return { success: false, error };
-  }
+    },
+    "admin password reset email"
+  );
 }
 
 interface InfoEmailData {
@@ -136,23 +150,49 @@ interface InfoEmailData {
 }
 
 export async function sendInfoEmail(data: InfoEmailData) {
-  const resend = getResendClient();
-  if (!resend) {
-    console.log("RESEND_API_KEY not set, skipping info email");
-    return { success: false, error: "RESEND_API_KEY not configured" };
-  }
-
-  try {
-    await resend.emails.send({
+  return sendWithResend(
+    {
       from: "Munsel.mn Info <info@munsel.mn>",
       to: data.to,
       subject: data.subject,
       html: data.html,
       replyTo: data.replyTo,
-    });
-    return { success: true };
-  } catch (error) {
-    console.error("Failed to send info email:", error);
-    return { success: false, error };
-  }
+    },
+    `info email to ${data.to}`
+  );
+}
+
+interface BulkInfoEmailInput {
+  to: string[];
+  subject: string;
+  html: string;
+  replyTo?: string;
+}
+
+export async function sendInfoEmails(data: BulkInfoEmailInput) {
+  const uniqueRecipients = Array.from(
+    new Set(data.to.map((email) => email.trim()).filter(Boolean))
+  );
+
+  const results = await Promise.all(
+    uniqueRecipients.map((recipient) =>
+      sendInfoEmail({
+        to: recipient,
+        subject: data.subject,
+        html: data.html,
+        replyTo: data.replyTo,
+      }).then((result) => ({ recipient, ...result }))
+    )
+  );
+
+  const sent = results.filter((r) => r.success).length;
+  const failed = results.length - sent;
+
+  return {
+    success: failed === 0,
+    sent,
+    failed,
+    total: results.length,
+    results,
+  };
 }

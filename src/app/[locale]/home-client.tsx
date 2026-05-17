@@ -45,18 +45,18 @@ export function HomeClient({ products, categories }: HomeClientProps) {
   return (
     <div className="container mx-auto px-3 sm:px-4 premium-shell">
       {/* Hero */}
-      <section className="text-center pt-12 sm:pt-18 pb-10 sm:pb-14">
-        <div className="flex justify-center mb-4 sm:mb-5">
+      <section className="text-center pt-8 sm:pt-14 pb-8 sm:pb-12 mobile-section">
+        <div className="flex justify-center mb-3 sm:mb-5">
           <Image
             src="/logo-black.png"
             alt="Munsel Fine Jewelry"
             width={680}
             height={260}
             priority
-            className="w-full max-w-[320px] sm:max-w-[460px] lg:max-w-[560px] h-auto"
+            className="w-full max-w-[280px] sm:max-w-[460px] lg:max-w-[560px] h-auto"
           />
         </div>
-        <div className="flex items-center gap-5 justify-center">
+        <div className="flex items-center gap-3 sm:gap-5 justify-center">
           <div className="h-px flex-1 max-w-20 bg-[var(--sand)]" />
           <p className="font-brand text-[11px] sm:text-xs text-muted-foreground tracking-[0.32em] uppercase">
             Алт · Мөнгө · Үнэт Чулуу
@@ -67,10 +67,10 @@ export function HomeClient({ products, categories }: HomeClientProps) {
 
       {/* Category tabs */}
       {categories.length > 0 && (
-        <div className="flex border-y border-[var(--border)]/80 mb-8 sm:mb-12 overflow-x-auto scrollbar-hide -mx-3 px-3 sm:-mx-4 sm:px-4 bg-white/55 backdrop-blur-[2px]">
+        <div className="flex snap-x-soft border-y border-[var(--border)]/80 mb-7 sm:mb-12 overflow-x-auto scrollbar-hide -mx-3 px-3 sm:-mx-4 sm:px-4 bg-white/55 backdrop-blur-[2px]">
           <button
             onClick={() => setSelectedCategory("all")}
-            className={`px-3.5 sm:px-6 py-4 text-[11px] sm:text-xs whitespace-nowrap relative shrink-0 transition-colors duration-200 tracking-[0.22em] uppercase ${
+            className={`px-3.5 sm:px-6 py-3.5 sm:py-4 text-[11px] sm:text-xs whitespace-nowrap relative shrink-0 transition-colors duration-200 tracking-[0.22em] uppercase ${
               selectedCategory === "all"
                 ? "text-foreground font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1.5px] after:bg-[var(--gold)]"
                 : "text-muted-foreground hover:text-foreground"
@@ -82,7 +82,7 @@ export function HomeClient({ products, categories }: HomeClientProps) {
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3.5 sm:px-6 py-4 text-[11px] sm:text-xs whitespace-nowrap relative shrink-0 transition-colors duration-200 tracking-[0.22em] uppercase ${
+              className={`px-3.5 sm:px-6 py-3.5 sm:py-4 text-[11px] sm:text-xs whitespace-nowrap relative shrink-0 transition-colors duration-200 tracking-[0.22em] uppercase ${
                 selectedCategory === cat.id
                   ? "text-foreground font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1.5px] after:bg-[var(--gold)]"
                   : "text-muted-foreground hover:text-foreground"
@@ -103,7 +103,7 @@ export function HomeClient({ products, categories }: HomeClientProps) {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-7 pb-14 animate-fade-in-up">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-5 md:gap-7 pb-14 animate-fade-in-up">
           {filteredProducts.map((product, i) => (
             <ProductCard key={product.id} product={product} imagePriority={i < 4} />
           ))}

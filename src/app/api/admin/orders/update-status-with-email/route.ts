@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     if (sendNotification && order.customerEmail) {
       const statusLabel = STATUS_LABELS[status] || status;
       
-      await sendInfoEmail({
+      const emailResult = await sendInfoEmail({
         to: order.customerEmail,
         subject: `Таны захиалга #${order.orderNumber} статус өөрчлөгдлөө`,
         html: `
@@ -104,6 +104,13 @@ export async function POST(req: Request) {
           </div>
         `,
       });
+
+      if (!emailResult.success) {
+        console.error(
+          `Order status email was not sent for order ${order.orderNumber}`,
+          emailResult.error
+        );
+      }
     }
 
     return Response.json({

@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { sendInfoEmail } from "@/lib/email";
+import { sendInfoEmails } from "@/lib/email";
 import { z } from "zod";
 
 const sendEmailSchema = z.object({
@@ -26,26 +26,18 @@ export async function POST(req: Request) {
 
     const emails = Array.isArray(data.to) ? data.to : [data.to];
 
-    // Send emails in parallel
-    const results = await Promise.allSettled(
-      emails.map((email) =>
-        sendInfoEmail({
-          to: email,
-          subject: data.subject,
-          html: data.html,
-          replyTo: data.replyTo,
-        })
-      )
-    );
-
-    const successful = results.filter((r) => r.status === "fulfilled").length;
-    const failed = results.filter((r) => r.status === "rejected").length;
+    const sendResult = await sendInfoEmails({
+      to: emails,
+      subject: data.subject,
+      html: data.html,
+      replyTo: data.replyTo,
+    });
 
     return Response.json({
-      success: true,
-      sent: successful,
-      failed: failed,
-      total: emails.length,
+      success: sendResult.success,
+      sent: sendResult.sent,
+      failed: sendResult.failed,
+      total: sendResult.total,
     });
   } catch (error) {
     console.error("Email send error:", error);

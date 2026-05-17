@@ -86,7 +86,7 @@ export function ProductCard({ product, imagePriority = false }: ProductCardProps
 
   return (
     <Link href={`/products/${product.slug}`}>
-      <Card className="group cursor-pointer transition-all duration-300 overflow-hidden h-full border border-[var(--sand)]/55 hover:border-[var(--gold-light)] hover:shadow-[0_10px_30px_rgba(198,151,63,0.10)] bg-white/92 backdrop-blur-[2px] rounded-none sm:rounded-sm" onMouseEnter={enableHover}>
+      <Card className="group cursor-pointer transition-all duration-300 overflow-hidden h-full border border-[var(--sand)]/55 hover:border-[var(--gold-light)] hover:shadow-[0_10px_30px_rgba(198,151,63,0.10)] active:scale-[0.995] bg-white/92 backdrop-blur-[2px] rounded-md sm:rounded-sm" onMouseEnter={enableHover}>
         <div className="relative bg-[var(--champagne)] aspect-[3/4] flex items-center justify-center overflow-hidden">
           {product.images && product.images.length > 0 ? (
             <>
@@ -120,11 +120,11 @@ export function ProductCard({ product, imagePriority = false }: ProductCardProps
           {mounted && (
             <button
               onClick={handleWishlist}
-              className="absolute top-2.5 right-2.5 z-10 h-8 w-8 rounded-full bg-white/85 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors shadow-sm"
+              className="absolute top-2.5 right-2.5 z-10 h-10 w-10 sm:h-8 sm:w-8 rounded-full bg-white/88 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors shadow-sm"
               aria-label="Хадгалах"
             >
               <Heart
-                className={`h-3.5 w-3.5 transition-colors ${
+                className={`h-4 w-4 sm:h-3.5 sm:w-3.5 transition-colors ${
                   isWished ? "fill-red-500 text-red-500" : "text-[var(--charcoal)]/70"
                 }`}
               />
@@ -153,7 +153,7 @@ export function ProductCard({ product, imagePriority = false }: ProductCardProps
           {inStock && (
             <Button
               size="icon"
-              className="absolute bottom-2.5 right-2.5 opacity-100 sm:opacity-0 sm:translate-y-2 sm:group-hover:opacity-100 sm:group-hover:translate-y-0 transition-all duration-300 h-9 w-9 rounded-full shadow-md bg-[var(--charcoal)] hover:bg-black text-white border-0"
+              className="absolute bottom-2.5 right-2.5 opacity-100 sm:opacity-0 sm:translate-y-2 sm:group-hover:opacity-100 sm:group-hover:translate-y-0 transition-all duration-300 h-10 w-10 sm:h-9 sm:w-9 rounded-full shadow-md bg-[var(--charcoal)] hover:bg-black text-white border-0"
               onClick={handleQuickAdd}
               aria-label="Сагсанд нэмэх"
             >
@@ -162,18 +162,18 @@ export function ProductCard({ product, imagePriority = false }: ProductCardProps
           )}
         </div>
 
-        <CardContent className="p-3 sm:p-4">
-          <div className="w-8 h-px bg-[var(--gold)]/70 mb-3" />
+        <CardContent className="p-2.5 sm:p-4">
+          <div className="w-8 h-px bg-[var(--gold)]/70 mb-2.5 sm:mb-3" />
           {categoryName && (
-            <p className="text-[9px] sm:text-[10px] tracking-[0.24em] uppercase text-muted-foreground/80 mb-1.5 truncate">
+            <p className="text-[9px] sm:text-[10px] tracking-[0.2em] uppercase text-muted-foreground/80 mb-1.5 truncate">
               {categoryName}
             </p>
           )}
-          <h3 className="font-heading font-semibold text-foreground mb-2 line-clamp-2 text-[15px] leading-[1.08] sm:text-[1.08rem] uppercase tracking-[0.02em]">
+          <h3 className="font-heading font-semibold text-foreground mb-2 line-clamp-2 text-[14px] leading-[1.16] sm:text-[1.08rem] uppercase tracking-[0.02em]">
             {displayName}
           </h3>
           <div className="flex items-baseline gap-2">
-            <p className="text-sm sm:text-[15px] font-semibold text-primary tracking-[0.03em]">
+            <p className="text-sm sm:text-[15px] font-semibold text-primary tracking-[0.02em]">
               {formatPrice(product.price)}
             </p>
             {hasDiscount && (

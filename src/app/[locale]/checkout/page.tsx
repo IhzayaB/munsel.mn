@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, CheckCircle2, QrCode, Tag, X } from "lucide-react";
+import { Loader2, CheckCircle2, QrCode, Tag, X, ShieldCheck, Truck, Headset } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -263,7 +263,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8 pb-4 sm:pb-8">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8 pb-28 sm:pb-8">
       <Breadcrumbs
         items={[
           { label: tc("cart"), href: "/cart" },
@@ -272,7 +272,8 @@ export default function CheckoutPage() {
       />
 
       {/* Step progress indicator */}
-      <div className="flex items-center justify-center gap-2 mb-6">
+      <div className="sticky top-16 sm:top-[4.25rem] z-20 -mx-3 px-3 sm:mx-0 sm:px-0 py-3 mb-5 sm:mb-6 bg-[linear-gradient(180deg,rgba(250,250,248,0.98),rgba(250,250,248,0.86))] sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none border-b border-border/50 sm:border-0">
+      <div className="flex items-center justify-center gap-2">
         {[{ key: "step1", step: "info" }, { key: "step2", step: "payment" }, { key: "step3", step: "success" }].map((s, i) => {
           const steps = ["info", "payment", "success"];
           const currentIdx = steps.indexOf(step);
@@ -294,13 +295,30 @@ export default function CheckoutPage() {
           );
         })}
       </div>
+      </div>
+
+      {/* Trust strip */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-5 sm:mb-6">
+        <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-white/75 px-3 py-2 text-xs text-muted-foreground">
+          <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+          <span>Аюулгүй QPay төлбөр</span>
+        </div>
+        <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-white/75 px-3 py-2 text-xs text-muted-foreground">
+          <Truck className="h-4 w-4 text-primary shrink-0" />
+          <span>Хот дотор 24-48 цагт хүргэнэ</span>
+        </div>
+        <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-white/75 px-3 py-2 text-xs text-muted-foreground">
+          <Headset className="h-4 w-4 text-primary shrink-0" />
+          <span>Тусламж: +976 8802-9180</span>
+        </div>
+      </div>
 
       {/* Order summary - visible on top on mobile */}
       <div className="lg:hidden mb-6">
-        <details className="bg-secondary rounded-xl">
-          <summary className="p-4 font-semibold cursor-pointer flex items-center justify-between">
+        <details className="bg-secondary/80 border border-border/60 rounded-xl">
+          <summary className="p-4 font-semibold cursor-pointer flex items-center justify-between list-none">
             <span>{t("orderSummary")} ({items.length})</span>
-            <span className="font-bold text-primary">{formatPrice(getGrandTotal())}</span>
+            <span className="font-bold text-primary">{formatPrice(grandTotalWithDiscount)}</span>
           </summary>
           <div className="px-4 pb-4 space-y-2 text-sm">
             {items.map((item) => (
@@ -380,6 +398,8 @@ export default function CheckoutPage() {
                       type="tel"
                       inputMode="tel"
                       autoComplete="tel"
+                      maxLength={8}
+                      pattern="[6-9][0-9]{7}"
                       value={form.phone}
                       onChange={(e) => {
                         setForm({ ...form, phone: e.target.value });
@@ -398,6 +418,7 @@ export default function CheckoutPage() {
                     {phoneError && (
                       <p className="text-xs text-destructive mt-1">{phoneError}</p>
                     )}
+                    {!phoneError && <p className="text-xs text-muted-foreground mt-1">Жишээ: 88029180 (зайгүй)</p>}
                   </div>
                   <div>
                     <Label htmlFor="email">{t("emailOptional")}</Label>
@@ -496,7 +517,7 @@ export default function CheckoutPage() {
                             key={district}
                             type="button"
                             onClick={() => setForm({ ...form, district })}
-                            className={`px-3 py-1.5 rounded-full text-xs font-medium border ${
+                              className={`touch-target px-3 py-2 rounded-full text-xs font-medium border ${
                               form.district === district
                                 ? "bg-primary text-primary-foreground border-primary"
                                 : "border-border text-muted-foreground"
@@ -587,7 +608,7 @@ export default function CheckoutPage() {
                       </Button>
                     </div>
                   ) : (
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <Input
                         value={couponCode}
                         onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
@@ -600,7 +621,7 @@ export default function CheckoutPage() {
                         variant="outline"
                         onClick={applyCoupon}
                         disabled={couponLoading || !couponCode.trim()}
-                        className="h-12 px-6"
+                        className="h-12 px-6 sm:min-w-[140px]"
                       >
                         {couponLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("couponApply")}
                       </Button>
@@ -610,15 +631,20 @@ export default function CheckoutPage() {
               </Card>
               )}
 
-              <Button
-                type="submit"
-                size="lg"
-                className="w-full h-14 text-base sticky bottom-3 sm:static sm:bottom-auto shadow-lg sm:shadow-none"
-                disabled={loading}
-              >
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t("placeOrder")} • {formatPrice(grandTotalWithDiscount)}
-              </Button>
+              <div className="sticky bottom-0 z-30 -mx-3 px-3 py-3 sm:mx-0 sm:px-0 sm:py-0 bg-[linear-gradient(180deg,rgba(250,250,248,0),rgba(250,250,248,0.96)_30%)] sm:bg-transparent safe-bottom">
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="w-full h-14 text-base shadow-lg sm:shadow-none"
+                  disabled={loading}
+                >
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {t("placeOrder")} • {formatPrice(grandTotalWithDiscount)}
+                </Button>
+                <p className="text-[11px] text-muted-foreground text-center mt-2">
+                  Захиалга баталгаажмагц мессежээр мэдээлэл илгээнэ.
+                </p>
+              </div>
             </form>
           )}
 
@@ -701,22 +727,27 @@ export default function CheckoutPage() {
                   <Loader2 className="h-3 w-3 animate-spin" />
                   {t("paymentPending")}
                 </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  Төлбөр амжилттай болсоны дараа энэ хуудас автоматаар шинэчлэгдэнэ.
+                </p>
 
-                <Button
-                  onClick={() => checkPayment(true)}
-                  disabled={loading}
-                  variant="outline"
-                  className="w-full"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {t("checking")}
-                    </>
-                  ) : (
-                    t("checkPayment")
-                  )}
-                </Button>
+                <div className="sticky bottom-0 -mx-6 px-6 pt-2 pb-3 bg-[linear-gradient(180deg,rgba(250,250,248,0),rgba(250,250,248,0.96)_30%)] safe-bottom">
+                  <Button
+                    onClick={() => checkPayment(true)}
+                    disabled={loading}
+                    variant="outline"
+                    className="w-full h-12"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {t("checking")}
+                      </>
+                    ) : (
+                      t("checkPayment")
+                    )}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}

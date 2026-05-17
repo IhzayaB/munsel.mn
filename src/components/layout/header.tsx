@@ -44,10 +44,10 @@ export function Header() {
   const isAdmin = session?.user?.role === "admin";
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--ivory)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--ivory)]/60 safe-top">
-      <div className="container mx-auto flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4">
+    <header className="sticky top-0 z-50 w-full border-b border-[var(--border)]/70 bg-[linear-gradient(180deg,rgba(250,250,248,0.98),rgba(250,250,248,0.9))] backdrop-blur supports-[backdrop-filter]:bg-[var(--ivory)]/70 safe-top">
+      <div className="container mx-auto flex h-16 sm:h-[4.25rem] items-center justify-between px-3 sm:px-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70">
           <Image
             src="/logo-black.png"
             alt="Munsel.mn"
@@ -61,40 +61,40 @@ export function Header() {
             alt="Munsel.mn"
             width={220}
             height={84}
-            className="hidden sm:block h-10 w-auto"
+            className="hidden sm:block h-11 w-auto"
             priority
           />
         </Link>
 
         {/* Right side actions */}
-        <div className="flex items-center gap-0.5 sm:gap-1">
+        <div className="flex items-center gap-0.5 sm:gap-1.5">
           {/* Search */}
-          <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-10 sm:w-10" aria-label={t("search")} onClick={() => setSearchOpen(true)}>
+          <Button variant="ghost" size="icon" className="touch-target h-11 w-11 sm:h-10 sm:w-10 rounded-full" aria-label={t("search")} onClick={() => setSearchOpen(true)}>
             <Search className="h-5 w-5" />
           </Button>
 
           {/* User account / Admin */}
           {isAdmin ? (
-            <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-10 sm:w-10" aria-label={t("admin")} render={<Link href="/admin" />}>
+            <Button variant="ghost" size="icon" className="touch-target h-11 w-11 sm:h-10 sm:w-10 rounded-full" aria-label={t("admin")} render={<Link href="/admin" />}>
               <Settings className="h-5 w-5" />
             </Button>
           ) : session ? (
-            <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-10 sm:w-10" aria-label={t("account")} render={<Link href="/account/orders" />}>
+            <Button variant="ghost" size="icon" className="touch-target h-11 w-11 sm:h-10 sm:w-10 rounded-full" aria-label={t("account")} render={<Link href="/account/orders" />}>
               <User className="h-5 w-5" />
             </Button>
           ) : null}
 
           {/* Cart */}
           <Suspense fallback={
-            <Button variant="ghost" size="icon" className="relative h-11 w-11 sm:h-10 sm:w-10" aria-label={t("cart")}>
+            <Button variant="ghost" size="icon" className="touch-target relative h-11 w-11 sm:h-10 sm:w-10 rounded-full" aria-label={t("cart")}>
               <ShoppingBag className="h-5 w-5" />
             </Button>
           }>
             <CartSheet>
-              <Button variant="ghost" size="icon" className="relative h-11 w-11 sm:h-10 sm:w-10" aria-label={t("cart")}>
+              <Button variant="ghost" size="icon" className="touch-target relative h-11 w-11 sm:h-10 sm:w-10 rounded-full" aria-label={t("cart")}>
                 <ShoppingBag className="h-5 w-5" />
                 {mounted && totalItems > 0 && (
-                  <Badge className={`absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] ${badgeBounce ? "cart-badge-bounce" : ""}`}>
+                  <Badge className={`absolute -top-1 -right-1 h-5 min-w-5 rounded-full px-1 py-0 flex items-center justify-center text-[10px] ${badgeBounce ? "cart-badge-bounce" : ""}`}>
                     {totalItems}
                   </Badge>
                 )}

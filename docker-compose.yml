@@ -1,12 +1,12 @@
 services:
   db:
     image: postgres:16-alpine
-    container_name: pajama_db
+    container_name: munsel_db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: pajama
-      POSTGRES_PASSWORD: pajama_secret
-      POSTGRES_DB: pajama_mn
+      POSTGRES_USER: munsel
+      POSTGRES_PASSWORD: munsel_secret
+      POSTGRES_DB: munsel_mn
     ports:
       - "5432:5432"
     volumes:

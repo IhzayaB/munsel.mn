@@ -36,8 +36,21 @@ export default function CartPage() {
   }
 
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 pb-28 sm:pb-8">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 pb-36 sm:pb-8">
       <Breadcrumbs items={[{ label: t("title") }]} />
+
+      <div className="flex items-center justify-between mt-3 mb-4 sm:mb-5">
+        <h1 className="text-xl sm:text-2xl font-bold">{t("title")} ({items.length})</h1>
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          className="text-muted-foreground"
+          onClick={() => clearCart()}
+        >
+          Сагс цэвэрлэх
+        </Button>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
         {/* Cart items */}
@@ -92,14 +105,19 @@ export default function CartPage() {
         </div>
 
         {/* Mobile sticky bottom bar */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border p-3 z-40 safe-bottom">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t border-border p-3 z-40 safe-bottom">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-muted-foreground">{t("total")}</span>
             <span className="text-lg font-bold">{formatPrice(getGrandTotal())}</span>
           </div>
-          <Button className="w-full h-12 text-base" size="lg" render={<Link href="/checkout" />}>
-            {t("checkout")}
-          </Button>
+          <div className="grid grid-cols-5 gap-2">
+            <Button className="col-span-3 h-12 text-base" size="lg" render={<Link href="/checkout" />}>
+              {t("checkout")}
+            </Button>
+            <Button className="col-span-2 h-12" variant="outline" render={<Link href="/products" />}>
+              {t("continueShopping")}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

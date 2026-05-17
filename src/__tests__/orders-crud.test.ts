@@ -360,7 +360,7 @@ describe("GET /api/orders - User Order Listing", () => {
         orderNumber: "ORD-001",
         status: "pending",
         total: "50000",
-        items: [{ id: "i1", name: "Pajama Set", quantity: 1, price: "50000" }],
+        items: [{ id: "i1", name: "Gold Ring", quantity: 1, price: "50000" }],
       },
       {
         id: "o2",
